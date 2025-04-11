@@ -1,7 +1,9 @@
 export default function Footer(){
     return (
         <div className="flex overflow-hidden bg-darkBrown w-screen h-[3rem] items-center justify-between">
-            <p className="!text-offWhite px-[1.25rem] !text-xs">© 2025 WorkQuest. All rights reserved.</p>
+            <p className="!text-offWhite px-[1.25rem] !text-xs">
+            © {new Date().getFullYear()} WorkQuest. All rights reserved.
+            </p>
             <div className="flex items-center gap-0.5">
                 <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 19 19" fill="none">
                 <g clip-path="url(#clip0_1_1039)">

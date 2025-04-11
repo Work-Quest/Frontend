@@ -10,14 +10,15 @@
   --color-lightBrown: #948B81;
   --color-red: #F76652;
   --color-orange:#EF9E6C;
-  --color-lightOrange: #FFAC48;
+  --color-lightOrange: #FFBB68;
   --color-yellow: #F7E352;
   --color-cream: #F4EBDF;
   --color-lightPeach: #FFC3AB;
   --color-veryLightBrown: #D7CEC5;
   --color-blue: #70BEFF;
   --color-darkBlue: #1759BD;
-  --color-green: #12B02F;
+  --color-darkBlue2: #2F3E65;
+  --color-green: #2EBF49;
 }
 
 :root {
@@ -75,59 +76,55 @@ body {
 }
 
 h1 {
-  color: var(--red, #F76652);
-  font-family: "Press Start 2P";
+  color: var(--color-red);
+  font-family: "Baloo 2";
   font-size: 3rem;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 800;
   line-height: normal;
   text-transform: capitalize;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
 }
 
 h2 {
-  color: var(--red, #F76652);
-  font-family: "Press Start 2P";
+  color: var(--color-darkBrown);
+  font-family: "Baloo 2";
   font-size: 2rem;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 800;
   line-height: normal;
 }
 
 h3 {
-  color: var(--darkBrown, #3D3730);
-  font-family: Inter;
+  color: var(--color-darkBrown);
+  font-family: "Baloo 2";
   font-size: 1.375rem;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 800;
   line-height: normal;
 }
 
 p {
-  color: var(--darkBrown, #3D3730);
+  color: var(--darkBrown);
   /* normal */
-  font-family: Inter;
+  font-family: "Baloo 2";
   font-size: 1rem;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
 }
 
-.highlightTopic {
-  color: var(--lightOrange, #FFAC48);
-  font-family: "Press Start 2P";
+.highlightText {
+  color: var(--color-red);
+  font-family: "Baloo 2";
   font-size: 2rem;
   font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-}
-
-.highlight {
-  color: var(--red, #F76652);
-  font-family: Inter;
-  font-size: 1rem;
-  font-style: normal;
-  font-weight: 700;
-  line-height: normal;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
 }
 
 .superHighlight {
@@ -139,11 +136,65 @@ p {
   gap: 0.375rem;
   background: var(--yellow, #F7E352);
   color: var(--darkBrown, #3D3730);
-  font-family: Inter;
+  font-family: "Baloo 2";
   font-size: 1rem;
   font-style: normal;
   font-weight: 700;
   line-height: normal;
+}
+
+.tag {
+  background: var(--yellow, #F7E352);
+  color: var(--darkBrown, #3D3730);
+  font-family: "Baloo 2";
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+
+/* --- Tag Types --- */
+.tag-name,
+.tag-iteration,
+.tag-priority {
+  border-radius: 0.625rem;
+  display: inline-block;
+  padding: 0rem 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.tag-name {
+  background-color: var(--color-blue);
+  color: var(--color-offWhite);
+}
+
+.tag-iteration {
+  background-color: var(--color-offWhite);
+  color: var(--color-darkBrown);
+  border: 1px solid var(--color-darkBrown);
+}
+
+.tag-priority {
+  background-color: var(--color-offWhite);
+  color: var(--color-darkBrown);
+  border: 1px solid;
+}
+
+/* --- Tag Priorities --- */
+.tag-priority-low {
+  color: var(--color-green);
+  border-color: var(--color-green);
+}
+
+.tag-priority-medium {
+  color: var(--color-orange);
+  border-color: var(--color-orange);
+}
+
+.tag-priority-high {
+  color: var(--color-red);
+  border-color: var(--color-red);
 }
 
 button {
