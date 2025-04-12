@@ -27,7 +27,7 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
 
   return (
     <div className="self-stretch bg-offWhite inline-flex flex-col justify-start items-start">
-      <Header bgColor="bg-blue" textColor="text-darkBrown" />
+      <Header bgColor="bg-blue" textColor="text-darkBrown"text="Project's Detail"/>
 
       <div className="self-stretch border-b-[3px] border-lightBrown border-dashed inline-flex justify-start items-end flex-wrap content-end">
         <div className="flex-1 inline-flex flex-col justify-start items-start">
