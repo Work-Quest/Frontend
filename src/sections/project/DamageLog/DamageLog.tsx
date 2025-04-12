@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "../Header";
 import DamageLogItem from "./DamageLogItem";
+import { Button } from "@/components/ui/button";
 import { DamageLogProps } from "./types";
 
 const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
@@ -14,6 +15,7 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
           No damage logs yet
         </div>
       )}
+      <Button variant="shadow" className="!bg-orange mt-2">Review</Button>
     </div>
   );
 };

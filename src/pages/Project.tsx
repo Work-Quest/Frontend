@@ -1,5 +1,6 @@
 import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard";
 import DamageLog from "@/sections/project/DamageLog/DamageLog";
+import ReviewTask from "@/sections/project/ReviewTask";
 
 export default function Project() {
   return (
@@ -40,6 +41,9 @@ export default function Project() {
             },
           ]}
         />
+      </div>
+      <div className="self-stretch bg-offWhite inline-flex flex-col justify-start items-start mt-4">
+        <ReviewTask />
       </div>
     </div>
   );
