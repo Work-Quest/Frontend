@@ -16,32 +16,30 @@ function Home() {
     ]
     
     return (
-     <div className="flex gap-7">
-        <img src={ridge} alt="ridge" className="absolute top-[25%] left-[48%] transform -translate-x-1/2 -translate-y-1/2 z-50 w-[6rem] h-auto "/>
-        <img src={ridge} alt="ridge" className="absolute top-[45%] left-[48%] transform -translate-x-1/2 -translate-y-1/2 z-50 w-[6rem] h-auto "/>
-        <img src={ridge} alt="ridge" className="absolute top-[65%] left-[48%] transform -translate-x-1/2 -translate-y-1/2 z-50 w-[6rem] h-auto "/>
-        <img src={ridge} alt="ridge" className="absolute top-[85%] left-[48%] transform -translate-x-1/2 -translate-y-1/2 z-50 w-[6rem] h-auto "/>
-
+     <div className="flex bg-[#FDD4A0] justify-center items-center rounded-3xl border-4 border-brown">
+       
         {/* left side */}
-        <div className="ml-7 flex w-[45vw] h-[80vh] bg-brown rounded-md justify-center">
-            <div className="w-[85%] mr-7 bg-offWhite rounded-md">
-                <h2 className="!ml-4 !mt-2 !text-red ">LeaderBoard</h2>
-                <Leaderboard 
-                    user={userMockData.slice(0, 5)}/>
-                {/* dashed line */}
-                <div className="mt-4 flex-grow border-dashed border-t-0 border-4 border-brown "></div>
-                
+        <div className="flex flex-col w-[45vw] h-[80vh] rounded-3xl justify-center">
+            <div className="flex flex-col border-2 border-orange w-[95%] h-[58%] bg-offWhite rounded-3xl">
+                <div className="!mx-7 !my-1">
+                    <h2 className="!text-red">Leader Board</h2>
+                    <Leaderboard 
+                        user={userMockData.slice(0, 5)}/>
+                </div>
+            </div>
+            <div className="flex flex-col mt-3 border-orange w-[95%] h-[35%] bg-offWhite rounded-3xl">
+            
             </div>
         </div>
 
         
         {/* right side */}
-        <div className="flex flex-col w-[50vw] h-[80vh] rounded-md justify-center">
-            <div className="flex bg-red w-[100%] h-[10%] rounded-t-md justify-center items-center">
+        <div className="flex flex-col w-[50vw] bg-offWhite h-[77vh] rounded-3xl justify-center items-center">
+            <div className="flex bg-red w-[100%] h-[10%]  rounded-t-3xl justify-center items-center">
                 <h2 className="!text-offWhite">Projects</h2>
             </div>
-            <div className="flex w-[100%] h-[90%] border-4 border-brown justify-center items-center">
-                <div className="flex ml-7 w-[92%] h-[95%] bg-blue"></div>
+            <div className="flex w-[100%] h-[90%] justify-center items-center">
+                <div className="flex  w-[96%] h-[95%] bg-blue rounded-md"></div>
             </div>
         </div>
       </div>

@@ -19,9 +19,17 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Landing /> },
       { path: "project", element: <Project /> },
-      { path: "home", element: <Home /> },
+    ]
+    
+  }, 
+  {
+    path: "/home",
+    element: <MainLayout className='bg-lightOrange'/>, 
+    children: [
+      { index: true, element: <Home />},
     ]
   }
+  
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

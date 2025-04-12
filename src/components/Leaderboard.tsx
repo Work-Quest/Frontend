@@ -14,17 +14,18 @@ type RankStyle = {
 function Leaderboard({ user }: LeaderboardProps) {
 
     const rankStyle:RankStyle[] = [
-        {"number":1, "style": "order !text-lightOrange"},
-        {"number":2, "style": "order !text-lightBrown"},
-        {"number":3, "style": "order !text-[#966B6B]"},
+        {"number":1, "style": "!text-lightOrange !text-6xl"},
+        {"number":2, "style": "!text-lightBrown !text-6xl"},
+        {"number":3, "style": "!text-[#966B6B] !text-6xl"},
     ]
 
     return (
      <div className="w-100% h-100% overflow-auto">
         {user.map((i) => {
-            const style = rankStyle.find(r => r.number === i.order)?.style || "!text-3xl";
+            const style:string = rankStyle.find(r => r.number === i.order)?.style || "!text-3xl";
+            const color:string = i.order % 2 == 0 ? "bg-cream" : ""
             return (
-            <div className="flex gap-4 items-center justify-between">
+            <div className={`flex ${color} gap-4 h-[10%] items-center rounded-xl justify-between`}>
                 <div className="flex gap-4 px-5 py-2 items-center">
                     <div className="flex w-12 justify-center items-center">
                         <h3 className={style}>{i.order}</h3>
