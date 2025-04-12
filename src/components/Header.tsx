@@ -35,7 +35,7 @@ export default function Header(){
       };
     
     const items: MenuItem[] = [
-        {"name" : "Home", "path" : "/"},
+        {"name" : "Home", "path" : "/home"},
         {"name" : "Profile", "path" : "/profile"},
         {"name" : "Friend", "path" : "/friend"},
         {"name" : "Help", "path" : "/help"},

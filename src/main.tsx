@@ -5,8 +5,10 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import Home from './pages/Home.tsx';
+import Landing from './pages/Landing.tsx';
 import Project from './pages/Project.tsx';
+import Home from './pages/Home.tsx';
+
 
 import MainLayout from './layouts/MainLayout.tsx'
 
@@ -15,9 +17,9 @@ const router = createBrowserRouter([
     path: "/",
     element: <MainLayout />, 
     children: [
-      { index: true, element: <Home /> },
+      { index: true, element: <Landing /> },
       { path: "project", element: <Project /> },
-      // { path: "about", element: <About /> }, sub route
+      { path: "home", element: <Home /> },
     ]
   }
 ]);
