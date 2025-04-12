@@ -32,7 +32,7 @@ jobs:
       # Create .env file from GitHub Secrets
       - name: Create .env file from GitHub Secrets
         run: |
-          echo "VITE_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
           
       # Clean up node_modules and package-lock.json (if necessary)
       - name: Clean up node_modules and package-lock.json
