@@ -1,4 +1,4 @@
-import ProjectDetailCard from "@/sections/project/ProjectDetailCard";
+// import ProjectDetailCard from "@/sections/project/ProjectDetailCard";
 
 export default function Project() {
   return (
