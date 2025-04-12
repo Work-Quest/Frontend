@@ -1,6 +1,7 @@
 import Leaderboard from "@/components/Leaderboard";
 import type { UserScore } from "@/types/User";
-import ridge from '../assets/ridge.svg'
+import ProfileCard from "@/sections/home/ProfileCard";
+import type { UserProfile } from "@/types/User";
 
 function Home() {
    
@@ -14,6 +15,41 @@ function Home() {
         {"order": 7, "name": "Michael2", "username": "michaelza5502", "score": 8500},
 
     ]
+
+    const mockProfile: UserProfile = {
+        name: "John Doe",
+        username: "littleJohn",
+        profileImg: "/mockImg/profile.svg",
+        tag: [
+          {
+            id: "tag1",
+            tagName: "Zombie of the group",
+            description: "Always active at midnighr are you a zombie???",
+          },
+          {
+            id: "tag2",
+            tagName: "Strategist",
+            description: "Always plans the next move with precision.",
+          },
+        ],
+        bossCollection: [
+          {
+            id: "boss1",
+            bossName: "Flame King",
+            img: "/mockImg/boss1.svg",
+          },
+          {
+            id: "boss2",
+            bossName: "Abyss Serpent",
+            img: "/mockImg/boss2.svg",
+          },
+          {
+            id: "boss3",
+            bossName: "Doggy",
+            img: "/mockImg/boss3.svg",
+          },
+        ],
+      };
     
     return (
      <div className="flex bg-[#FDD4A0] justify-center items-center rounded-3xl border-4 border-brown">
@@ -28,7 +64,8 @@ function Home() {
                 </div>
             </div>
             <div className="flex flex-col mt-3 border-orange w-[95%] h-[35%] bg-offWhite rounded-3xl">
-            
+                <ProfileCard 
+                    data={mockProfile} />
             </div>
         </div>
 
