@@ -1,6 +1,8 @@
 name: Build CI
 
-on: pull_request
+on:
+  push:
+  pull_request:
 
 jobs:
   build:
@@ -16,22 +18,21 @@ jobs:
         with:
           node-version: lts/*
 
-      # Caching step to speed up subsequent builds
+      # Caching
       - name: Caching
         uses: actions/cache@v4
         with:
           path: |
             ~/.npm
-            ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ github.run_id }}-${{ hashFiles('**/package-lock.json') }}
+            ${{ github.workspace }}/node_modules/.vite
+          key: ${{ runner.os }}-vite-${{ github.run_id }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-vite-${{ hashFiles('**/package-lock.json') }}-
 
       # Create .env file from GitHub Secrets
       - name: Create .env file from GitHub Secrets
         run: |
-          echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "VITE_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env
           
       # Clean up node_modules and package-lock.json (if necessary)
       - name: Clean up node_modules and package-lock.json
