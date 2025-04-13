@@ -119,7 +119,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
                   !font-normal
                 `}
                 >
-                <SelectValue placeholder="Select priority" />
+                  <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent className="font-['Baloo_2'] bg-offWhite text-darkBrown border-lightBrown">
                   <SelectItem value="Low" className="hover:!bg-cream">
@@ -165,7 +165,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
                 id="assignees"
                 value={assignees}
                 onChange={(e) => setAssignees(e.target.value)}
-                 placeholder="You"
+                placeholder="You"
                 className="font-['Baloo_2'] text-darkBrown"
               />
             </div>

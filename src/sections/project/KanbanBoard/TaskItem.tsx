@@ -36,14 +36,14 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
 
   return (
     <>
-      <div 
-        ref={setNodeRef} 
-        style={style} 
-        {...attributes} 
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
         {...listeners}
         className={`p-3 rounded-lg border border-brown ${
-          isDragging 
-            ? "border-dashed scale-105 bg-white/80 shadow-lg" 
+          isDragging
+            ? "border-dashed scale-105 bg-white/80 shadow-lg"
             : "bg-offWhite shadow-sm hover:shadow-md hover:scale-[1.01]"
         } flex flex-col gap-2 transition-all cursor-grab active:cursor-grabbing`}
       >

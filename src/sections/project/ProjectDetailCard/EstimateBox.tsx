@@ -7,7 +7,7 @@ const EstimateBox = ({ estimatedTime }: Props) => (
     <div className="inline-flex flex-col justify-start items-start">
       <div className="p-2 inline-flex justify-start items-center gap-2">
         <div className="flex justify-start items-center gap-3">
-          <div className="highlightText">{estimatedTime ?? '-'}</div>
+          <div className="highlightText">{estimatedTime ?? "-"}</div>
         </div>
         <div className="inline-flex flex-col justify-start items-start">
           <div className="self-stretch inline-flex justify-start items-center gap-2">
