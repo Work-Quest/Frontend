@@ -34,6 +34,7 @@ export default function ProfileCard({data}: ProfileCardProps){
                 </div>
                 <div className="flex flex-col">
                     <h2 className="!text-white">{data.name}</h2>
+                    {/* tag bagde */}
                     <div className="flex gap-2">
                         {data.tag.map((i)=>(
                             <div className="superHighlight">
@@ -41,6 +42,7 @@ export default function ProfileCard({data}: ProfileCardProps){
                             </div>
                         ))}
                     </div>
+                    {/* Boss collection */}
                     <div className="flex mt-3 gap-2">
                         {data.bossCollection.map((i)=>(
                             <a className="cursor-pointer">
