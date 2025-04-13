@@ -15,7 +15,7 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
           No damage logs yet
         </div>
       )}
-      <Button variant="shadow" className="!bg-orange mt-2">Review</Button>
+      <Button variant="shadow" className="!bg-orange m-2">See More</Button>
     </div>
   );
 };

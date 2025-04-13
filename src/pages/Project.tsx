@@ -1,13 +1,14 @@
+import { useState } from 'react';
 import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard";
 import DamageLog from "@/sections/project/DamageLog/DamageLog";
 import ReviewTask from "@/sections/project/ReviewTask";
+import KanbanBoard from "@/sections/project/KanbanBoard/KanbanBoard";
 
 export default function Project() {
   return (
-    <div className="self-stretch bg-cream border-r-2 inline-flex flex-col justify-start items-start">
-      <div className="self-stretch bg-offWhite inline-flex flex-col justify-start items-start">
+    <div className="flex bg-cream overflow-hidden">
+      <div className="w-[500px] h-full flex-shrink-0 bg-offWhite flex flex-col overflow-y-auto">
         <ProjectDetailCard
-          // dummy data
           hpData={{
             boss: { current: 50, max: 100 },
             player: { current: 80, max: 100 },
@@ -18,10 +19,8 @@ export default function Project() {
             estimatedTime: 10,
           }}
         />
-      </div>
-      <div className="self-stretch bg-offWhite inline-flex flex-col justify-start items-start mt-4">
+
         <DamageLog
-          // dummy data
           logs={[
             {
               id: "1",
@@ -41,9 +40,18 @@ export default function Project() {
             },
           ]}
         />
-      </div>
-      <div className="self-stretch bg-offWhite inline-flex flex-col justify-start items-start mt-4">
+
         <ReviewTask />
+      </div>
+
+      <div className="flex-1 h-full flex flex-col bg-offWhite min-w-0 overflow-hidden">
+        <div className="h-[250px] flex-shrink-0 border-b border-gray-400 flex items-center justify-center text-gray-500 text-sm">
+          Boss Fight Placeholder
+        </div>
+        
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <KanbanBoard />
+        </div>
       </div>
     </div>
   );

@@ -197,6 +197,11 @@ p {
   border-color: var(--color-red);
 }
 
+.dragging {
+  opacity: 0.5;
+  transform: scale(1.02);
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;

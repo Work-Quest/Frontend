@@ -27,12 +27,12 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
 
   return (
     <div className="self-stretch bg-offWhite inline-flex flex-col justify-start items-start">
-      <Header bgColor="bg-blue" textColor="text-darkBrown"text="Project's Detail"/>
+      <Header bgColor="bg-blue" textColor="!text-darkBlue2" text="Project's Detail"/>
 
       <div className="self-stretch border-b-[3px] border-lightBrown border-dashed inline-flex justify-start items-end flex-wrap content-end">
         <div className="flex-1 inline-flex flex-col justify-start items-start">
-          <div className="self-stretch px-4 py-2 inline-flex justify-start items-center gap-2">
-            <div className="flex-1 flex justify-start items-start gap-4">
+          <div className="self-stretch px-3 sm:px-4 py-2 inline-flex justify-start items-center gap-2">
+            <div className="flex-1 flex flex-col sm:flex-row justify-start items-start gap-2 sm:gap-4">
               <DeadlineBox projectData={projectData} />
               <EstimateBox estimatedTime={projectData?.estimatedTime} />
             </div>
@@ -42,7 +42,7 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
 
       <div className="self-stretch inline-flex justify-start items-end flex-wrap content-end">
         <div className="flex-1 inline-flex flex-col justify-start items-start">
-          <div className="self-stretch px-6 py-4 flex flex-col justify-center items-start gap-2">
+          <div className="self-stretch px-4 sm:px-6 py-4 flex flex-col justify-center items-start gap-2">
             <HpBar label="Boss HP" current={bossHp} max={maxBossHp} color="orange" />
             <HpBar label="Player HP" current={playerHp} max={maxPlayerHp} color="green" />
           </div>
