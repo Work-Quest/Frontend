@@ -1,4 +1,3 @@
-// KanbanBoard.tsx
 import React from "react";
 import {
   DndContext,

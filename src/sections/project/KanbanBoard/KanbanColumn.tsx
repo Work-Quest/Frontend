@@ -30,7 +30,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   };
 
   return (
-    <div ref={setNodeRef} className="w-full min-h-[300px] flex flex-col">
+    <div ref={setNodeRef} className="w-full flex flex-col">
       <div className="flex items-center mb-3">
         <h3 className="text-darkBrown font-medium font-['Baloo_2']">{title}</h3>
         <p className="ml-2 px-2 bg-lightBrown !text-offWhite text-sm !font-bold rounded-full">
@@ -44,7 +44,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         items={tasks.map((task) => task.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="space-y-3 flex-grow">
+        <div className="space-y-3">
           {tasks.map((task) => (
             <TaskItem 
               key={task.id} 
