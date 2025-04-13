@@ -1,3 +1,4 @@
+// KanbanBoard.tsx
 import React from "react";
 import {
   DndContext,
@@ -10,8 +11,18 @@ import {
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { KanbanColumn } from "./KanbanColumn";
-import { useKanbanBoard } from "./useKanbanBoard";
-import { IoTrashOutline } from "react-icons/io5";
+import { Task, Tasks } from "./types";
+
+interface KanbanBoardProps {
+  tasks: Tasks;
+  onAddTask: (columnId: keyof Tasks, task: Omit<Task, "id">) => void;
+  onDeleteTask: (taskId: string) => void;
+  onDragStart: (event: any) => void;
+  onDragOver: (event: any) => void;
+  onDragEnd: (event: any) => void;
+  activeId: string | null;
+  findActiveTask: () => Task | null;
+}
 
 const getColumnTitle = (id: string): string => {
   const titles: Record<string, string> = {
@@ -23,16 +34,16 @@ const getColumnTitle = (id: string): string => {
   return titles[id] || id;
 };
 
-export const KanbanBoard: React.FC = () => {
-  const {
-    tasks,
-    activeId,
-    handleDragStart,
-    handleDragOver,
-    handleDragEnd,
-    findActiveTask,
-  } = useKanbanBoard();
-
+export const KanbanBoard: React.FC<KanbanBoardProps> = ({
+  tasks,
+  onAddTask,
+  onDeleteTask,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+  activeId,
+  findActiveTask,
+}) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -43,9 +54,9 @@ export const KanbanBoard: React.FC = () => {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDragEnd={onDragEnd}
       >
         <div className="flex gap-4 overflow-x-auto pb-4 px-2">
           {Object.keys(tasks).map((columnId) => (
@@ -54,6 +65,8 @@ export const KanbanBoard: React.FC = () => {
               id={columnId as keyof typeof tasks}
               title={getColumnTitle(columnId)}
               tasks={tasks[columnId as keyof typeof tasks]}
+              onAddTask={onAddTask}
+              onDeleteTask={onDeleteTask}
             />
           ))}
         </div>
@@ -103,5 +116,3 @@ export const KanbanBoard: React.FC = () => {
     </div>
   );
 };
-
-export default KanbanBoard;

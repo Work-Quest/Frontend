@@ -1,26 +1,9 @@
 import { useState } from 'react';
 import { DragStartEvent, DragOverEvent, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Tasks } from './types';
+import { Task, Tasks, TaskStatus } from "./types";
 
-const initialTasks: Tasks = {
-  backlog: [
-    { id: 'task-1', title: 'Design database schema', priority: 'High', iteration: 'Sprint 1', assignees: ['Alice', 'You'] },
-    { id: 'task-2', title: 'Research API requirements', priority: 'Medium', iteration: 'Sprint 1', assignees: ['Bob'] },
-  ],
-  todo: [
-    { id: 'task-3', title: 'Setup project repository', priority: 'Low', iteration: 'Sprint 1', assignees: ['You'] },
-    { id: 'task-4', title: 'Create component structure', priority: 'Medium', iteration: 'Sprint 1', assignees: ['Charlie', 'Alice'] },
-  ],
-  inProgress: [
-    { id: 'task-5', title: 'Implement authentication', priority: 'Urgent', iteration: 'Sprint 2', assignees: ['You', 'David'] },
-  ],
-  done: [
-    { id: 'task-6', title: 'Project setup', priority: 'Low', iteration: 'Sprint 1', assignees: ['Bob'] },
-  ],
-};
-
-export const useKanbanBoard = () => {
+export const useKanbanBoard = (initialTasks: Tasks) => {
   const [tasks, setTasks] = useState<Tasks>(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -32,6 +15,31 @@ export const useKanbanBoard = () => {
       }
     }
     return null;
+  };
+
+  const handleAddTask = (columnId: TaskStatus, task: Omit<Task, "id">) => {
+    const newTask: Task = {
+      ...task,
+      id: `task-${Date.now()}`,
+      status: columnId,
+      iteration: task.iteration || 'Sprint 1',
+      assignees: task.assignees || ['You'],
+    };
+    
+    setTasks(prev => ({
+      ...prev,
+      [columnId]: [...prev[columnId], newTask]
+    }));
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    setTasks(prev => {
+      const newTasks = {...prev};
+      for (const column in newTasks) {
+        newTasks[column as keyof Tasks] = newTasks[column as keyof Tasks].filter(task => task.id !== taskId);
+      }
+      return newTasks;
+    });
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -139,6 +147,8 @@ export const useKanbanBoard = () => {
     handleDragStart,
     handleDragOver,
     handleDragEnd,
-    findActiveTask
+    findActiveTask,
+    handleAddTask,
+    handleDeleteTask,
   };
 };

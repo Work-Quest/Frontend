@@ -1,4 +1,5 @@
 export type TaskPriority = 'Low' | 'Medium' | 'High' | 'Urgent';
+export type TaskStatus = 'backlog' | 'todo' | 'inProgress' | 'done';
 
 export interface Task {
   id: string;
@@ -6,6 +7,7 @@ export interface Task {
   priority: TaskPriority;
   iteration: string;
   assignees: string[];
+  status: TaskStatus;
 }
 
 export interface Tasks {
