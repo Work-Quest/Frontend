@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react"
 import {
   DndContext,
   closestCorners,
@@ -7,6 +7,7 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
+  MeasuringStrategy,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { KanbanColumn } from "./KanbanColumn";
@@ -56,6 +57,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         onDragStart={onDragStart}
         onDragOver={onDragOver}
         onDragEnd={onDragEnd}
+        modifiers={[]}
+        autoScroll={true}
+        measuring={{
+          droppable: {
+            strategy: MeasuringStrategy.Always,
+          },
+        }}
       >
         <div className="flex gap-4 overflow-x-auto pb-4 px-2">
           {Object.keys(tasks).map((columnId) => (

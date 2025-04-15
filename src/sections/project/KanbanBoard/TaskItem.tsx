@@ -48,16 +48,27 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
         } flex flex-col gap-2 transition-all cursor-grab active:cursor-grabbing`}
       >
         <div className="flex justify-between items-start">
-          <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">
-            {task.title}
-          </h4>
-          <IoTrashOutline
+          <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">{task.title}</h4>
+          <div
+            className="cursor-pointer"
             onClick={(e) => {
-              e.stopPropagation();
-              setShowOverlay(true);
+              e.preventDefault()
+              e.stopPropagation()
+              setShowOverlay(true)
             }}
-            className="text-darkBrown hover:text-red cursor-pointer text-xl hover:scale-110 transition-transform"
-          />
+            {...{
+              "data-no-dnd": true,
+              onPointerDown: (e) => {
+                e.stopPropagation()
+              },
+              onKeyDown: (e) => {
+                e.stopPropagation()
+              },
+              draggable: false,
+            }}
+          >
+            <IoTrashOutline className="text-darkBrown hover:text-red text-xl hover:scale-110 transition-transform" />
+          </div>
         </div>
 
         <div className="h-px bg-brown w-full"></div>

@@ -26,7 +26,7 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
   const maxPlayerHp = hpData?.player?.max || 100;
 
   return (
-    <div className="self-stretch bg-offWhite inline-flex flex-col justify-start items-start">
+    <div className="w-full pr-3 self-stretch bg-offWhite inline-flex flex-col justify-start items-start">
       <Header
         bgColor="bg-blue"
         textColor="!text-darkBlue2"

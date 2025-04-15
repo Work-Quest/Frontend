@@ -1,37 +1,40 @@
-import React from "react";
-import { Task } from "./types";
+import type React from "react"
+import type { Task } from "./types"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 
 interface DeleteConfirmationOverlayProps {
-  task: Task;
-  onCancel: () => void;
-  onConfirm: () => void;
+  task: Task
+  onCancel: () => void
+  onConfirm: () => void
 }
 
-export const DeleteConfirmationOverlay: React.FC<
-  DeleteConfirmationOverlayProps
-> = ({ task, onCancel, onConfirm }) => {
+export const DeleteConfirmationOverlay: React.FC<DeleteConfirmationOverlayProps> = ({ task, onCancel, onConfirm }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col gap-4 w-[90%] max-w-sm">
-        <h2 className="text-lg font-semibold text-darkBrown">Delete Task?</h2>
-        <p className="text-sm text-gray-600">
-          Are you sure you want to delete <strong>{task.title}</strong>?
-        </p>
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={onCancel}
-            className="px-3 py-1 rounded-lg border border-lightBrown text-darkBrown hover:bg-offWhite"
-          >
+    <Dialog open={true} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent className="sm:max-w-md bg-offWhite">
+        <DialogHeader>
+          <DialogTitle className="text-darkBrown">Delete Task?</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete <span className="font-semibold">{task.title}</span>?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="sm:justify-end">
+          <Button variant="outline" onClick={onCancel} className="!bg-offWhite !border-lightBrown !text-darkBrown hover:!bg-cream !font-['Baloo_2']">
             Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-3 py-1 rounded-lg bg-red text-white hover:bg-red-500"
-          >
+          </Button>
+          <Button variant="destructive" onClick={onConfirm} className="!bg-red hover:!bg-red-500 !font-['Baloo_2']">
             Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
