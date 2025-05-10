@@ -8,9 +8,11 @@ type MainLayoutProps = {
 
 const MainLayout = ({ className = '' }: MainLayoutProps) => {
   return (
-    <div className={`flex flex-col min-h-screen w-screen ${className}`}>
-      <Header />
-      <main className="flex-1 p-4">
+    <div className="flex flex-col min-h-screen">
+      <div className="sticky top-0 z-50">
+        <Header />
+      </div>
+        <main className="flex-grow overflow-hidden">
         <Outlet />
       </main>
       <Footer />

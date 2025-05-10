@@ -107,7 +107,7 @@ h3 {
 }
 
 p {
-  color: var(--darkBrown);
+  color: var(--darkBrown, #3D3730);
   /* normal */
   font-family: "Baloo 2";
   font-size: 1rem;
@@ -204,6 +204,11 @@ p {
 .tag-priority-high {
   color: var(--color-red);
   border-color: var(--color-red);
+}
+
+.dragging {
+  opacity: 0.5;
+  transform: scale(1.02);
 }
 
 button {
