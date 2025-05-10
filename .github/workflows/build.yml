@@ -1,0 +1,56 @@
+name: Build CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    environment: 
+        name: frontend_env
+
+    steps:
+      # Step to checkout the code
+      - uses: actions/checkout@v4
+
+      # Step to set up Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      # Caching
+      - name: Caching
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/node_modules/.vite
+          key: ${{ runner.os }}-vite-${{ github.run_id }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vite-${{ hashFiles('**/package-lock.json') }}-
+
+      # Create .env file from GitHub Secrets
+      - name: Create .env file from GitHub Secrets
+        run: |
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
+          
+      # Clean up node_modules and package-lock.json (if necessary)
+      - name: Clean up node_modules and package-lock.json
+        run: |
+          rm -rf node_modules
+          rm -f package-lock.json
+
+      # Install dependencies using npm i
+      - name: Install dependencies
+        run: npm install
+
+      # Install missing Rollup binary for Linux
+      - name: Install missing Rollup binary (Linux)
+        run: |
+          npm install @rollup/rollup-linux-x64-gnu || echo "Rollup binary not found"
+
+      # Run build
+      - name: Run build
+        run: npm run build --if-present --verbose
