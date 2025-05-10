@@ -2,13 +2,11 @@ import type { Project } from "@/types/Project";
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
   } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Button } from "./ui/button";
 
 type ProfileTabCardProps = {

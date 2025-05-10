@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import Landing from './pages/Landing.tsx';
 import Project from './pages/Project.tsx';
+import ProjectEnd from './pages/ProjectEnd.tsx';
 import Home from './pages/Home.tsx';
 
 
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
     element: <MainLayout />, 
     children: [
       { index: true, element: <Landing /> },
+      { path: "project-end", element: <ProjectEnd /> },
       { path: "project", element: <Project /> },
     ]
     
