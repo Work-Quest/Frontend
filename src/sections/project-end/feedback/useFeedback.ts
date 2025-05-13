@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { UserInfo, FeedbackResponse } from "./types";
+import { postData } from "@/Api";
 
 const useFeedback = () => {
   const [feedbackData, setFeedbackData] = useState<Record<string, FeedbackResponse>>({});
@@ -8,23 +9,11 @@ const useFeedback = () => {
 
   const fetchFeedback = async (user: UserInfo) => {
     if (loading[user.user_name]) return;
-    
+
     setLoading(prev => ({ ...prev, [user.user_name]: true }));
-    
+
     try {
-      const response = await fetch("http://127.0.0.1:5000/feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(user)
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const data = await postData<UserInfo, FeedbackResponse>("/feedback", user);
       setFeedbackData(prev => ({ ...prev, [user.user_name]: data }));
       setError(prev => {
         const newErrors = { ...prev };
@@ -32,9 +21,10 @@ const useFeedback = () => {
         return newErrors;
       });
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        [user.user_name]: err instanceof Error ? err.message : "Failed to fetch feedback" 
+      console.error('Feedback request failed:', err);
+      setError(prev => ({
+        ...prev,
+        [user.user_name]: err instanceof Error ? err.message : "Failed to fetch feedback"
       }));
     } finally {
       setLoading(prev => {
