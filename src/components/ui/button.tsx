@@ -20,6 +20,7 @@ const buttonVariants = cva(
         ghost: "bg-transparent !text-offWhite/50 border-transparent hover:!text-offWhite font-['Baloo_2']",
         neon: "bg-cyan-600 text-white border-cyan-300 shadow-[0_4px_0_0_#0891b2] hover:shadow-[0_5px_0_0_#0891b2] active:shadow-[0_2px_0_0_#0891b2] active:translate-y-1 font-['Baloo_2']",
         pagination: "bg-transparent !text-offWhite border-transparent font-['Baloo_2']",
+        shadow: "!border !border-b-5 !border-black/30 text-gray-800 active:translate-y-1 !font-['Baloo_2']"
       },
       size: {
         default: "h-12 px-6 py-3 text-base has-[>svg]:px-4",

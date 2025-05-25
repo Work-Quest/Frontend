@@ -9,7 +9,7 @@ const ReviewTask = () => {
         textColor="!text-offWhite"
         text="Review Task"
       />
-      <Button variant="shadow" className="m-2">
+      <Button variant="shadow" className="w-full !bg-brown !text-offWhite my-4">
         Review
       </Button>
     </div>
