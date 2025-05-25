@@ -37,7 +37,7 @@ export default function ProjectTab({ data }: ProfileTabProps) {
 
   return (
     <div className="flex relative flex-col w-[100%] h-[100%]">
-      <div className="flex h-[10%] w-full bg-darkBrown items-center rounded-t-xl justify-between px-7">
+      <div className="flex h-[10%] w-full bg-darkBrown items-center rounded-t-xl rounded-b-sm justify-between px-7">
         <h3 className="!text-offWhite">Project's name</h3>
         <div className="flex justify-between w-[40%]">
           <h3 className="!text-offWhite">Status</h3>
@@ -45,16 +45,16 @@ export default function ProjectTab({ data }: ProfileTabProps) {
         </div>
       </div>
 
-      <div className="flex flex-col py-3 px-3 gap-3 flex-1 overflow-auto">
+      <div className="flex flex-col py-3 gap-3 flex-1 overflow-auto">
         {paginatedData.map((i) => (
           <ProjectTabCard key={i.ProjectID} project={i} />
         ))}
       </div>
 
-      <div className="absolute bottom-0 h-[9%] w-full bg-darkBrown rounded-b-xl flex items-center justify-end">
+      <div className="absolute bottom-0 h-[10%] w-full bg-darkBrown rounded-b-xl rounded-t-sm flex items-center justify-end">
         <Pagination className="ml-[60%]">
             <PaginationContent>
-                <PaginationItem className="bg-offWhite rounded-md">
+                <PaginationItem className="!text-offWhite rounded-md">
                 <PaginationPrevious
                     href={`#${page-1}`}
                     onClick={(e) => {
@@ -118,7 +118,7 @@ export default function ProjectTab({ data }: ProfileTabProps) {
                 </PaginationItem>
                 )}
 
-                <PaginationItem className="bg-offWhite rounded-md">
+                <PaginationItem className="!text-offWhite rounded-md">
                 <PaginationNext
                     href={`#${page+1}`}
                     onClick={(e) => {

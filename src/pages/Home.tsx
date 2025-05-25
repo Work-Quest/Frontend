@@ -152,61 +152,69 @@ function Home() {
         setResults(searchResults.map((result) => result.item))
       }
     }
-   
-    
-    
     
     return (
-     <div className="flex bg-[#FDD4A0] justify-center items-center rounded-3xl border-4 border-brown">
-       
-        {/* left side */}
-        <div className="flex flex-col w-[45vw] h-[80vh] rounded-3xl justify-center">
-            <div className="flex flex-col border-2 border-orange w-[95%] h-[58%] bg-offWhite rounded-3xl">
-                <div className="!mx-7 !my-1">
-                    <h2 className="!text-red">Leader Board</h2>
-                    <Leaderboard 
-                        user={userMockData.slice(0, 5)}/>
-                </div>
-            </div>
-            <div className="flex flex-col mt-3 border-orange w-[95%] h-[35%] bg-offWhite rounded-3xl">
-                <ProfileCard 
-                    data={mockProfile} />
-            </div>
-        </div>
+      <div
+        className="w-screen overflow-hidden p-4 bg-[rgb(255,205,138)] flex gap-8"
+        style={{ height: "calc(100vh - 90px - 50px)" }}
+      >
 
-        
-        {/* right side */}
-        <div className="flex flex-col w-[50vw] bg-offWhite h-[77vh] rounded-3xl justify-center items-center">
-            <div className="flex bg-red w-[100%] h-[10%]  rounded-t-3xl justify-center items-center">
-                <h2 className="!text-offWhite">Projects</h2>
+          <div className="flex flex-col w-1/2 h-full gap-4">
+            
+            <div className="flex-[3] border-2 border-orange bg-offWhite rounded-3xl p-4 min-h-0">
+              <h2 className="!text-red text-xl font-bold">Leader Board</h2>
+              <div className="h-[calc(100%-3rem)] overflow-hidden">
+                <Leaderboard user={userMockData} height={"100%"} />
+              </div>
             </div>
-            <div className="flex w-[100%] h-[90%] justify-center items-center">
-                <div className="flex flex-col w-[96%] h-[95%] bg-blue rounded-md items-center justify-center">
-                  <div className="flex gap-4 w-[97%] h-[12%] items-center">
-                      <Input 
-                        type="search" 
-                        placeholder="Search" 
-                        className="bg-offWhite  rounded-sm" 
-                        value={query}
-                        onChange={(e) => handleSearch(e.target.value)}
-                        />
-                        
-                      <Button className="!bg-transparent hover:!text-darkBlue hover:!border-darkBlue !border-3 !border-offWhite border-dashed h-[80%]">
-                          <IoMdAddCircleOutline /> Add Project
-                      </Button>
-                    
+            
+            <div className="flex-[2] border-2 border-orange bg-offWhite rounded-3xl min-h-0">
+              <ProfileCard data={mockProfile} />
+            </div>
+            
+          </div>
+
+          <div className="flex flex-col w-1/2 h-full bg-blue rounded-3xl overflow-hidden">
+            
+            {/* Header */}
+            <div className="flex bg-red h-16 rounded-t-3xl justify-center items-center flex-shrink-0">
+              <h2 className="!text-offWhite text-xl font-bold">Projects</h2>
+            </div>
+            
+            {/* Content Area */}
+            <div className="flex-1 flex justify-center items-center p-4 min-h-0">
+              <div className="w-full h-full flex flex-col">
+                {/* Search Bar */}
+                <div className="w-full flex flex-col sm:flex-row gap-4 items-stretch sm:items-center mb-4 border-b-3 border-dashed pb-4">
+                  <div className="flex-1">
+                    <Input 
+                      type="search" 
+                      placeholder="Search projects..." 
+                      className="w-full bg-offWhite rounded-lg font-['Baloo_2']" 
+                      value={query}
+                      onChange={(e) => handleSearch(e.target.value)}
+                    />
                   </div>
-                  <div className="w-[97%] h-[84%]">
-                    <ProjectTab 
-                      data={results}/>
+                  <div className="sm:w-auto w-full">
+                    <Button 
+                      className="w-full sm:w-auto !bg-darkBlue !font-['Baloo_2'] hover:!bg-[#4650da] !rounded-lg h-full"
+                      variant="default"
+                    >
+                      <IoMdAddCircleOutline className="mr-2" /> Add Project
+                    </Button>
                   </div>
+                </div>       
+                {/* Projects List */}
+                <div className="flex-1 min-h-0">
+                  <ProjectTab data={results} />
                 </div>
+                
+              </div>
             </div>
-        </div>
+            
+          </div>
       </div>
-
     )
-  }
-  
-  export default Home
-  
+}
+
+export default Home
