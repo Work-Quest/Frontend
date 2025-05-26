@@ -47,7 +47,7 @@ export default function Header(){
       };
 
     return (
-        <div className="flex overflow-hidden bg-darkBrown w-screen h-[90px] items-center justify-between">
+        <div className="flex overflow-hidden bg-darkBrown w-screen h-[90px] items-center justify-between z-100">
             <img src={logo} alt="Logo" className="h-[3.6875rem] w-auto ml-[2.5rem]"/>
             {isFullScreen ? (
                 <div className=''>

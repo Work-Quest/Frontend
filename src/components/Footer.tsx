@@ -1,6 +1,6 @@
 export default function Footer(){
     return (
-        <div className="flex overflow-hidden bg-darkBrown w-screen h-[50px] items-center justify-between">
+        <div className="flex overflow-hidden bg-darkBrown w-screen h-[50px] items-center justify-between z-100">
             <p className="!text-offWhite px-[1.25rem] !text-xs">
             © {new Date().getFullYear()} WorkQuest. All rights reserved.
             </p>

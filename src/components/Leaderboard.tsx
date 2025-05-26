@@ -34,11 +34,11 @@ function Leaderboard({ user, height = "100%" }: LeaderboardProps) {
     if (!firstPlace) return null
 
     return (
-      <div className="flex flex-col items-center justify-center h-full relative overflow-hidden">
+      <div className="flex flex-col items-center justify-center min-h-90 relative overflow-hidden">
 
         {/* Crown */}
         <div className="relative mb-1">
-          <Crown className="w-16 h-16 text-yellow-500 fill-yellow-400 animate-bounce" />
+          <Crown className="w-13 h-13 text-red fill-red -mb-3" />
         </div>
 
         {/* Winner podium effect */}
@@ -55,14 +55,13 @@ function Leaderboard({ user, height = "100%" }: LeaderboardProps) {
           <h2 className="text-2xl font-bold text-gray-800 -mb-2">{firstPlace.name}</h2>
           <a
             href={`/${firstPlace.username}`}
-            className="text-lg text-orange-600 hover:text-orange-700 cursor-pointer font-medium font-['Baloo_2']"
+            className="text-lg text-gray-400 cursor-pointer font-medium font-['Baloo_2']"
           >
             @{firstPlace.username}
           </a>
 
-          {/* Score with trophy */}
-          <div className="flex items-center justify-center gap-2 mt-4 bg-white rounded-full px-4 py-2 shadow-md">
-            <span className="text-2xl font-bold text-orange-600 font-['Baloo_2']">{firstPlace.score}</span>
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <span className="text-2xl font-extrabold text-lightBrown font-['Baloo_2']">{firstPlace.score}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="17"
