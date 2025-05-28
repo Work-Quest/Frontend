@@ -5,20 +5,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none relative cursor-pointer select-none border-2 uppercase tracking-wide",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all duration-150 relative cursor-pointer select-none uppercase leading-none focus:!outline-none",
   {
     variants: {
       variant: {
-        default: "bg-blue-600 text-white border-blue-300 shadow-[0_4px_0_0_#1e40af] hover:shadow-[0_5px_0_0_#1e40af] active:shadow-[0_2px_0_0_#1e40af] active:translate-y-1 font-['Baloo_2']",
-        destructive: "bg-red-600 text-white border-red-300 shadow-[0_4px_0_0_#dc2626] hover:shadow-[0_5px_0_0_#dc2626] active:shadow-[0_2px_0_0_#dc2626] active:translate-y-1 font-['Baloo_2']",
-        success: "bg-green-600 text-white border-green-300 shadow-[0_4px_0_0_#16a34a] hover:shadow-[0_5px_0_0_#16a34a] active:shadow-[0_2px_0_0_#16a34a] active:translate-y-1 font-['Baloo_2']",
-        warning: "bg-orange-600 text-white border-orange-300 shadow-[0_4px_0_0_#ea580c] hover:shadow-[0_5px_0_0_#ea580c] active:shadow-[0_2px_0_0_#ea580c] active:translate-y-1 font-['Baloo_2']",
-        purple: "bg-purple-600 text-white border-purple-300 shadow-[0_4px_0_0_#9333ea] hover:shadow-[0_5px_0_0_#9333ea] active:shadow-[0_2px_0_0_#9333ea] active:translate-y-1 font-['Baloo_2']",
-        pink: "bg-pink-600 text-white border-pink-300 shadow-[0_4px_0_0_#db2777] hover:shadow-[0_5px_0_0_#db2777] active:shadow-[0_2px_0_0_#db2777] active:translate-y-1 font-['Baloo_2']",
-        golden: "bg-yellow-500 text-yellow-900 border-yellow-200 shadow-[0_4px_0_0_#d97706] hover:shadow-[0_5px_0_0_#d97706] active:shadow-[0_2px_0_0_#d97706] active:translate-y-1 font-['Baloo_2']",
-        outline: "bg-gray-200 text-gray-800 border-gray-300 shadow-[0_4px_0_0_#6b7280] hover:shadow-[0_5px_0_0_#6b7280] active:shadow-[0_2px_0_0_#6b7280] active:translate-y-1 font-['Baloo_2']",
-        ghost: "bg-transparent !text-offWhite/50 border-transparent hover:!text-offWhite font-['Baloo_2']",
-        neon: "bg-cyan-600 text-white border-cyan-300 shadow-[0_4px_0_0_#0891b2] hover:shadow-[0_5px_0_0_#0891b2] active:shadow-[0_2px_0_0_#0891b2] active:translate-y-1 font-['Baloo_2']",
+        default: "!bg-offWhite text-orange !border-veryLightBrown !border-2 shadow-[0_4px_0_0_#d6cec4] hover:shadow-[0_2px_0_0_#d6cec4] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#d6cec4] active:translate-y-1 !font-['Baloo_2']",
+        destructive: "bg-red-600 text-white shadow-[0_4px_0_0_#b91c1c] hover:shadow-[0_2px_0_0_#b91c1c] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#b91c1c] active:translate-y-1 font-['Baloo_2']",
+        success: "bg-green-600 text-white shadow-[0_4px_0_0_#15803d] hover:shadow-[0_2px_0_0_#15803d] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#15803d] active:translate-y-1 font-['Baloo_2']",
+        warning: "bg-orange-600 text-white shadow-[0_4px_0_0_#c2410c] hover:shadow-[0_2px_0_0_#c2410c] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#c2410c] active:translate-y-1 font-['Baloo_2']",
+        purple: "bg-purple-600 text-white shadow-[0_4px_0_0_#7e22ce] hover:shadow-[0_2px_0_0_#7e22ce] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#7e22ce] active:translate-y-1 font-['Baloo_2']",
+        pink: "bg-pink-600 text-white shadow-[0_4px_0_0_#be185d] hover:shadow-[0_2px_0_0_#be185d] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#be185d] active:translate-y-1 font-['Baloo_2']",
+        golden: "bg-yellow-500 text-yellow-900 shadow-[0_4px_0_0_#ca8a04] hover:shadow-[0_2px_0_0_#ca8a04] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#ca8a04] active:translate-y-1 font-['Baloo_2']",
+        outline: "bg-gray-200 text-gray-800 shadow-[0_4px_0_0_#4b5563] hover:shadow-[0_2px_0_0_#4b5563] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#4b5563] active:translate-y-1 font-['Baloo_2']",
+        ghost: "bg-transparent text-offWhite/50 shadow-none hover:text-offWhite font-['Baloo_2']",
+        neon: "bg-cyan-600 text-white shadow-[0_4px_0_0_#0e7490] hover:shadow-[0_2px_0_0_#0e7490] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#0e7490] active:translate-y-1 font-['Baloo_2']",
         pagination: "bg-transparent !text-offWhite border-transparent font-['Baloo_2']",
         shadow: "!border !border-b-5 !border-black/30 text-gray-800 active:translate-y-1 !font-['Baloo_2']"
       },

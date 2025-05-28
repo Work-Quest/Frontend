@@ -155,7 +155,7 @@ function Home() {
   }
 
   return (
-    <div className="w-full overflow-x-hidden p-2 sm:p-4 bg-[#ffe070] bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2740%27%20height%3D%271%27%20viewBox%3D%270%200%2040%201%27%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%3E%3Cpath%20d%3D%27M0%200h20v1H0z%27%20fill%3D%27%23ffb666%27%20fill-opacity%3D%270.20%27%20fill-rule%3D%27evenodd%27/%3E%3C/svg%3E')] bg-repeat bg-[length:60px_2.5px]">
+    <div className="h-screen w-full overflow-x-hidden sm:px-4 sm:pt-4 bg-offWhite">
       <svg
         className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-20 sm:h-24 md:h-32"
         viewBox="0 0 1440 320"
@@ -198,11 +198,6 @@ function Home() {
           </div>
 
           <div className="flex-[2] z-1 relative overflow-hidden">
-            <img
-              src="/paper.svg"
-              alt="Decorative Paper"
-              className="absolute -bottom-40 left-90 w-100 h-auto -z-3 pointer-events-none select-none"
-            />
             <ProfileCard data={mockProfile} />
           </div>
 
