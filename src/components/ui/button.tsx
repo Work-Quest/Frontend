@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all duration-150 relative cursor-pointer select-none uppercase leading-none focus:!outline-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all duration-150 relative cursor-pointer select-none uppercase leading-none focus:!outline-none hover!outline-none hover!border-none",
   {
     variants: {
       variant: {
@@ -15,6 +15,8 @@ const buttonVariants = cva(
         warning: "bg-orange-600 text-white shadow-[0_4px_0_0_#c2410c] hover:shadow-[0_2px_0_0_#c2410c] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#c2410c] active:translate-y-1 font-['Baloo_2']",
         purple: "bg-purple-600 text-white shadow-[0_4px_0_0_#7e22ce] hover:shadow-[0_2px_0_0_#7e22ce] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#7e22ce] active:translate-y-1 font-['Baloo_2']",
         pink: "bg-pink-600 text-white shadow-[0_4px_0_0_#be185d] hover:shadow-[0_2px_0_0_#be185d] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#be185d] active:translate-y-1 font-['Baloo_2']",
+        orange: "!bg-orange text-white shadow-[0_4px_0_0_#c2410c] hover:shadow-[0_2px_0_0_#c2410c] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#c2410c] active:translate-y-1 font-['Baloo_2']",
+        cream: "!bg-cream text-darkBrown shadow-[0_4px_0_0_#948B81] hover:shadow-[0_2px_0_0_#948B81] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#948B81] active:translate-y-1 !font-['Baloo_2']",
         golden: "bg-yellow-500 text-yellow-900 shadow-[0_4px_0_0_#ca8a04] hover:shadow-[0_2px_0_0_#ca8a04] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#ca8a04] active:translate-y-1 font-['Baloo_2']",
         outline: "bg-gray-200 text-gray-800 shadow-[0_4px_0_0_#4b5563] hover:shadow-[0_2px_0_0_#4b5563] hover:translate-y-0.5 active:shadow-[0_0px_0_0_#4b5563] active:translate-y-1 font-['Baloo_2']",
         ghost: "bg-transparent text-offWhite/50 shadow-none hover:text-offWhite font-['Baloo_2']",

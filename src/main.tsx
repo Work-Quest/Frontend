@@ -9,11 +9,20 @@ import Landing from './pages/Landing.tsx';
 import Project from './pages/Project.tsx';
 import ProjectEnd from './pages/ProjectEnd.tsx';
 import Home from './pages/Home.tsx';
+import Login from './pages/Login.tsx';
+import Register from './pages/Register.tsx';
 
 
 import MainLayout from './layouts/MainLayout.tsx'
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    children: [
+      { path: "login", element: <Login /> },
+      { path: "register", element: <Register /> },
+    ]
+  },
   {
     path: "/",
     element: <MainLayout />, 
