@@ -52,9 +52,9 @@ export default function Header() {
 
   return (
     <div className="flex overflow-hidden bg-darkBrown w-screen h-[90px] items-center justify-between z-100">
-        <a href="/">
-            <img src={logo || "/placeholder.svg"} alt="Logo" className="h-[3.6875rem] w-auto ml-[2.5rem]" />
-        </a>
+      <div onClick={() => handleClick("/")} className="cursor-pointer">
+        <img src={logo || "/placeholder.svg"} alt="Logo" className="h-[3.6875rem] w-auto ml-[2.5rem]" />
+      </div>
       {isFullScreen ? (
         <>
           <div className="">
@@ -69,12 +69,12 @@ export default function Header() {
             ))}
           </div>
           <div className="flex items-center mr-[2.5rem]">
-            <a
-              href="/register"
+            <span
+              onClick={() => handleClick("/register")}
               className='text-offWhite px-[1.5rem] cursor-pointer font-["Baloo_2"] hover:text-gray-300 transition-colors'
             >
               Register
-            </a>
+            </span>
             <button
               className="flex !bg-veryLightBrown text-darkBrown gap-1 items-center h-[2.1675rem] hover:text-brown !font-['Baloo_2'] transition-colors hover:!border-brown"
               onClick={() => handleClick("/login")}

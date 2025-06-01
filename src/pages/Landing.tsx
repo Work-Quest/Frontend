@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button"
 import { DotLottieReact } from "@lottiefiles/dotlottie-react"
 import { FaCaretDown } from "react-icons/fa"
 import { useEffect, useState, useCallback, useRef } from "react"
+import { useNavigate } from "react-router-dom";
 
 function Landing() {
+  const navigate = useNavigate();
   const [animationStage, setAnimationStage] = useState(0)
   const [isScrollVisible, setIsScrollVisible] = useState(true)
   const [currentFlow, setCurrentFlow] = useState<string | null>(null)
@@ -160,7 +162,10 @@ function Landing() {
                 animationStage >= 4 ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-6 scale-95"
               }`}
             >
-              <Button className="w-full !font-bold text-sm sm:text-base">Start Your Quest</Button>
+              <Button className="w-full !font-bold text-sm sm:text-base
+              "onClick={() => navigate('/home')}>
+                Start Your Quest
+              </Button>
             </div>
           </div>
         </div>
@@ -276,6 +281,7 @@ function Landing() {
             transition: "opacity 1s ease-out",
             pointerEvents: showButton ? "auto" : "none",
           }}
+          onClick={() => navigate('/home')}
         >
           Start Your Quest
         </Button>

@@ -1,4 +1,4 @@
-import Form from "@/components/form";
+import Form from "@/components/Form.tsx";
 
 function Register() {
   return <div>
