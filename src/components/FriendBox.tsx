@@ -14,7 +14,7 @@ export default function FriendBox(FriendBoxProps: FriendBoxProps) {
     <>
       <div className="flex flex-row p-2 border-2 rounded-md border-veryLightBrown">
         <div className="flex flex-row items-center gap-4 mr-auto">
-          <Avatar variant="round" className="!h-[50px] !w-[50px] rounded-md">
+          <Avatar className="!h-[50px] !w-[50px] rounded-md">
             <AvatarImage
               src={FriendBoxProps.profilePicture}
               alt="Friend Avatar"

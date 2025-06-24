@@ -1,7 +1,5 @@
-import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface UserInfoProps {
   profilePicture?: string;
@@ -13,7 +11,7 @@ export default function UserInfo(UserInfoProps: UserInfoProps) {
   return (
     <>
       <div className="flex items-center w-full gap-4">
-        <Avatar variant="round" className="!h-[115px] !w-auto !rounded-md">
+        <Avatar className="!h-[115px] !w-auto !rounded-md">
           <AvatarImage src={UserInfoProps.profilePicture} alt="User Avatar" />
           <AvatarFallback>AK</AvatarFallback>
         </Avatar>
