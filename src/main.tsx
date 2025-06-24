@@ -11,6 +11,7 @@ import ProjectEnd from './pages/ProjectEnd.tsx';
 import Home from './pages/Home.tsx';
 import Login from './pages/Login.tsx';
 import Register from './pages/Register.tsx';
+import Profile from './pages/Profile.tsx';
 import NotFound from './pages/NotFound.tsx';
 
 
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
       { index: true, element: <Landing /> },
       { path: "project-end", element: <ProjectEnd /> },
       { path: "project", element: <Project /> },
+      { path: "profile", element: <Profile /> },
       { path: "*", element: <NotFound /> },
     ]
     
