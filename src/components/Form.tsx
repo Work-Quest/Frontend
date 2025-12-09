@@ -5,6 +5,9 @@ import { FcGoogle } from "react-icons/fc"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Eye, EyeOff } from "lucide-react"
+import axios from "axios"
+
+const API_URL = import.meta.env.VITE_API_URL
 
 function Form({ method = "register" }: { method?: "login" | "register" }) {
   const [loading, setLoading] = useState(false)
@@ -44,6 +47,32 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
 
     try {
       // call api
+      const endpoint =
+      method === "login" ?  "/api/auth/login/" : "/api/auth/register/"
+      
+
+      const request =
+        method === "login"
+          ? {
+              email: formData.email,
+              password: formData.password,
+            }
+          : {
+              username: formData.name,
+              password: formData.password,
+              email: formData.email 
+            }
+
+      const res = await axios.post(`${API_URL}${endpoint}`, request, { withCredentials: true })
+      console.log("SUCCESS:", res.data)
+
+      // After success
+      if (method === "login") {
+        localStorage.setItem("token", res.data.access)
+        navigate("/dashboard")
+      } else {
+        navigate("/login")
+      }
       console.log(formData)
     } catch (err) {
       console.error(err)
@@ -95,7 +124,7 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                         </div>
                       </div>
                     )}
-                    <div className="self-stretch flex flex-col justify-start items-start gap-1.5">
+                    <div className="self-stretch flex flex-col justify-dstart items-start gap-1.5">
                       <Label className="self-stretch justify-start !text-sm">Email</Label>
                       <div className="relative w-full">
                         <Input
