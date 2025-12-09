@@ -12,11 +12,17 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "./ui/button"
+import axios from "axios"
+
+const API_URL = import.meta.env.VITE_API_URL
 
 export default function Header() {
   const location = useLocation()
   const navigate = useNavigate()
   const [isFullScreen, setIsFullScreen] = useState<boolean>(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState<any>(null)
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -28,22 +34,70 @@ export default function Header() {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
+  useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      const res = await axios.get(
+        `${API_URL}/api/auth/status/`,
+        { withCredentials: true } //  REQUIRED for cookie auth
+      )
+
+      const data = res.data
+    
+     
+
+      if (data.isAuthenticated) {
+        setIsAuthenticated(true)
+         const userRes = await axios.get(
+        `${API_URL}/api/me/`,
+        { withCredentials: true } //  REQUIRED for cookie auth
+      )
+
+      const userData = userRes.data
+        console.log(userData)
+        setUser(userData)
+      } else {
+        setIsAuthenticated(false)
+        setUser(null)
+      }
+    } catch (err) {
+      console.error("Auth check failed", err)
+      setIsAuthenticated(false)
+      setUser(null)
+    }
+  }
+
+  checkAuth()
+  }, [])
+
   type MenuItem = {
     name: string
     path: string
   }
 
-  const items: MenuItem[] = [
-    { name: "Home", path: "/home" },
-    { name: "Profile", path: "/profile" },
-    { name: "Friend", path: "/friend" },
-    { name: "Help", path: "/help" },
-  ]
+  let Items: MenuItem[];
 
+  if (isAuthenticated) {
+    Items = [
+      { name: "Home", path: "/home" },
+      { name: "Profile", path: "/profile" },
+      { name: "Friend", path: "/friend" },
+      { name: "Help", path: "/help" },
+    ]
+    
+  } else {
+    Items = [
+      { name: "Home", path: "/" },
+      { name: "Help", path: "/help" }, 
+    ]
+  }
   const authItems: MenuItem[] = [
-    { name: "Register", path: "/register" },
-    { name: "Login", path: "/login" },
-  ]
+      { name: "Register", path: "/register" },
+      { name: "Login", path: "/login" },
+    ]
+    
+
+ 
 
   const handleClick = (path: string) => {
     console.log(`Navigating to: ${path}`)
@@ -58,7 +112,7 @@ export default function Header() {
       {isFullScreen ? (
         <>
           <div className="">
-            {items.map((i) => (
+            {Items.map((i) => (
               <a
                 key={i.path}
                 href={i.path}
@@ -68,6 +122,12 @@ export default function Header() {
               </a>
             ))}
           </div>
+          { isAuthenticated ? 
+            <span 
+            className='text-offWhite px-[3rem]'>
+              {user.name}
+              </span>
+           : 
           <div className="flex items-center mr-[2.5rem]">
             <span
               onClick={() => handleClick("/register")}
@@ -85,6 +145,7 @@ export default function Header() {
               Login
             </button>
           </div>
+          }
         </>
       ) : (
         <div className="mr-[2.5rem]">
@@ -95,7 +156,7 @@ export default function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 bg-offWhite">
-              {items.map((i) => (
+              {Items.map((i) => (
                 <DropdownMenuItem
                   className='hover:bg-veryLightBrown font-["Baloo_2"]'
                   key={i.path}
@@ -105,15 +166,17 @@ export default function Header() {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              {authItems.map((i) => (
+              {isAuthenticated ?( 
+                  null
+                ) : authItems.map((i) => (
                 <DropdownMenuItem
                   className='hover:bg-veryLightBrown font-["Baloo_2"]'
                   key={i.path}
                   onClick={() => handleClick(i.path)}
                 >
                   {i.name}
-                </DropdownMenuItem>
-              ))}
+                </DropdownMenuItem>)) 
+                }
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

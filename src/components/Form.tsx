@@ -69,7 +69,7 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
       // After success
       if (method === "login") {
         localStorage.setItem("token", res.data.access)
-        navigate("/dashboard")
+        navigate("/home")
       } else {
         navigate("/login")
       }
