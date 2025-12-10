@@ -5,14 +5,14 @@ import { FcGoogle } from "react-icons/fc"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Eye, EyeOff } from "lucide-react"
-import axios from "axios"
-
-const API_URL = import.meta.env.VITE_API_URL
+import { useAuth } from "@/context/AuthContext"
+import { post} from "@/Api"
 
 function Form({ method = "register" }: { method?: "login" | "register" }) {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+  const { checkAuth } = useAuth()
 
   const name = method === "login" ? "Login" : "Register"
 
@@ -63,12 +63,12 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
               email: formData.email 
             }
 
-      const res = await axios.post(`${API_URL}${endpoint}`, request, { withCredentials: true })
-      console.log("SUCCESS:", res.data)
+      const res = await post(endpoint, request)
+      console.log("SUCCESS:", res)
 
       // After success
       if (method === "login") {
-        localStorage.setItem("token", res.data.access)
+        await checkAuth()
         navigate("/home")
       } else {
         navigate("/login")

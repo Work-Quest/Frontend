@@ -13,6 +13,7 @@ import Login from './pages/Login.tsx';
 import Register from './pages/Register.tsx';
 import Profile from './pages/Profile.tsx';
 import NotFound from './pages/NotFound.tsx';
+import { AuthProvider } from "./context/AuthContext"
 
 
 import MainLayout from './layouts/MainLayout.tsx'
@@ -20,6 +21,7 @@ import MainLayout from './layouts/MainLayout.tsx'
 const router = createBrowserRouter([
   {
     path: "/",
+    element: <MainLayout />, 
     children: [
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
@@ -49,7 +51,9 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </React.StrictMode>
 );
 
