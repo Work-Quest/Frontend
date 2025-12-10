@@ -5,7 +5,7 @@ export interface Item {
   name: string
 }
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000"
+const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
 
 if (!BASE_URL) {
   throw new Error("VITE_API_URL is not defined in your .env file")

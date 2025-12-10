@@ -8,6 +8,7 @@ import { Eye, EyeOff } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { post} from "@/Api"
 import toast from 'react-hot-toast';
+import { useGoogleLogin } from "@react-oauth/google"
 
 
 function Form({ method = "register" }: { method?: "login" | "register" }) {
@@ -90,6 +91,22 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
     }
   }
 
+  const loginWithGoogle = useGoogleLogin({
+  onSuccess: async (tokenResponse) => {
+    console.log("Google Login Success:", tokenResponse)
+    // Send Google access token to your backend
+    await post("/api/auth/google/", {
+      access_token: tokenResponse.access_token,
+    })
+
+    await checkAuth()
+    navigate("/home")
+  },
+  onError: () => {
+    console.log("Google Login Failed")
+  },
+})
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -104,7 +121,11 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                 </div>
               </div>
               <div className="self-stretch flex flex-col justify-start items-center gap-8">
-                <Button variant="cream" className="self-stretch p-4 rounded-md inline-flex justify-center items-center gap-1.5">
+                <Button 
+                  type="button"
+                  variant="cream" 
+                  className="self-stretch p-4 rounded-md inline-flex justify-center items-center gap-1.5"
+                  onClick={() => loginWithGoogle()}>
                   <FcGoogle />
                   {name} with Google
                 </Button>
