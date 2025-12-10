@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { get, post} from "@/Api"
+import toast from "react-hot-toast"
 
 type User = {
   id: string
@@ -48,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
      await post<{}, any>("/api/auth/logout/", {})
-
+    toast.success("Logged out successfully.")
     setIsAuthenticated(false)
     setUser(null)
   }

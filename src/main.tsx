@@ -15,27 +15,46 @@ import Profile from './pages/Profile.tsx';
 import NotFound from './pages/NotFound.tsx';
 import { AuthProvider } from "./context/AuthContext"
 
-
+import AuthLayout from './layouts/AuthLayout.tsx'
 import MainLayout from './layouts/MainLayout.tsx'
+import ProtectedLayout from './layouts/ProtectedLayout.tsx';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />, 
+    element: <AuthLayout />, 
     children: [
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
     ]
   },
+
+  //public routes
+  {
+    path: "/",
+    element: <MainLayout />,
+    children: [
+      { index: true, element: <Landing /> }, // ← THIS IS NOW PUBLIC
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+
+  
+  //protected routes
   {
     path: "/",
     element: <MainLayout />, 
     children: [
-      { index: true, element: <Landing /> },
-      { path: "project-end", element: <ProjectEnd /> },
-      { path: "project", element: <Project /> },
-      { path: "profile", element: <Profile /> },
-      { path: "*", element: <NotFound /> },
+      { 
+        element: <ProtectedLayout />,  
+        children: [
+          { index: true, element: <Landing /> },
+          { path: "project-end", element: <ProjectEnd /> },
+          { path: "project", element: <Project /> },
+          { path: "profile", element: <Profile /> },
+          
+        ]
+      }
     ]
     
   }, 
@@ -43,7 +62,12 @@ const router = createBrowserRouter([
     path: "/home",
     element: <MainLayout className='bg-lightOrange'/>, 
     children: [
-      { index: true, element: <Home />},
+      { 
+        element: <ProtectedLayout />,  
+        children: [
+        { index: true, element: <Home />},
+        ]
+      }
     ]
   }
   

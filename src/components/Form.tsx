@@ -7,6 +7,8 @@ import { Label } from "./ui/label"
 import { Eye, EyeOff } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { post} from "@/Api"
+import toast from 'react-hot-toast';
+
 
 function Form({ method = "register" }: { method?: "login" | "register" }) {
   const [loading, setLoading] = useState(false)
@@ -70,11 +72,18 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
       if (method === "login") {
         await checkAuth()
         navigate("/home")
+        toast.success("Login successful!")
       } else {
         navigate("/login")
+        toast.success("Registration successful! Please login.")
       }
       console.log(formData)
     } catch (err) {
+      if (method === "login") {
+        toast.error("Login failed. Please check your credentials.")
+      } else {
+        toast.error("Registration failed. Please try again.")
+      }
       console.error(err)
     } finally {
       setLoading(false)
