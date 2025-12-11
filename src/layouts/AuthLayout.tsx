@@ -1,5 +1,4 @@
 import { Outlet } from 'react-router-dom';
-import Footer from '@/components/Footer';
 import { useRef } from "react"
 import LoadingBar from "react-top-loading-bar"
 import { Toaster } from 'react-hot-toast';
