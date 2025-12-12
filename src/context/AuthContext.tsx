@@ -12,6 +12,7 @@ type User = {
 
 type AuthContextType = {
   isAuthenticated: boolean
+  loading: boolean
   user: User | null
   checkAuth: () => Promise<void>
   logout: () => Promise<void>
@@ -26,8 +27,10 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
   
   const checkAuth = async () => {
+    setLoading(true)
     try {
       const res = await get<AuthStatusResponse>(`/api/auth/status/`)
 
@@ -41,11 +44,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(false)
         setUser(null)
       }
+
+      console.log("Auth status checked:", res.isAuthenticated)
     } catch {
       setIsAuthenticated(false)
       setUser(null)
-    } 
-  }
+    } finally {
+      setLoading(false)
+    }
+  } 
 
   const logout = async () => {
      await post<{}, any>("/api/auth/logout/", {})
@@ -60,7 +67,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, checkAuth, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, loading, user, checkAuth, logout }}>
       {children}
     </AuthContext.Provider>
   )
