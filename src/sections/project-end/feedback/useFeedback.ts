@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { UserInfo, FeedbackResponse } from "./types";
-import { postData } from "@/Api";
+import { post } from "@/Api";
 
 const useFeedback = () => {
   const [feedbackData, setFeedbackData] = useState<Record<string, FeedbackResponse>>({});
@@ -13,7 +13,7 @@ const useFeedback = () => {
     setLoading(prev => ({ ...prev, [user.user_name]: true }));
 
     try {
-      const data = await postData<UserInfo, FeedbackResponse>("/feedback", user);
+      const data = await post<UserInfo, FeedbackResponse>("/feedback", user);
       setFeedbackData(prev => ({ ...prev, [user.user_name]: data }));
       setError(prev => {
         const newErrors = { ...prev };

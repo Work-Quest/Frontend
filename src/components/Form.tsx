@@ -5,11 +5,17 @@ import { FcGoogle } from "react-icons/fc"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Eye, EyeOff } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
+import { post} from "@/Api"
+import toast from 'react-hot-toast';
+import { useGoogleLogin } from "@react-oauth/google"
+
 
 function Form({ method = "register" }: { method?: "login" | "register" }) {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+  const { checkAuth } = useAuth()
 
   const name = method === "login" ? "Login" : "Register"
 
@@ -44,13 +50,62 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
 
     try {
       // call api
+      const endpoint =
+      method === "login" ?  "/api/auth/login/" : "/api/auth/register/"
+      
+
+      const request =
+        method === "login"
+          ? {
+              email: formData.email,
+              password: formData.password,
+            }
+          : {
+              username: formData.name,
+              password: formData.password,
+              email: formData.email 
+            }
+
+      const res = await post(endpoint, request)
+      console.log("SUCCESS:", res)
+
+      // After success
+      if (method === "login") {
+        await checkAuth()
+        navigate("/home")
+        toast.success("Login successful!")
+      } else {
+        navigate("/login")
+        toast.success("Registration successful! Please login.")
+      }
       console.log(formData)
     } catch (err) {
+      if (method === "login") {
+        toast.error("Login failed. Please check your credentials.")
+      } else {
+        toast.error("Registration failed. Please try again.")
+      }
       console.error(err)
     } finally {
       setLoading(false)
     }
   }
+
+  const loginWithGoogle = useGoogleLogin({
+  onSuccess: async (tokenResponse) => {
+    console.log("Google Login Success:", tokenResponse)
+    // Send Google access token to your backend
+    await post("/api/auth/google/", {
+      access_token: tokenResponse.access_token,
+    })
+
+    await checkAuth()
+    navigate("/home")
+  },
+  onError: () => {
+    console.log("Google Login Failed")
+  },
+})
 
   return (
     <div>
@@ -66,7 +121,11 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                 </div>
               </div>
               <div className="self-stretch flex flex-col justify-start items-center gap-8">
-                <Button variant="cream" className="self-stretch p-4 rounded-md inline-flex justify-center items-center gap-1.5">
+                <Button 
+                  type="button"
+                  variant="cream" 
+                  className="self-stretch p-4 rounded-md inline-flex justify-center items-center gap-1.5"
+                  onClick={() => loginWithGoogle()}>
                   <FcGoogle />
                   {name} with Google
                 </Button>
@@ -95,7 +154,7 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                         </div>
                       </div>
                     )}
-                    <div className="self-stretch flex flex-col justify-start items-start gap-1.5">
+                    <div className="self-stretch flex flex-col justify-dstart items-start gap-1.5">
                       <Label className="self-stretch justify-start !text-sm">Email</Label>
                       <div className="relative w-full">
                         <Input
