@@ -65,8 +65,8 @@ export default function ProjectTab({ data, onFilterChange }: ProfileTabProps) {
     setPage(1)
   }
 
-  const uniqueStatuses = Array.from(new Set(data.map((project) => project.Status)))
-  const uniqueOwners = Array.from(new Set(data.map((project) => project.OwnerName)))
+  const uniqueStatuses = Array.from(new Set(data.map((project) => project.status)))
+  const uniqueOwners = Array.from(new Set(data.map((project) => project.owner_name)))
 
   const updateStatusFilter = (status: string | null) => {
     handleFilterChange({ ...filters, status })
@@ -223,7 +223,7 @@ export default function ProjectTab({ data, onFilterChange }: ProfileTabProps) {
           <div className="flex flex-col px-4 gap-2 flex-1 overflow-auto min-h-0">
             {paginatedData.length > 0 ? (
               paginatedData.map((project) => (
-                <div key={project.ProjectID} className="h-16 flex-shrink-0">
+                <div key={project.project_id} className="h-16 flex-shrink-0">
                   <ProjectTabCard project={project} />
                 </div>
               ))
