@@ -4,6 +4,8 @@ import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Calendar, User, Target, CheckCircle } from "lucide-react"
 import ProjectEditForm from "./ProjectEditForm"
+import { useNavigate } from "react-router-dom"
+import toast from "react-hot-toast"
 
 type ProfileTabCardProps = {
   project: Project
@@ -16,7 +18,7 @@ type ProfileTabCardProps = {
 
 export default function ProjectTabCard({ project, onUpdateProject }: ProfileTabCardProps) {
   const completionPercentage = Math.round((project.completed_tasks / project.total_tasks) * 100)
-
+  const navigate = useNavigate()
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -141,7 +143,18 @@ export default function ProjectTabCard({ project, onUpdateProject }: ProfileTabC
                 <p className="!text-brown/70">Ready to face the challenge?</p>
               </div>
             </div>
-            <Button variant="warning" className="!bg-orange hover:!bg-orange/90 hover:!outline-none !font-['Baloo_2']">Let's Fight!</Button>
+            <Button 
+              variant="warning" 
+              className="!bg-orange hover:!bg-orange/90 hover:!outline-none !font-['Baloo_2']" 
+              onClick={() => {
+                if (project.status === "Done") {
+                  toast.error("This project is already completed")
+                  return
+                }
+                  navigate(`/project/${project.project_id}`)
+                }}>
+                Let's Fight!
+            </Button>
           </div>
         </div>
         <DialogFooter>

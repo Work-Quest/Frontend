@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import type { Project } from "@/types/Project"
-import { get, post} from "@/Api"
+import { get} from "@/Api"
 
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([])
