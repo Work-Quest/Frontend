@@ -64,6 +64,9 @@ api.interceptors.response.use(
 export async function get<T>(url: string): Promise<T> {
   try {
     const res = await api.get<T>(`${url}`)
+     if (!res.status.toString().startsWith("2")) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
     return res.data
   } catch (error) {
     console.error("Fetch failed:", error)
@@ -75,6 +78,9 @@ export async function get<T>(url: string): Promise<T> {
 export async function post<T, U>(url: string, data: T): Promise<U> {
   try {
     const res = await api.post<U>(`${url}`, data)
+    if (!res.status.toString().startsWith("2")) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
     return res.data
   } catch (error) {
     console.error("Post request failed:", error)

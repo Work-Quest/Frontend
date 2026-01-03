@@ -8,6 +8,8 @@ import { useState, useMemo } from "react"
 import Fuse from "fuse.js"
 import { Input } from "@/components/ui/input"
 import { useProjects } from "@/hook/useProjects"
+import { post } from "@/Api"
+import { Project } from "@/types/Project"
 
 const userMockData: UserScore[] = [
   { order: 1, name: "Michael", username: "michaelza550", score: 12040 },
@@ -65,7 +67,7 @@ function Home() {
     status: null,
     owner: null,
   })
-  const { projects } = useProjects()
+  const { projects, setProjects} = useProjects()
   console.log("Projects in Home:", projects)
   const fuse = useMemo(() => {
   return new Fuse(projects, {
@@ -97,6 +99,26 @@ function Home() {
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters)
+  }
+
+  const handleCreateProject = async (data: {
+    project_name: string
+    deadline: string
+  }) => {
+    const project = await post<{ project_name: string, deadline: string }, Project>("/api/project/create", data);
+    const newProject: Project = {
+      project_id: project.project_id,
+      project_name: project.project_name,
+      status: project.status,
+      owner_id: project.owner_id,
+      owner_name: project.owner_name,
+      created_at: project.created_at,
+      deadline: project.deadline,
+      total_tasks: project.total_tasks,
+      completed_tasks: project.completed_tasks,
+    }
+    setProjects(prev => [...prev, newProject])
+    console.log("Created project:", newProject)
   }
 
   return (
@@ -135,7 +157,7 @@ function Home() {
 
             {/* Project Tab with Filter */}
             <div className="flex-1 min-h-0">
-              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} />
+              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onCreateProject={handleCreateProject} />
             </div>
           </div>
         </div>

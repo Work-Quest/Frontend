@@ -16,10 +16,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { X, Filter } from "lucide-react"
+import ProjectCreateForm from "@/components/ProjectCreateForm"
 
-type ProfileTabProps = {
+type ProjectTabProps = {
   data: Project[]
   onFilterChange: (filters: FilterState) => void
+  onCreateProject: (data: {
+    project_name: string
+    deadline: string
+  }) => Promise<void>
 }
 
 export interface FilterState {
@@ -27,7 +32,7 @@ export interface FilterState {
   owner: string | null
 }
 
-export default function ProjectTab({ data, onFilterChange }: ProfileTabProps) {
+export default function ProjectTab({ data, onFilterChange, onCreateProject }: ProjectTabProps) {
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<FilterState>({
     status: null,
@@ -214,11 +219,7 @@ export default function ProjectTab({ data, onFilterChange }: ProfileTabProps) {
           </div>
 
           {/* Add New Project */}
-          <div className="bg-orange/20 border-2 border-orange border-dashed rounded-md hover:bg-orange/30 flex items-center justify-center p-3 m-4 cursor-pointer flex-shrink-0 transition-colors h-12">
-            <IoAddCircle className="w-5 h-5 text-orange" />
-            <p className="!text-orange !font-bold ml-2">Add new project</p>
-          </div>
-
+          <ProjectCreateForm onCreateProject={onCreateProject} />
           {/* Project List */}
           <div className="flex flex-col px-4 gap-2 flex-1 overflow-auto min-h-0">
             {paginatedData.length > 0 ? (
