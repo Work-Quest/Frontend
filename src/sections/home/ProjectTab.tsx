@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { X, Filter } from "lucide-react"
 import ProjectCreateForm from "@/components/ProjectCreateForm"
+import { ClipLoader } from "react-spinners";
 
 type ProjectTabProps = {
   data: Project[]
@@ -29,6 +30,7 @@ type ProjectTabProps = {
     deadline: string
     status: string
   }) => Promise<void>
+  loading?: boolean
 }
 
 export interface FilterState {
@@ -36,7 +38,7 @@ export interface FilterState {
   owner: string | null
 }
 
-export default function ProjectTab({ data, onFilterChange, onCreateProject, onUpdateProject }: ProjectTabProps) {
+export default function ProjectTab({ data, onFilterChange, onCreateProject, onUpdateProject, loading }: ProjectTabProps) {
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<FilterState>({
     status: null,
@@ -90,6 +92,8 @@ export default function ProjectTab({ data, onFilterChange, onCreateProject, onUp
   }
 
   const hasActiveFilters = filters.status || filters.owner
+
+
 
   return (
     <div className="flex gap-4 h-full">
@@ -224,22 +228,33 @@ export default function ProjectTab({ data, onFilterChange, onCreateProject, onUp
 
           {/* Add New Project */}
           <ProjectCreateForm onCreateProject={onCreateProject} />
+          
           {/* Project List */}
-          <div className="flex flex-col px-4 gap-2 flex-1 overflow-auto min-h-0">
-            {paginatedData.length > 0 ? (
-              paginatedData.map((project) => (
-                <div key={project.project_id} className="h-16 flex-shrink-0">
-                  <ProjectTabCard project={project} onUpdateProject={onUpdateProject} />
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <ClipLoader
+                loading={loading}     
+                color="gray"         
+                size={100}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col px-4 gap-2 flex-1 overflow-auto min-h-0">
+              {paginatedData.length > 0 ? (
+                paginatedData.map((project) => (
+                  <div key={project.project_id} className="h-16 flex-shrink-0">
+                    <ProjectTabCard project={project} onUpdateProject={onUpdateProject} />
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-brown/60">
+                  <Filter className="w-12 h-12 mb-4 text-brown/30" />
+                  <p className="text-lg font-medium">No projects found</p>
+                  <p className="text-sm">Try adjusting your filters</p>
                 </div>
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-brown/60">
-                <Filter className="w-12 h-12 mb-4 text-brown/30" />
-                <p className="text-lg font-medium">No projects found</p>
-                <p className="text-sm">Try adjusting your filters</p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (

@@ -66,8 +66,7 @@ function Home() {
     status: null,
     owner: null,
   })
-  const { projects, setProjects} = useProjects()
-  console.log("Projects in Home:", projects)
+  const { projects, setProjects, loading} = useProjects()
   const fuse = useMemo(() => {
   return new Fuse(projects, {
     keys: ["project_name", "owner_name", "status"],
@@ -181,7 +180,7 @@ const handleUpdateProject = async (
 
             {/* Project Tab with Filter */}
             <div className="flex-1 min-h-0">
-              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onCreateProject={handleCreateProject} onUpdateProject={handleUpdateProject} />
+              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onCreateProject={handleCreateProject} onUpdateProject={handleUpdateProject} loading={loading} />
             </div>
           </div>
         </div>
