@@ -3,12 +3,18 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Calendar, User, Target, CheckCircle } from "lucide-react"
+import ProjectEditForm from "./ProjectEditForm"
 
 type ProfileTabCardProps = {
   project: Project
+ onUpdateProject: (projectId: string, data: {
+    project_name: string
+    deadline: string
+    status: string
+  }) => Promise<void>
 }
 
-export default function ProjectTabCard({ project }: ProfileTabCardProps) {
+export default function ProjectTabCard({ project, onUpdateProject }: ProfileTabCardProps) {
   const completionPercentage = Math.round((project.completed_tasks / project.total_tasks) * 100)
 
   return (
@@ -139,9 +145,7 @@ export default function ProjectTabCard({ project }: ProfileTabCardProps) {
           </div>
         </div>
         <DialogFooter>
-          <Button className="text-brown border-brown hover:bg-brown/10">
-            Edit Project
-          </Button>
+          <ProjectEditForm project={project} onUpdateProject={onUpdateProject} />
         </DialogFooter>
       </DialogContent>
     </Dialog>

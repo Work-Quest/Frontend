@@ -60,7 +60,6 @@ const mockProfile: UserProfile = {
 }
 
 
-
 function Home() {
   const [query, setQuery] = useState("")
   const [filters, setFilters] = useState<FilterState>({
@@ -121,6 +120,31 @@ function Home() {
     console.log("Created project:", newProject)
   }
 
+
+const handleUpdateProject = async (
+  projectId: string,
+  data: {project_name: string; deadline: string; status: string }
+) => {
+  if (!projectId) {
+    throw new Error("No project selected");
+  }
+
+  const editedProject = await post<{project_name: string; deadline: string; status: string }, Project>(
+    `/api/project/edit/${projectId}`,
+    data
+  );
+
+  setProjects(prevProjects =>
+    prevProjects.map(project =>
+      project.project_id === projectId
+        ? { ...project, ...editedProject }
+        : project
+    )
+  );
+};
+
+
+
   return (
     <div className="h-[calc(100vh-140px)] w-screen overflow-hidden p-4 bg-offWhite">
       <div className="flex flex-col lg:flex-row lg:gap-4 h-full">
@@ -157,7 +181,7 @@ function Home() {
 
             {/* Project Tab with Filter */}
             <div className="flex-1 min-h-0">
-              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onCreateProject={handleCreateProject} />
+              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onCreateProject={handleCreateProject} onUpdateProject={handleUpdateProject} />
             </div>
           </div>
         </div>
