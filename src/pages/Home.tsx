@@ -59,6 +59,14 @@ const mockProfile: UserProfile = {
   ],
 }
 
+type BatchDeleteResponse = {
+  deleted_projects: string[]
+  failed_projects: {
+    project_id: string
+    error: string
+  }[]
+}
+
 
 function Home() {
   const [query, setQuery] = useState("")
@@ -118,6 +126,31 @@ function Home() {
     setProjects(prev => [...prev, newProject])
     console.log("Created project:", newProject)
   }
+
+const handleDeleteProject = async (projectId: string) => {
+  if (!projectId) {
+    throw new Error("No project selected")
+  }
+
+  const response = await post<
+    { project_ids: string[] },
+    BatchDeleteResponse
+  >(
+    "/api/project/delete",
+    { project_ids: [projectId] }
+  )
+
+  if (response.deleted_projects.includes(projectId)) {
+    setProjects(prev =>
+      prev.filter(p => p.project_id !== projectId)
+    )
+  } else {
+    const error =
+      response.failed_projects.find(f => f.project_id === projectId)?.error ??
+      "Failed to delete project"
+    throw new Error(error)
+  }
+}
 
 
 const handleUpdateProject = async (
@@ -180,7 +213,7 @@ const handleUpdateProject = async (
 
             {/* Project Tab with Filter */}
             <div className="flex-1 min-h-0">
-              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onCreateProject={handleCreateProject} onUpdateProject={handleUpdateProject} loading={loading} />
+              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onCreateProject={handleCreateProject} onUpdateProject={handleUpdateProject} onDelete={handleDeleteProject} loading={loading} />
             </div>
           </div>
         </div>

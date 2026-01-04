@@ -6,17 +6,19 @@ import { Calendar, User, Target, CheckCircle } from "lucide-react"
 import ProjectEditForm from "./ProjectEditForm"
 import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
+import NotificationDialog from "./NotificationDialog"
 
 type ProfileTabCardProps = {
   project: Project
- onUpdateProject: (projectId: string, data: {
-    project_name: string
-    deadline: string
-    status: string
-  }) => Promise<void>
+  onUpdateProject: (projectId: string, data: {
+      project_name: string
+      deadline: string
+      status: string
+    }) => Promise<void>
+  onDelete: (projectId: string) => void
 }
 
-export default function ProjectTabCard({ project, onUpdateProject }: ProfileTabCardProps) {
+export default function ProjectTabCard({ project, onUpdateProject, onDelete }: ProfileTabCardProps) {
   const completionPercentage = Math.round((project.completed_tasks / project.total_tasks) * 100)
   const navigate = useNavigate()
   return (
@@ -159,6 +161,20 @@ export default function ProjectTabCard({ project, onUpdateProject }: ProfileTabC
         </div>
         <DialogFooter>
           <ProjectEditForm project={project} onUpdateProject={onUpdateProject} />
+          <NotificationDialog
+              title="Delete Project"
+              description="Are you sure you want to proceed with this action? All Project history will be lost forever."
+              trigger={<Button className="text-red">Delete Project</Button>}
+              onConfirm={async () => {
+                  try {
+                    await onDelete(project.project_id)
+                    toast.success("Project deleted successfully")
+                  } catch (err) {
+                    toast.error("Failed to delete project.")
+                    console.error(err)
+                  }
+                }}
+              />
         </DialogFooter>
       </DialogContent>
     </Dialog>

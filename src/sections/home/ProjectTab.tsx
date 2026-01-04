@@ -31,6 +31,7 @@ type ProjectTabProps = {
     status: string
   }) => Promise<void>
   loading?: boolean
+  onDelete: (projectId: string) => void
 }
 
 export interface FilterState {
@@ -38,7 +39,7 @@ export interface FilterState {
   owner: string | null
 }
 
-export default function ProjectTab({ data, onFilterChange, onCreateProject, onUpdateProject, loading }: ProjectTabProps) {
+export default function ProjectTab({ data, onFilterChange, onCreateProject, onUpdateProject, onDelete, loading }: ProjectTabProps) {
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<FilterState>({
     status: null,
@@ -243,7 +244,7 @@ export default function ProjectTab({ data, onFilterChange, onCreateProject, onUp
               {paginatedData.length > 0 ? (
                 paginatedData.map((project) => (
                   <div key={project.project_id} className="h-16 flex-shrink-0">
-                    <ProjectTabCard project={project} onUpdateProject={onUpdateProject} />
+                    <ProjectTabCard project={project} onUpdateProject={onUpdateProject} onDelete={onDelete} />
                   </div>
                 ))
               ) : (
