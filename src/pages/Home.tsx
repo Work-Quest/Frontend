@@ -77,7 +77,7 @@ function Home() {
   const { projects, setProjects, loading} = useProjects()
   const fuse = useMemo(() => {
   return new Fuse(projects, {
-    keys: ["project_name", "owner_name", "status"],
+    keys: ["project_name", "owner_username", "status"],
   })
 }, [projects])
 
@@ -93,7 +93,7 @@ function Home() {
   }
 
   if (filters.owner) {
-    results = results.filter(p => p.owner_name === filters.owner)
+    results = results.filter(p => p.owner_username === filters.owner)
   }
 
   return results
@@ -111,20 +111,9 @@ function Home() {
     project_name: string
     deadline: string
   }) => {
-    const project = await post<{ project_name: string, deadline: string }, Project>("/api/project/create", data);
-    const newProject: Project = {
-      project_id: project.project_id,
-      project_name: project.project_name,
-      status: project.status,
-      owner_id: project.owner_id,
-      owner_name: project.owner_name,
-      created_at: project.created_at,
-      deadline: project.deadline,
-      total_tasks: project.total_tasks,
-      completed_tasks: project.completed_tasks,
-    }
-    setProjects(prev => [...prev, newProject])
-    console.log("Created project:", newProject)
+    const project = await post<{ project_name: string, deadline: string }, Project>("/api/project/create/", data);
+    setProjects(prev => [...prev, project])
+    console.log("Created project:", project)
   }
 
 const handleDeleteProject = async (projectId: string) => {
@@ -136,7 +125,7 @@ const handleDeleteProject = async (projectId: string) => {
     { project_ids: string[] },
     BatchDeleteResponse
   >(
-    "/api/project/delete",
+    "/api/project/delete/",
     { project_ids: [projectId] }
   )
 
@@ -162,7 +151,7 @@ const handleUpdateProject = async (
   }
 
   const editedProject = await post<{project_name: string; deadline: string; status: string }, Project>(
-    `/api/project/edit/${projectId}`,
+    `/api/project/edit/${projectId}/`,
     data
   );
 

@@ -3,7 +3,7 @@ export type Project = {
   project_name: string;
   status: "Working" | "Done"; 
   owner_id: string;            
-  owner_name: string;
+  owner_username: string;
   created_at: string;          
   deadline: string;            
   total_tasks: number;

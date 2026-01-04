@@ -11,7 +11,7 @@ export function useProjects() {
   const fetchProjects = async () => {
         try {
           setLoading(true)
-          const data = await get<Project[]>("/api/project/get_user_project")
+          const data = await get<Project[]>("/api/project/get_user_project/")
           setProjects(data)
           console.log("Fetched projects:", data)
         } catch (err) {

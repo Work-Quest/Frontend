@@ -78,7 +78,7 @@ export default function ProjectTab({ data, onFilterChange, onCreateProject, onUp
   }
 
   const uniqueStatuses = Array.from(new Set(data.map((project) => project.status)))
-  const uniqueOwners = Array.from(new Set(data.map((project) => project.owner_name)))
+  const uniqueOwners = Array.from(new Set(data.map((project) => project.owner_username)))
 
   const updateStatusFilter = (status: string | null) => {
     handleFilterChange({ ...filters, status })

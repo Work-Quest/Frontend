@@ -54,10 +54,10 @@ export default function ProjectTabCard({ project, onUpdateProject, onDelete }: P
             </div>
             <div className="flex items-center w-[60%] justify-end">
               <div className="w-6 h-6 bg-orange/20 rounded-full flex items-center justify-center mr-2">
-                <span className="text-xs font-bold text-orange">{project.owner_name.charAt(0).toUpperCase()}</span>
+                <span className="text-xs font-bold text-orange">{project.owner_username.charAt(0).toUpperCase()}</span>
               </div>
               <p className="text-right overflow-hidden !font-medium !text-brown truncate text-sm">
-                {project.owner_name}
+                {project.owner_username}
               </p>
             </div>
           </div>
@@ -75,7 +75,7 @@ export default function ProjectTabCard({ project, onUpdateProject, onDelete }: P
               <User className="w-4 h-4 text-brown/60" />
               <div>
                 <p className="!font-semibold !text-brown -mb-1">Owner</p>
-                <p className="text-sm text-brown/80">{project.owner_name}</p>
+                <p className="text-sm text-brown/80">{project.owner_username}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
