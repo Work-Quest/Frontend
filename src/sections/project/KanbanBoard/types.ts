@@ -2,7 +2,7 @@ export type TaskPriority = 'Low' | 'Medium' | 'High' | 'Urgent';
 export type TaskStatus = 'backlog' | 'todo' | 'inProgress' | 'done';
 
 export interface Task {
-  id?: string;
+  id: string;
   title: string;
   priority: TaskPriority;
   description: string | null;
@@ -13,7 +13,7 @@ export interface Task {
 }
 
 export interface TaskResponse {
-  task_id?: string;
+  task_id: string;
   project: string;
   priority: number;
   task_name: string;

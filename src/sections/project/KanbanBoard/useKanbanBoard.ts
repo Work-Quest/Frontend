@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { DragStartEvent, DragOverEvent, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { mapTaskResponseToTask, mapTaskToTaskResponse, Task, TaskResponse, Tasks, TaskStatus } from "./types";
-import { post } from '@/Api';
+import { post, del } from '@/Api';
 import { useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -28,21 +28,6 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
     }
     return null;
   };
-
-  // const handleAddTask = (columnId: TaskStatus, task: Omit<Task, "id">) => {
-  //   const newTask: Task = {
-  //     ...task,
-  //     id: `task-${Date.now()}`,
-  //     status: columnId,
-  //     iteration: task.iteration || 'Sprint 1',
-  //     assignees: task.assignees || ['You'],
-  //   };
-    
-  //   setTasks(prev => ({
-  //     ...prev,
-  //     [columnId]: [...prev[columnId], newTask]
-  //   }));
-  // };
 
   const handleAddTask = async (
     columnId: TaskStatus,
@@ -74,7 +59,9 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
     }
   };
 
-  const handleDeleteTask = (taskId: string) => {
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+    const res = await del(`/api/project/${projectId}/tasks/${taskId}/delete/`);
     setTasks(prev => {
       const newTasks = {...prev};
       for (const column in newTasks) {
@@ -82,6 +69,11 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
       }
       return newTasks;
     });
+    toast.success("Task deleted successflly")
+  } catch(err) {
+      console.error(err);
+      toast.error("Failed to add task");
+  }
   };
 
   const handleDragStart = (event: DragStartEvent) => {

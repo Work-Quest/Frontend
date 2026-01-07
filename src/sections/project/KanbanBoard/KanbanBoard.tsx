@@ -17,6 +17,7 @@ import { UserStatus } from "@/types/User";
 interface KanbanBoardProps {
   tasks: Tasks;
   onAddTask: (column: TaskStatus, task: Task) => void;
+  onDeleteTask: (id: string) => void;
   onDragStart: (event: any) => void;
   onDragOver: (event: any) => void;
   onDragEnd: (event: any) => void;

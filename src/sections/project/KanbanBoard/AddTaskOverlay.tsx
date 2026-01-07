@@ -50,7 +50,10 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const id = ""
+
     const newTask: Task = {
+      id,
       title,
       priority,
       iteration,

@@ -32,6 +32,8 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
     onAddTask(id, task);
   };
 
+  
+
   return (
     <div ref={setNodeRef} className="w-full flex flex-col">
       <div className="flex items-center mb-3">
