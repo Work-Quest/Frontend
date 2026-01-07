@@ -25,6 +25,5 @@ export function useProjects() {
   useEffect(() => {
     fetchProjects()
   }, [])
-
   return { projects, setProjects, loading, error }
 }

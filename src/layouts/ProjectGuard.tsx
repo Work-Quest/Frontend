@@ -12,7 +12,7 @@ export default function ProjectGuard() {
 
     const checkAccess = async () => {
       try {
-        await get(`/api/project/access/${projectId}/`)
+        await get(`/api/project/${projectId}/access/`)
         setAllowed(true)
       } catch {
         setAllowed(false)

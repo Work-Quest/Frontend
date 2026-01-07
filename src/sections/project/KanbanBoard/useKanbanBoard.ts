@@ -1,13 +1,23 @@
 "use client"
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DragStartEvent, DragOverEvent, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Task, Tasks, TaskStatus } from "./types";
+import { mapTaskResponseToTask, mapTaskToTaskResponse, Task, TaskResponse, Tasks, TaskStatus } from "./types";
+import { post } from '@/Api';
+import { useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export const useKanbanBoard = (initialTasks: Tasks) => {
   const [tasks, setTasks] = useState<Tasks>(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const { projectId } = useParams<{ projectId: string }>();
+
+   // Add this useEffect to update tasks when initialTasks changes
+   useEffect(() => {
+    setTasks(initialTasks);
+  }, [initialTasks]);
+
 
   const findContainer = (id: string) => {
     if (id in tasks) return id as keyof Tasks;
@@ -19,19 +29,49 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
     return null;
   };
 
-  const handleAddTask = (columnId: TaskStatus, task: Omit<Task, "id">) => {
-    const newTask: Task = {
-      ...task,
-      id: `task-${Date.now()}`,
-      status: columnId,
-      iteration: task.iteration || 'Sprint 1',
-      assignees: task.assignees || ['You'],
-    };
+  // const handleAddTask = (columnId: TaskStatus, task: Omit<Task, "id">) => {
+  //   const newTask: Task = {
+  //     ...task,
+  //     id: `task-${Date.now()}`,
+  //     status: columnId,
+  //     iteration: task.iteration || 'Sprint 1',
+  //     assignees: task.assignees || ['You'],
+  //   };
     
-    setTasks(prev => ({
-      ...prev,
-      [columnId]: [...prev[columnId], newTask]
-    }));
+  //   setTasks(prev => ({
+  //     ...prev,
+  //     [columnId]: [...prev[columnId], newTask]
+  //   }));
+  // };
+
+  const handleAddTask = async (
+    columnId: TaskStatus,
+    task: Task
+  ) => {
+    try {
+      const mappedTask = mapTaskToTaskResponse(task);
+      const res = await post<TaskResponse, TaskResponse>(`/api/project/${projectId}/tasks/create/`, mappedTask);
+      const createdTask = mapTaskResponseToTask(res);
+      console.log("Created Task:", createdTask);
+
+      console.log(task.assignees);
+      if (task.assignees.length > 0) {
+        for (const assignee of task.assignees) {
+          // Assuming there's an API endpoint to assign users to tasks
+          await post(`/api/project/${projectId}/tasks/${createdTask.id}/assign/`, { "project_member_id": assignee });
+          console.log(`Assigned ${assignee} to task ${createdTask.id}`);
+        }
+      }
+      // update state without refetch
+      setTasks(prev => ({
+        ...prev,
+        [columnId]: [...prev[columnId], createdTask],
+      }));
+      toast.success("Task added successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add task");
+    }
   };
 
   const handleDeleteTask = (taskId: string) => {

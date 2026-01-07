@@ -151,7 +151,7 @@ const handleUpdateProject = async (
   }
 
   const editedProject = await post<{project_name: string; deadline: string; status: string }, Project>(
-    `/api/project/edit/${projectId}/`,
+    `/api/project/${projectId}/edit/`,
     data
   );
 
