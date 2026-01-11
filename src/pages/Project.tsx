@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react";
-import { INITIAL_TASKS, DAMAGE_LOGS, HP_DATA, PROJECT_DATA } from "@/sections/project/constants";
+import { DAMAGE_LOGS, HP_DATA, PROJECT_DATA } from "@/sections/project/constants";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import BossPlaceholder from "@/sections/project/BossPlaceholder";
 import ToggleButton from "@/components/ToggleButton";
@@ -10,9 +10,11 @@ import DamageLog from "@/sections/project/DamageLog/DamageLog";
 import ReviewTask from "@/sections/project/ReviewTask";
 import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard";
 import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
-
+import { useTask } from "@/hook/useTask";
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
+   const { fetchedTask, projectMembers } = useTask();
+   console.log("Fetched tasks in ProjectPage:", fetchedTask);
 
   const {
     tasks,
@@ -23,7 +25,7 @@ const ProjectPage: React.FC = () => {
     findActiveTask,
     handleAddTask,
     handleDeleteTask,
-  } = useKanbanBoard(INITIAL_TASKS);
+  } = useKanbanBoard(fetchedTask);
 
   const toggleBossPlaceholder = () => {
     setShowBossPlaceholder((prev) => !prev);
@@ -60,6 +62,7 @@ const ProjectPage: React.FC = () => {
               onDragEnd={handleDragEnd}
               activeId={activeId}
               findActiveTask={findActiveTask}
+              projectMember={projectMembers ?? []}
             />
           </ScrollArea>
         </section>

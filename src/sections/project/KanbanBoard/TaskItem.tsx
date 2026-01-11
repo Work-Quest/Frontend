@@ -30,6 +30,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
   };
 
   const handleDelete = () => {
+    if (!task.id) return;
     onDelete?.(task.id);
     setShowOverlay(false);
   };

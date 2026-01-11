@@ -18,6 +18,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 import AuthLayout from './layouts/AuthLayout.tsx'
 import MainLayout from './layouts/MainLayout.tsx'
 import ProtectedLayout from './layouts/ProtectedLayout.tsx';
+import ProjectGuard from './layouts/ProjectGuard.tsx';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const router = createBrowserRouter([
@@ -51,7 +52,13 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Landing /> },
           { path: "project-end", element: <ProjectEnd /> },
-          { path: "project", element: <Project /> },
+          {
+            path: "project/:projectId",
+            element: <ProjectGuard />,
+            children: [
+              { index: true, element: <Project /> }
+            ]
+          },
           { path: "profile", element: <Profile /> },
           
         ]

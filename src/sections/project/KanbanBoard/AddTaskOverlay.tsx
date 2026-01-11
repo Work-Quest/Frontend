@@ -20,32 +20,50 @@ import {
 } from "@/components/ui/select";
 import { IoAddCircleOutline } from "react-icons/io5";
 import { Task, TaskPriority, TaskStatus } from "./types";
+import { UserStatus } from "@/types/User";
+import MultiCombobox, { MultiComboboxOption } from "@/components/ui/multicombobox";
 
 interface AddTaskOverlayProps {
   columnId: TaskStatus;
-  onAddTask: (task: Omit<Task, "id">) => void;
+  projectMember: UserStatus[]
+  onAddTask: (task:  Task) => void;
 }
 
 export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
   columnId,
+  projectMember,
   onAddTask,
 }) => {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("Medium");
   const [iteration, setIteration] = useState("Sprint 1");
-  const [assignees, setAssignees] = useState("You");
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  console.log(selectedMembers)
+    const memberOptions = React.useMemo<MultiComboboxOption[]>(() => {
+    return projectMember?.map(member => ({
+      value: member.id,
+      label: member.name
+    })) ?? []
+  }, [projectMember])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newTask: Omit<Task, "id"> = {
+    const id = ""
+
+    const newTask: Task = {
+      id,
       title,
       priority,
       iteration,
-      assignees: assignees.split(",").map((a) => a.trim()),
+      assignees: selectedMembers,
       status: columnId,
+      description: null,
+      deadline: null
     };
+
+    console.log("newTask", newTask)
 
     onAddTask(newTask);
     resetForm();
@@ -56,7 +74,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
     setTitle("");
     setPriority("Medium");
     setIteration("Sprint 1");
-    setAssignees("You");
+    setSelectedMembers([]);
   };
 
   return (
@@ -155,8 +173,8 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
               />
             </div>
 
-            <div className="space-y-2">
-              {/* change later */}
+            {/* <div className="space-y-2">
+             
               <Label
                 htmlFor="assignees"
                 className="font-['Baloo_2'] text-darkBrown"
@@ -170,7 +188,16 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
                 placeholder="You"
                 className="font-['Baloo_2'] text-darkBrown"
               />
-            </div>
+            </div> */}
+
+            <MultiCombobox
+              label="Assignees"
+              placeholder="Select Assignee"
+              searchPlaceholder="Search Assignee"
+              options={memberOptions}
+              value={selectedMembers}
+            onChange={setSelectedMembers}
+            />
 
             <DialogFooter>
               <Button

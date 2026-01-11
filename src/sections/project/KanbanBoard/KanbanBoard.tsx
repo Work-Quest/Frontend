@@ -11,17 +11,19 @@ import {
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { KanbanColumn } from "./KanbanColumn";
-import { Task, Tasks } from "./types";
+import { Task, Tasks, TaskStatus } from "./types";
+import { UserStatus } from "@/types/User";
 
 interface KanbanBoardProps {
   tasks: Tasks;
-  onAddTask: (columnId: keyof Tasks, task: Omit<Task, "id">) => void;
-  onDeleteTask: (taskId: string) => void;
+  onAddTask: (column: TaskStatus, task: Task) => void;
+  onDeleteTask: (id: string) => void;
   onDragStart: (event: any) => void;
   onDragOver: (event: any) => void;
   onDragEnd: (event: any) => void;
   activeId: string | null;
   findActiveTask: () => Task | null;
+  projectMember: UserStatus[]
 }
 
 const getColumnTitle = (id: string): string => {
@@ -43,6 +45,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   onDragEnd,
   activeId,
   findActiveTask,
+  projectMember
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -74,6 +77,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               tasks={tasks[columnId as keyof typeof tasks]}
               onAddTask={onAddTask}
               onDeleteTask={onDeleteTask}
+              projectMember={projectMember}
             />
           ))}
         </div>

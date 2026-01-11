@@ -1,11 +1,11 @@
 export type Project = {
-    ProjectID: string;
-    OwnerID: string;
-    OwnerName: string;
-    ProjectName: string;
-    CreatedAt: string; // ISO timestamp
-    DeadLine: string;  // ISO timestamp
-    TotalTask: number;
-    CompletedTasks: number;
-    Status: "Working" | "Done";
+  project_id: string;          
+  project_name: string;
+  status: "Working" | "Done"; 
+  owner_id: string;            
+  owner_username: string;
+  created_at: string;          
+  deadline: string;            
+  total_tasks: number;
+  completed_tasks: number;
   };
