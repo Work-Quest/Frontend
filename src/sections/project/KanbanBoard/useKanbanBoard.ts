@@ -62,7 +62,7 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-    const res = await del(`/api/project/${projectId}/tasks/${taskId}/delete/`);
+    await del(`/api/project/${projectId}/tasks/${taskId}/delete/`);
     setTasks(prev => {
       const newTasks = {...prev};
       for (const column in newTasks) {

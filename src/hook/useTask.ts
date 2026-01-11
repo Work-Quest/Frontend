@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { mapTaskResponseToTask, Task, TaskResponse, Tasks, TaskStatus } from "../sections/project/KanbanBoard/types";
-import { get, post, patch, del } from "@/Api";
+import { mapTaskResponseToTask, Task, TaskResponse, Tasks } from "../sections/project/KanbanBoard/types";
+import { get } from "@/Api";
 import { UserStatus } from "@/types/User";
 
 export const useTask = () => {
@@ -13,7 +13,7 @@ export const useTask = () => {
     done: [],
   });
   const [projectMembers, setProjectMember] = useState<UserStatus[] | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId] = useState<string | null>(null);
 
   const fetchTasks = async (projectId: string): Promise<TaskResponse[]> => {
     const response = await get<TaskResponse[]>(`/api/project/${projectId}/tasks/`);
@@ -24,24 +24,6 @@ export const useTask = () => {
     const response = await get<UserStatus[]>(`/api/project/${projectId}/members/`);
     return response;
   };
-
-
-  // const updateTaskStatus = async (projectId: string, taskId: string, status: TaskStatus): Promise<Task> => {
-  //   const response = await patch<{ status: TaskStatus }, Task>(`/api/project/${projectId}/tasks/${taskId}/update/`, {
-  //     status: status,
-  //   });
-  //   return response;
-  // };
-
-  // const addTask = async (projectId: string, task: Omit<Task, 'id'>): Promise<Task> => {
-  //   const response = await post<Omit<Task, 'id'>, Task>(`/api/project/${projectId}/tasks/create/`, task);
-  //   return response;
-  // };
-
-  // const deleteTask = async (projectId: string, taskId: string): Promise<void> => {
-  //   await del(`/api/project/${projectId}/tasks/${taskId}/delete/`);
-  // };
-  
 
   useEffect(() => {
     if (projectId) {
@@ -81,9 +63,6 @@ export const useTask = () => {
     }
     return null;
   }, [activeId, fetchedTask]);
-
-
-
 
   return {
     fetchedTask,
