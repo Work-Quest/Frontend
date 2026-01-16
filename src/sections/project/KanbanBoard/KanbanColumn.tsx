@@ -5,15 +5,17 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { TaskItem } from "./TaskItem";
-import { Task, Tasks } from "./types";
+import { Task, Tasks, TaskStatus } from "./types";
 import { AddTaskOverlay } from "./AddTaskOverlay";
+import { UserStatus } from "@/types/User";
 
 interface KanbanColumnProps {
   id: keyof Tasks;
   title: string;
   tasks: Task[];
-  onAddTask: (columnId: keyof Tasks, task: Omit<Task, "id">) => void;
+  onAddTask: (column: TaskStatus, task: Task) => void;
   onDeleteTask: (taskId: string) => void;
+  projectMember: UserStatus[];
 }
 
 export const KanbanColumn: React.FC<KanbanColumnProps> = ({
@@ -22,12 +24,15 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   tasks,
   onAddTask,
   onDeleteTask,
+  projectMember
 }) => {
   const { setNodeRef } = useDroppable({ id: `column-${id}` });
 
-  const handleAddTask = (task: Omit<Task, "id">) => {
+  const handleAddTask = (task: Task) => {
     onAddTask(id, task);
   };
+
+  
 
   return (
     <div ref={setNodeRef} className="w-full flex flex-col">
@@ -38,7 +43,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         </p>
       </div>
 
-      <AddTaskOverlay columnId={id} onAddTask={handleAddTask} />
+      <AddTaskOverlay columnId={id} projectMember={projectMember} onAddTask={handleAddTask} />
 
       <SortableContext
         items={tasks.map((task) => task.id)}

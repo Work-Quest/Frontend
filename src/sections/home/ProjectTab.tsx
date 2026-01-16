@@ -11,15 +11,27 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { useState, useEffect } from "react"
-import { IoAddCircle } from "react-icons/io5"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { X, Filter } from "lucide-react"
+import ProjectCreateForm from "@/components/ProjectCreateForm"
+import { ClipLoader } from "react-spinners";
 
-type ProfileTabProps = {
+type ProjectTabProps = {
   data: Project[]
   onFilterChange: (filters: FilterState) => void
+  onCreateProject: (data: {
+    project_name: string
+    deadline: string
+  }) => Promise<void>
+  onUpdateProject: (projectId: string, data: {
+    project_name: string
+    deadline: string
+    status: string
+  }) => Promise<void>
+  loading?: boolean
+  onDelete: (projectId: string) => void
 }
 
 export interface FilterState {
@@ -27,7 +39,7 @@ export interface FilterState {
   owner: string | null
 }
 
-export default function ProjectTab({ data, onFilterChange }: ProfileTabProps) {
+export default function ProjectTab({ data, onFilterChange, onCreateProject, onUpdateProject, onDelete, loading }: ProjectTabProps) {
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<FilterState>({
     status: null,
@@ -65,8 +77,8 @@ export default function ProjectTab({ data, onFilterChange }: ProfileTabProps) {
     setPage(1)
   }
 
-  const uniqueStatuses = Array.from(new Set(data.map((project) => project.Status)))
-  const uniqueOwners = Array.from(new Set(data.map((project) => project.OwnerName)))
+  const uniqueStatuses = Array.from(new Set(data.map((project) => project.status)))
+  const uniqueOwners = Array.from(new Set(data.map((project) => project.owner_username)))
 
   const updateStatusFilter = (status: string | null) => {
     handleFilterChange({ ...filters, status })
@@ -81,6 +93,8 @@ export default function ProjectTab({ data, onFilterChange }: ProfileTabProps) {
   }
 
   const hasActiveFilters = filters.status || filters.owner
+
+
 
   return (
     <div className="flex gap-4 h-full">
@@ -214,27 +228,34 @@ export default function ProjectTab({ data, onFilterChange }: ProfileTabProps) {
           </div>
 
           {/* Add New Project */}
-          <div className="bg-orange/20 border-2 border-orange border-dashed rounded-md hover:bg-orange/30 flex items-center justify-center p-3 m-4 cursor-pointer flex-shrink-0 transition-colors h-12">
-            <IoAddCircle className="w-5 h-5 text-orange" />
-            <p className="!text-orange !font-bold ml-2">Add new project</p>
-          </div>
-
+          <ProjectCreateForm onCreateProject={onCreateProject} />
+          
           {/* Project List */}
-          <div className="flex flex-col px-4 gap-2 flex-1 overflow-auto min-h-0">
-            {paginatedData.length > 0 ? (
-              paginatedData.map((project) => (
-                <div key={project.ProjectID} className="h-16 flex-shrink-0">
-                  <ProjectTabCard project={project} />
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <ClipLoader
+                loading={loading}     
+                color="gray"         
+                size={100}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col px-4 gap-2 flex-1 overflow-auto min-h-0">
+              {paginatedData.length > 0 ? (
+                paginatedData.map((project) => (
+                  <div key={project.project_id} className="h-16 flex-shrink-0">
+                    <ProjectTabCard project={project} onUpdateProject={onUpdateProject} onDelete={onDelete} />
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-brown/60">
+                  <Filter className="w-12 h-12 mb-4 text-brown/30" />
+                  <p className="text-lg font-medium">No projects found</p>
+                  <p className="text-sm">Try adjusting your filters</p>
                 </div>
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-brown/60">
-                <Filter className="w-12 h-12 mb-4 text-brown/30" />
-                <p className="text-lg font-medium">No projects found</p>
-                <p className="text-sm">Try adjusting your filters</p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
