@@ -62,7 +62,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/home',
-    element: <MainLayout className="bg-white" />,
+    element: <MainLayout />,
     children: [
       {
         element: <ProtectedLayout />,
