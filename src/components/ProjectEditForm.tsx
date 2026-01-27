@@ -30,7 +30,7 @@ type ProjectEditFormProps = {
     project_name: string
     deadline: string
     status: string
-  }) => Promise<void>
+  }) => Promise<Project>
 }
 
 export default function ProjectEditForm({ project, onUpdateProject }: ProjectEditFormProps) {
@@ -144,6 +144,14 @@ const [deadline, setDeadline] = useState(
     </Dialog>
   )
 }
+
+
+
+
+
+
+
+
 
 
 

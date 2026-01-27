@@ -14,7 +14,7 @@ type ProfileTabCardProps = {
       project_name: string
       deadline: string
       status: string
-    }) => Promise<void>
+    }) => Promise<Project>
   onDelete: (projectId: string) => void
 }
 

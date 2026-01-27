@@ -24,7 +24,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   tasks,
   onAddTask,
   onDeleteTask,
-  projectMember
+  projectMember,
 }) => {
   const { setNodeRef } = useDroppable({ id: `column-${id}` });
 

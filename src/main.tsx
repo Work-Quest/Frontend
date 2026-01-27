@@ -6,7 +6,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import Landing from './pages/Landing.tsx';
-import Project from './pages/Project.tsx';
+import Project from './pages/project/Project.tsx';
 import ProjectEnd from './pages/ProjectEnd.tsx';
 import Home from './pages/Home.tsx';
 import Login from './pages/Login.tsx';
@@ -19,6 +19,8 @@ import AuthLayout from './layouts/AuthLayout.tsx'
 import MainLayout from './layouts/MainLayout.tsx'
 import ProtectedLayout from './layouts/ProtectedLayout.tsx';
 import ProjectGuard from './layouts/ProjectGuard.tsx';
+import CreateProjectPage from './pages/project/CreateProject.tsx';
+import SetupProject from './pages/project/SetupProject.tsx';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const router = createBrowserRouter([
@@ -56,9 +58,11 @@ const router = createBrowserRouter([
             path: "project/:projectId",
             element: <ProjectGuard />,
             children: [
-              { index: true, element: <Project /> }
+              { index: true, element: <Project /> },
+              { path: "setup", element: <SetupProject /> }, 
             ]
           },
+          { path: "project/create", element: < CreateProjectPage/>},
           { path: "profile", element: <Profile /> },
           
         ]
