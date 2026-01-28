@@ -153,7 +153,8 @@ export default function ProjectTabCard({ project, onUpdateProject, onDelete }: P
                   toast.error("This project is already completed")
                   return
                 }
-                  navigate(`/project/${project.project_id}`)
+                // Route is guarded: if boss isn't setup yet, user will be redirected to /setup
+                navigate(`/project/${project.project_id}`)
                 }}>
                 Let's Fight!
             </Button>
