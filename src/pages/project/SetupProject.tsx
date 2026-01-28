@@ -19,7 +19,7 @@ const PRIORITY_HP: Record<string, number> = {
 
 export default function SetupProject() {
   const { fetchedTask, projectMembers } = useTask()
-  const { tasks, handleAddTask } = useKanbanBoard(fetchedTask)
+  const { tasks, handleAddTask, handleDeleteTask } = useKanbanBoard(fetchedTask)
   const { setupBoss } = useProjects()
   const navigate = useNavigate()
   const { projectId } = useParams()
@@ -82,6 +82,7 @@ export default function SetupProject() {
                 key={task.id}
                 id={task.id}
                 task={task}
+                onDelete={handleDeleteTask}
               />
             ))
           )}
@@ -116,6 +117,8 @@ export default function SetupProject() {
             <div className="flex w-screen mx-10 justify-between">
                 <button
                     className= "!text-[rgba(148, 139, 129, 1)] px-6 py-2 rounded-md"
+                    type="button"
+                    onClick={() => navigate(`/home`)}
                 >
                     retreat
                 </button>

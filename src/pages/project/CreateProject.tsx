@@ -4,7 +4,6 @@ import { useState } from "react"
 import useProjects from "@/hook/useProjects"
 import toast from "react-hot-toast"
 import { useNavigate } from "react-router-dom"
-import { error } from "console"
 
 const CreateProjectPage = () => {
   const [projectName, setProjectName] = useState("")
@@ -104,6 +103,7 @@ const CreateProjectPage = () => {
             <div className="flex w-screen mx-10 justify-between">
                 <button
                     className= "!text-[rgba(148, 139, 129, 1)] px-6 py-2 rounded-md"
+                    onClick={() => navigate(`/home`)}
                 >
                     retreat
                 </button>

@@ -8,8 +8,6 @@ import { useState, useMemo } from "react"
 import Fuse from "fuse.js"
 import { Input } from "@/components/ui/input"
 import { useProjects } from "@/hook/useProjects"
-import { post } from "@/Api"
-import { Project } from "@/types/Project"
 
 const userMockData: UserScore[] = [
   { order: 1, name: "Michael", username: "michaelza550", score: 12040 },
@@ -59,13 +57,13 @@ const mockProfile: UserProfile = {
   ],
 }
 
-type BatchDeleteResponse = {
-  deleted_projects: string[]
-  failed_projects: {
-    project_id: string
-    error: string
-  }[]
-}
+// type BatchDeleteResponse = {
+//   deleted_projects: string[]
+//   failed_projects: {
+//     project_id: string
+//     error: string
+//   }[]
+// }
 
 
 function Home() {
