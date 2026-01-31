@@ -1,7 +1,5 @@
 import type { Tag } from "@/types/Tag";
-import type { Boss } from "@/types/Boss"
-
-
+import type { Boss } from "@/types/Boss";
 
 export enum MemberStatus {
   Alive = "Alive",
@@ -9,26 +7,35 @@ export enum MemberStatus {
 }
 
 export type UserScore = {
-    order: number;
-    name: string;
-    username: string;
-    score: number;
-  };
+  order: number;
+  name: string;
+  username: string;
+  score: number;
+};
 
 export type UserProfile = {
-    name?: string;
-    username?: string;
-    profileImg?: string;
-    backgroundColor?: string;
-    avatarFallback?: string;
-    tag?: Tag[];
-    bossCollection?: Boss[];
+  name?: string;
+  username?: string;
+  profileImg?: string;
+  backgroundColor?: string;
+  avatarFallback?: string;
+  tag?: Tag[];
+  bossCollection?: Boss[];
 };
 
 export type UserStatus = {
-    id : string;
-    name : string;
-    username : string;
-    hp : number;
-    status : MemberStatus;
+  id: string;
+  name: string;
+  username: string;
+  hp: number;
+  status: MemberStatus;
 };
+
+export interface PartyMember {
+  id: string;
+  username: string;
+  name: string;
+  avatarId: number;
+  avatarBgColorId: number;
+  isLeader?: boolean;
+}
