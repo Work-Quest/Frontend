@@ -23,7 +23,7 @@ interface KanbanBoardProps {
   onDragEnd: (event: any) => void;
   activeId: string | null;
   findActiveTask: () => Task | null;
-  projectMember: UserStatus[]
+  projectMember: UserStatus[];
 }
 
 const getColumnTitle = (id: string): string => {
@@ -45,7 +45,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   onDragEnd,
   activeId,
   findActiveTask,
-  projectMember
+  projectMember,
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor),

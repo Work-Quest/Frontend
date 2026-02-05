@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,10 +22,11 @@ import { IoAddCircleOutline } from "react-icons/io5";
 import { Task, TaskPriority, TaskStatus } from "./types";
 import { UserStatus } from "@/types/User";
 import MultiCombobox, { MultiComboboxOption } from "@/components/ui/multicombobox";
-
+import { useParams } from "react-router-dom";
+import useProjects from "@/hook/useProjects";
 interface AddTaskOverlayProps {
   columnId: TaskStatus;
-  projectMember: UserStatus[]
+  projectMember: UserStatus[];
   onAddTask: (task:  Task) => void;
 }
 
@@ -34,12 +35,30 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
   projectMember,
   onAddTask,
 }) => {
+  const { projectId } = useParams<{ projectId: string }>();
+  const { projects } = useProjects();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("Medium");
-  const [iteration, setIteration] = useState("Sprint 1");
+  const [deadline, setDeadline] = useState<string>("");
+  const [defaultDeadline, setDefaultDeadline] = useState<string>("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  console.log(selectedMembers)
+
+  // Derive project deadline from global projects list
+  useEffect(() => {
+    if (!projectId || !projects || projects.length === 0) return;
+
+    const currentProject = projects.find((p) => p.project_id === projectId);
+    if (!currentProject) return;
+
+    // Assume backend stores ISO string; convert to yyyy-MM-dd for input[type="date"]
+    const iso = currentProject.deadline ?? "";
+    const formatted = iso ? iso.split("T")[0] : "";
+
+    setDeadline(formatted);
+    setDefaultDeadline(formatted);
+  }, [projectId, projects]);
+
     const memberOptions = React.useMemo<MultiComboboxOption[]>(() => {
     return projectMember?.map(member => ({
       value: member.id,
@@ -56,11 +75,11 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
       id,
       title,
       priority,
-      iteration,
+      iteration: null,
       assignees: selectedMembers,
       status: columnId,
       description: null,
-      deadline: null
+      deadline: deadline || null,
     };
 
     console.log("newTask", newTask)
@@ -73,7 +92,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
   const resetForm = () => {
     setTitle("");
     setPriority("Medium");
-    setIteration("Sprint 1");
+    setDeadline(defaultDeadline);
     setSelectedMembers([]);
   };
 
@@ -159,17 +178,18 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
             </div>
             <div className="space-y-2">
               <Label
-                htmlFor="iteration"
+                htmlFor="Deadline"
                 className="font-['Baloo_2'] text-darkBrown"
               >
-                Iteration
+                Deadline
               </Label>
               <Input
-                id="iteration"
-                value={iteration}
-                onChange={(e) => setIteration(e.target.value)}
-                placeholder="Sprint 1"
+                id="deadline"
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
                 className="font-['Baloo_2'] text-darkBrown"
+                required
               />
             </div>
 

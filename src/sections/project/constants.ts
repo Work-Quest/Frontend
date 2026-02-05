@@ -45,7 +45,6 @@ export const PROJECT_DATA = {
 };
 
 export default {
-  // INITIAL_TASKS,
   DAMAGE_LOGS,
   HP_DATA,
   PROJECT_DATA,

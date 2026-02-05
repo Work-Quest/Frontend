@@ -8,8 +8,6 @@ import { useState, useMemo } from "react"
 import Fuse from "fuse.js"
 import { Input } from "@/components/ui/input"
 import { useProjects } from "@/hook/useProjects"
-import { post } from "@/Api"
-import { Project } from "@/types/Project"
 
 const userMockData: UserScore[] = [
   { order: 1, name: "Michael", username: "michaelza550", score: 12040 },
@@ -59,13 +57,13 @@ const mockProfile: UserProfile = {
   ],
 }
 
-type BatchDeleteResponse = {
-  deleted_projects: string[]
-  failed_projects: {
-    project_id: string
-    error: string
-  }[]
-}
+// type BatchDeleteResponse = {
+//   deleted_projects: string[]
+//   failed_projects: {
+//     project_id: string
+//     error: string
+//   }[]
+// }
 
 
 function Home() {
@@ -74,7 +72,7 @@ function Home() {
     status: null,
     owner: null,
   })
-  const { projects, setProjects, loading} = useProjects()
+  const { projects, loading, updateProject, deleteProject } = useProjects()
   const fuse = useMemo(() => {
   return new Fuse(projects, {
     keys: ["project_name", "owner_username", "status"],
@@ -106,64 +104,6 @@ function Home() {
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters)
   }
-
-  const handleCreateProject = async (data: {
-    project_name: string
-    deadline: string
-  }) => {
-    const project = await post<{ project_name: string, deadline: string }, Project>("/api/project/create/", data);
-    setProjects(prev => [...prev, project])
-    console.log("Created project:", project)
-  }
-
-const handleDeleteProject = async (projectId: string) => {
-  if (!projectId) {
-    throw new Error("No project selected")
-  }
-
-  const response = await post<
-    { project_ids: string[] },
-    BatchDeleteResponse
-  >(
-    "/api/project/delete/",
-    { project_ids: [projectId] }
-  )
-
-  if (response.deleted_projects.includes(projectId)) {
-    setProjects(prev =>
-      prev.filter(p => p.project_id !== projectId)
-    )
-  } else {
-    const error =
-      response.failed_projects.find(f => f.project_id === projectId)?.error ??
-      "Failed to delete project"
-    throw new Error(error)
-  }
-}
-
-
-const handleUpdateProject = async (
-  projectId: string,
-  data: {project_name: string; deadline: string; status: string }
-) => {
-  if (!projectId) {
-    throw new Error("No project selected");
-  }
-
-  const editedProject = await post<{project_name: string; deadline: string; status: string }, Project>(
-    `/api/project/${projectId}/edit/`,
-    data
-  );
-
-  setProjects(prevProjects =>
-    prevProjects.map(project =>
-      project.project_id === projectId
-        ? { ...project, ...editedProject }
-        : project
-    )
-  );
-};
-
 
 
   return (
@@ -202,7 +142,7 @@ const handleUpdateProject = async (
 
             {/* Project Tab with Filter */}
             <div className="flex-1 min-h-0">
-              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onCreateProject={handleCreateProject} onUpdateProject={handleUpdateProject} onDelete={handleDeleteProject} loading={loading} />
+              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onUpdateProject={updateProject} onDelete={deleteProject} loading={loading} />
             </div>
           </div>
         </div>

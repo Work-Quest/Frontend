@@ -15,21 +15,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { X, Filter } from "lucide-react"
-import ProjectCreateForm from "@/components/ProjectCreateForm"
 import { ClipLoader } from "react-spinners";
+import { IoAddCircle } from "react-icons/io5"
 
 type ProjectTabProps = {
   data: Project[]
   onFilterChange: (filters: FilterState) => void
-  onCreateProject: (data: {
-    project_name: string
-    deadline: string
-  }) => Promise<void>
   onUpdateProject: (projectId: string, data: {
     project_name: string
     deadline: string
     status: string
-  }) => Promise<void>
+  }) => Promise<Project>
   loading?: boolean
   onDelete: (projectId: string) => void
 }
@@ -39,7 +35,7 @@ export interface FilterState {
   owner: string | null
 }
 
-export default function ProjectTab({ data, onFilterChange, onCreateProject, onUpdateProject, onDelete, loading }: ProjectTabProps) {
+export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDelete, loading }: ProjectTabProps) {
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<FilterState>({
     status: null,
@@ -228,7 +224,13 @@ export default function ProjectTab({ data, onFilterChange, onCreateProject, onUp
           </div>
 
           {/* Add New Project */}
-          <ProjectCreateForm onCreateProject={onCreateProject} />
+          <a href="/project/create" >
+            <div 
+              className="bg-orange/20 border-2 border-orange border-dashed rounded-md hover:bg-orange/30 flex items-center justify-center p-3 m-4 cursor-pointer flex-shrink-0 transition-colors h-12">
+              <IoAddCircle className="w-5 h-5 text-orange" />
+              <p className="!text-orange !font-bold ml-2">Add new project</p>
+            </div>
+          </a>
           
           {/* Project List */}
           {loading ? (
