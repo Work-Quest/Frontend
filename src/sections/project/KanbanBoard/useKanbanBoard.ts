@@ -12,7 +12,8 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
   const [tasks, setTasks] = useState<Tasks>(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
   const { projectId } = useParams<{ projectId: string }>();
-  const lastSentStatusRef = useRef<Record<string, TaskStatus>>({});
+  const dragStartContainerRef = useRef<TaskStatus | null>(null);
+  const dragStartTasksSnapshotRef = useRef<Tasks | null>(null);
 
    // Add this useEffect to update tasks when initialTasks changes
    useEffect(() => {
@@ -94,75 +95,104 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
 
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
+    const taskId = event.active.id as string;
+    setActiveId(taskId);
+    dragStartContainerRef.current = findContainer(taskId) as TaskStatus | null;
+
+    // Snapshot tasks so we can revert if the drag is cancelled / dropped outside.
+    dragStartTasksSnapshotRef.current = Object.fromEntries(
+      Object.entries(tasks).map(([k, v]) => [k, [...v]])
+    ) as unknown as Tasks;
   };
 
-  const handleDragOver = (event: DragOverEvent) => {
-  const { active, over } = event;
-  if (!over) return;
+  function handleDragOver(event: DragOverEvent) {
+    const { active, over } = event;
+    if (!over) return;
 
-  const taskId = active.id as string;
-  const activeContainer = findContainer(taskId);
-  if (!activeContainer) return;
+    const taskId = active.id as string;
+    const activeContainer = findContainer(taskId);
+    if (!activeContainer) return;
 
-  let targetStatus: TaskStatus | null = null;
+    // Tasks in Done cannot be moved out (we'll also enforce on dragEnd).
+    if (activeContainer === 'done') return;
 
-  if (over.id.toString().startsWith("column-")) {
-    targetStatus = over.id
-      .toString()
-      .replace("column-", "") as TaskStatus;
-  } else {
-    const overContainer = findContainer(over.id as string);
-    if (!overContainer) return;
-    targetStatus = overContainer;
+    let targetStatus: TaskStatus | null = null;
+
+    if (over.id.toString().startsWith("column-")) {
+      targetStatus = over.id
+        .toString()
+        .replace("column-", "") as TaskStatus;
+    } else {
+      const overContainer = findContainer(over.id as string);
+      if (!overContainer) return;
+      targetStatus = overContainer;
+    }
+
+    if (!targetStatus || targetStatus === activeContainer) return;
+
+    // Optimistic UI
+    setTasks((prev) => {
+      const activeItems = prev[activeContainer];
+      const activeIndex = activeItems.findIndex(
+        (item) => item.id === taskId
+      );
+      if (activeIndex === -1) return prev;
+
+      const movedTask = activeItems[activeIndex];
+
+      return {
+        ...prev,
+        [activeContainer]: prev[activeContainer].filter(
+          (item) => item.id !== taskId
+        ),
+        [targetStatus]: [...prev[targetStatus], movedTask],
+      };
+    });
+
+    console.log("target:", targetStatus);
   }
-
-  if (!targetStatus || targetStatus === activeContainer) return;
-
-  // Optimistic UI
-  setTasks((prev) => {
-    const activeItems = prev[activeContainer];
-    const activeIndex = activeItems.findIndex(
-      (item) => item.id === taskId
-    );
-    if (activeIndex === -1) return prev;
-
-    const movedTask = activeItems[activeIndex];
-
-    return {
-      ...prev,
-      [activeContainer]: prev[activeContainer].filter(
-        (item) => item.id !== taskId
-      ),
-      [targetStatus]: [...prev[targetStatus], movedTask],
-    };
-  });
-
-      console.log("target:",targetStatus)
-
-  // Async DB update (non-blocking)
-  if (lastSentStatusRef.current[taskId] !== targetStatus) {
-    lastSentStatusRef.current[taskId] = targetStatus;
-    void updateTaskStatus(taskId, targetStatus);
-  }
-};
 
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) {
+      if (dragStartTasksSnapshotRef.current) {
+        setTasks(dragStartTasksSnapshotRef.current);
+      }
       setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
       return;
     }
-    
+
+    const taskId = active.id as string;
+    const originContainer = dragStartContainerRef.current;
+
     const activeContainer = findContainer(active.id as string);
     if (!activeContainer) {
+      if (dragStartTasksSnapshotRef.current) {
+        setTasks(dragStartTasksSnapshotRef.current);
+      }
       setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
       return;
     }
     
     if (over.id.toString().startsWith('column-')) {
       const containerId = over.id.toString().replace('column-', '') as keyof Tasks;
+
+      // Tasks cannot be moved OUT of done.
+      if (originContainer === 'done' && containerId !== 'done') {
+        if (dragStartTasksSnapshotRef.current) {
+          setTasks(dragStartTasksSnapshotRef.current);
+        }
+        setActiveId(null);
+        dragStartContainerRef.current = null;
+        dragStartTasksSnapshotRef.current = null;
+        return;
+      }
+
       if (activeContainer !== containerId) {
         setTasks(prev => {
           const activeItems = prev[activeContainer];
@@ -174,13 +204,36 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
           };
         });
       }
+
+      // Only persist when the task is dropped into a different column
+      if (originContainer && containerId && originContainer !== containerId) {
+        void updateTaskStatus(taskId, containerId as TaskStatus);
+      }
       setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
       return;
     }
     
     const overContainer = findContainer(over.id as string);
     if (!overContainer) {
+      if (dragStartTasksSnapshotRef.current) {
+        setTasks(dragStartTasksSnapshotRef.current);
+      }
       setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
+      return;
+    }
+
+    // Tasks cannot be moved OUT of done.
+    if (originContainer === 'done' && overContainer !== 'done') {
+      if (dragStartTasksSnapshotRef.current) {
+        setTasks(dragStartTasksSnapshotRef.current);
+      }
+      setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
       return;
     }
     
@@ -195,7 +248,14 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
         }));
       }
     }
+
+    // Only persist when the task is dropped into a different column
+    if (originContainer && overContainer && originContainer !== overContainer) {
+      void updateTaskStatus(taskId, overContainer as TaskStatus);
+    }
     setActiveId(null);
+    dragStartContainerRef.current = null;
+    dragStartTasksSnapshotRef.current = null;
   };
 
   const findActiveTask = () => {
