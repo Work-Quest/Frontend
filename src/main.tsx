@@ -56,7 +56,7 @@ const router = createBrowserRouter([
           { index: true, element: <Landing /> },
           { path: "project-end", element: <ProjectEnd /> },
           { path: "join", element: <JoinProject /> },
-          { path: "join?:token", element: <JoinProject /> },
+          { path: "join/:token", element: <JoinProject /> },
           {
             path: "project/:projectId",
             element: <ProjectGuard />,

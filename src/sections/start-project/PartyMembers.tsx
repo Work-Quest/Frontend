@@ -12,23 +12,15 @@ import { useParams } from "react-router-dom";
 
 interface PartyMembersProps {
   members: PartyMember[];
-  maxSize: number;
+  // maxSize: number;
   removeMember: (id: string) => void;
-  // handleCopyLink: () => void;
   isLoading: boolean;
 }
 
-export function PartyMembers({
-  members,
-  maxSize,
-  removeMember,
-  // handleCopyLink,
-  isLoading
-}: PartyMembersProps) {
+export function PartyMembers({ members, removeMember, isLoading }: PartyMembersProps) {
   const { projectId } = useParams<{ projectId: string }>();
-  const {users, loading} = useBussinessUser();
+  const {users} = useBussinessUser();
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const [inviteSubmitting, setInviteSubmitting] = useState(false);
 
   const memberOptions = users.map((u) => ({
     value: u.id,
@@ -43,15 +35,11 @@ export function PartyMembers({
   };
 
   async function handleInvite(){
-    // if (isLoading || loading || inviteSubmitting) return;
     if (!projectId) {
       toast.error("Missing project id.");
       return;
     }
-    // if (members.length >= maxSize) {
-    //   toast.error("Party is full.");
-    //   return;
-    // }
+   
     if (selectedMembers.length === 0) {
       toast.error("Please select at least 1 user to invite.");
       return;
@@ -63,14 +51,13 @@ export function PartyMembers({
     );
 
     console.log(uniqueUserIds)
-    
+
     if (uniqueUserIds.length === 0) {
       toast.error("All selected users are already in your party.");
       return;
     }
 
     try {
-      setInviteSubmitting(true);
       const res = await post<{ user_ids: string[] }, InviteResponse>(
         `/api/project/${projectId}/invite/`,
         { user_ids: uniqueUserIds }
@@ -93,9 +80,7 @@ export function PartyMembers({
         toast.error("Failed to send invites.");
       }
       console.error(err);
-    } finally {
-      setInviteSubmitting(false);
-    }
+    } 
 
   }
   return (
@@ -119,10 +104,9 @@ export function PartyMembers({
         <Button
           type="button"
           onClick={handleInvite}
-          // disabled={
-            // members.length >= maxSize ||
-            // selectedMembers.length === 0
-          // }
+          disabled={
+            selectedMembers.length === 0
+          }
         >
           Invite
         </Button>
@@ -132,23 +116,16 @@ export function PartyMembers({
         <span className="font-bold text-darkBrown text-sm">
           Your Party{" "}
           <span
-            className={
-              members.length === maxSize ? "text-red" : "text-lightBrown"
-            }
+            // className={
+            //   members.length === maxSize ? "text-red" : "text-lightBrown"
+            // }
+            className="text-lightBrown"
           >
-            ({members.length}/{maxSize})
+            ({members.length}
+            {/* /{maxSize} */}
+            )
           </span>
         </span>
-        {/* <Button
-          type="button"
-          variant="orange"
-          onClick={handleCopyLink}
-          disabled={isLoading}
-          className="h-8 text-xs px-3 gap-1.5"
-        >
-          <LinkIcon className="w-3 h-3" />
-          Copy Link
-        </Button> */}
       </div>
 
       {/* Scrollable Party List */}
@@ -200,7 +177,7 @@ export function PartyMembers({
         ))}
 
         {/* Empty State */}
-        {members.length < maxSize && (
+        {members.length < 1 && (
           <div className="border border-dashed border-brown/20 rounded-xl p-4 flex justify-center items-center text-xs text-lightBrown italic">
             Waiting for adventurers...
           </div>

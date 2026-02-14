@@ -9,51 +9,9 @@ import { PartyMember } from "@/types/User";
 import { QuestFormData } from "@/types/Quest";
 import { useProjects } from "@/hook/useProjects";
 
-// Constants
-const MAX_PARTY_SIZE = 5;
 
-// Mock Data (Move to constants or API hook later)
-const INITIAL_PARTY: PartyMember[] = [
-  {
-    id: "u1",
-    name: "You",
-    username: "@your_username",
-    avatarId: 1,
-    avatarBgColorId: 2,
-    isLeader: true,
-  },
-  {
-    id: "u2",
-    name: "Alice",
-    username: "@alice_dev",
-    avatarId: 3,
-    avatarBgColorId: 4,
-  },
-  {
-    id: "u3",
-    name: "Bob",
-    username: "@bob_design",
-    avatarId: 2,
-    avatarBgColorId: 5,
-  },
-  {
-    id: "u4",
-    name: "Charlie",
-    username: "@charlie_pm",
-    avatarId: 5,
-    avatarBgColorId: 1,
-  },
-  {
-    id: "u5",
-    name: "Dave",
-    username: "@dave_qa",
-    avatarId: 4,
-    avatarBgColorId: 3,
-  },
-];
 
 function StartProject() {
-  //   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<QuestFormData>({
     questName: "",
@@ -63,25 +21,10 @@ function StartProject() {
   const { createProject } = useProjects()
   const navigate = useNavigate()
 
-  // const [partyMembers, setPartyMembers] =
-  //   useState<PartyMember[]>(INITIAL_PARTY);
-
-  // --- Handlers ---
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
-  // const handleCopyLink = () => {
-  //   navigator.clipboard.writeText(
-  //     `https://workquest.app/invite/${Math.random().toString(36).substring(7)}`,
-  //   );
-  //   toast.success("Invite link copied!");
-  // };
-
-  // const removeMember = (id: string) => {
-  //   setPartyMembers((prev) => prev.filter((m) => m.id !== id));
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,17 +33,13 @@ function StartProject() {
     const payload = {
       name: formData.questName,
       deadline: new Date(formData.dueDate).toISOString(),
-      // partyMemberIds: partyMembers.map((m) => m.id),
-      // ownerId: partyMembers.find((m) => m.isLeader)?.id || "u1",
     };
 
     try {
       console.log("API Payload:", payload);
-      // Simulate API call
       const res = await createProject({ project_name: formData.questName, deadline: formData.dueDate })
       navigate(`/project/${res.project_id}/setup`)
       toast.success("Quest started successfully!");
-      // navigate(`/project/123`);
     } catch (error) {
       console.error(error);
       toast.error("Failed to start quest.");
@@ -125,32 +64,11 @@ function StartProject() {
         onSubmit={handleSubmit}
         className="w-full h-full"
       >
-        {/* Left Column */}
         <MissionDetails
           formData={formData}
           handleChange={handleChange}
           isLoading={isLoading}
         />
-
-        {/* Right Column
-        <div className="flex flex-col gap-5 h-full">
-          <PartyMembers
-            members={partyMembers}
-            maxSize={MAX_PARTY_SIZE}
-            removeMember={removeMember}
-            handleCopyLink={handleCopyLink}
-            isLoading={isLoading}
-          /> */}
-
-          {/* <Button
-            variant="default"
-            type="submit"
-            disabled={isLoading}
-            className="w-full h-14 text-lg bg-orange hover:bg-red text-white font-bold rounded-xl border-b-[4px] border-[#d95845] active:border-b-0 active:translate-y-[4px] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {isLoading ? "Summoning..." : "Start Quest"}
-          </Button> */}
-        {/* </div> */}
         <div
         className="
             fixed bottom-0 left-0

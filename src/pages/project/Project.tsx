@@ -11,10 +11,13 @@ import ReviewTask from "@/sections/project/ReviewTask";
 import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard";
 import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
 import { useTask } from "@/hook/useTask";
+import { useProjectMembers } from "@/hook/useProjectMembers";
+import { useParams } from "react-router-dom";
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
-   const { fetchedTask, projectMembers } = useTask();
-   console.log("Fetched tasks in ProjectPage:", fetchedTask);
+  const { projectId } = useParams<{ projectId: string }>()
+  const { fetchedTask } = useTask();
+  const { projectMembers } = useProjectMembers(projectId)
 
   const {
     tasks,

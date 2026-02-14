@@ -6,10 +6,11 @@ import { TaskItem } from "@/sections/project/KanbanBoard/TaskItem"
 import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard"
 import { Task } from "@/sections/project/KanbanBoard/types"
 import useProjects from "@/hook/useProjects"
+import { useProjectMembers } from "@/hook/useProjectMembers"
 import toast from "react-hot-toast"
 import { useNavigate, useParams } from "react-router-dom"
 import { PartyMembers } from "@/sections/start-project/PartyMembers"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { PartyMember } from "@/types/User"
 
 
@@ -20,69 +21,49 @@ const PRIORITY_HP: Record<string, number> = {
   Urgent: 4000,
 }
 
-// Constants
-const MAX_PARTY_SIZE = 5;
-
-// Mock Data (Move to constants or API hook later)
-const INITIAL_PARTY: PartyMember[] = [
-  {
-    id: "u1",
-    name: "You",
-    username: "@your_username",
-    avatarId: 1,
-    avatarBgColorId: 2,
-    isLeader: true,
-  },
-  {
-    id: "u2",
-    name: "Alice",
-    username: "@alice_dev",
-    avatarId: 3,
-    avatarBgColorId: 4,
-  },
-  {
-    id: "u3",
-    name: "Bob",
-    username: "@bob_design",
-    avatarId: 2,
-    avatarBgColorId: 5,
-  },
-  {
-    id: "u4",
-    name: "Charlie",
-    username: "@charlie_pm",
-    avatarId: 5,
-    avatarBgColorId: 1,
-  },
-  {
-    id: "u5",
-    name: "Dave",
-    username: "@dave_qa",
-    avatarId: 4,
-    avatarBgColorId: 3,
-  },
-];
 
 export default function SetupProject() {
-  const { fetchedTask, projectMembers } = useTask()
+  const { fetchedTask } = useTask()
   const { tasks, handleAddTask, handleDeleteTask } = useKanbanBoard(fetchedTask)
-  const { setupBoss } = useProjects()
+  const { setupBoss, getProjectOwner } = useProjects()
   const navigate = useNavigate()
   const { projectId } = useParams()
+  const { projectMembers } = useProjectMembers(projectId)
 
   const [isLoading] = useState(false);
-  const [partyMembers, setPartyMembers] =
-    useState<PartyMember[]>(INITIAL_PARTY);
-
-
-
   const handleBacklogAddTask = (task: Task) => {
     handleAddTask("backlog", task)
   }
 
-   const removeMember = (id: string) => {
-    setPartyMembers((prev) => prev.filter((m) => m.id !== id));
-  };
+  const partyMembers: PartyMember[] = useMemo(() => {
+    // Backend `/members/` returns `UserStatus` (no avatar fields),
+    // so we derive stable avatars from ids for display.
+    const stableHash = (s: string) => {
+      let h = 0
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
+      return h
+    }
+
+    const members = projectMembers ?? []
+    const owner = getProjectOwner(projectId)
+    const ownerUsername = (owner?.owner_username || "").toString().trim().toLowerCase()
+    const ownerMemberId =
+      ownerUsername
+        ? members.find((m) => (m.username || "").toString().trim().toLowerCase() === ownerUsername)?.id
+        : undefined
+
+    return members.map((m) => {
+      const h = stableHash(m.id || m.username || m.name || "")
+      return {
+        id: m.id,
+        name: m.name,
+        username: `@${m.username}`.replace(/^@@/, "@"),
+        avatarId: (h % 6) + 1,
+        avatarBgColorId: (h % 10) + 1,
+        isLeader: ownerMemberId ? m.id === ownerMemberId : false,
+      }
+    })
+  }, [getProjectOwner, projectId, projectMembers])
 
   const handleSetupBoss = async () => { 
     try {
@@ -162,20 +143,11 @@ export default function SetupProject() {
           <div className="flex flex-col gap-5 ">
             <PartyMembers
               members={partyMembers}
-              maxSize={MAX_PARTY_SIZE}
-              removeMember={removeMember}
+              // maxSize={MAX_PARTY_SIZE}
+              removeMember={() => {}}
               // handleCopyLink={handleCopyLink}
               isLoading={isLoading}
             /> 
-
-            {/* <Button
-              variant="default"
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-14 text-lg bg-orange hover:bg-red text-white font-bold rounded-xl border-b-[4px] border-[#d95845] active:border-b-0 active:translate-y-[4px] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Summoning..." : "Start Quest"}
-            </Button>  */}
           </div>
          
       
