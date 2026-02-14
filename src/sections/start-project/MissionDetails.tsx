@@ -47,27 +47,7 @@ export function MissionDetails({
       </div>
 
       {/* Dates Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-auto">
-        <div className="grid gap-2">
-          <Label
-            htmlFor="startDate"
-            className="text-sm font-bold text-darkBrown pl-1"
-          >
-            Start Date
-          </Label>
-          <div className="relative group">
-            <Input
-              id="startDate"
-              type="date"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleChange}
-              disabled={isLoading}
-              className="h-11 px-4 bg-offWhite border border-brown/20 rounded-xl focus-visible:ring-2 focus-visible:ring-orange focus-visible:border-orange transition-all cursor-pointer relative z-10 text-sm w-full block"
-              required
-            />
-          </div>
-        </div>
+        
         <div className="grid gap-2">
           <Label
             htmlFor="dueDate"
@@ -89,6 +69,5 @@ export function MissionDetails({
           </div>
         </div>
       </div>
-    </div>
   );
 }

@@ -8,6 +8,10 @@ import { Task } from "@/sections/project/KanbanBoard/types"
 import useProjects from "@/hook/useProjects"
 import toast from "react-hot-toast"
 import { useNavigate, useParams } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { PartyMembers } from "@/sections/start-project/PartyMembers"
+import { useState } from "react"
+import { PartyMember } from "@/types/User"
 
 
 const PRIORITY_HP: Record<string, number> = {
@@ -17,6 +21,49 @@ const PRIORITY_HP: Record<string, number> = {
   Urgent: 4000,
 }
 
+// Constants
+const MAX_PARTY_SIZE = 5;
+
+// Mock Data (Move to constants or API hook later)
+const INITIAL_PARTY: PartyMember[] = [
+  {
+    id: "u1",
+    name: "You",
+    username: "@your_username",
+    avatarId: 1,
+    avatarBgColorId: 2,
+    isLeader: true,
+  },
+  {
+    id: "u2",
+    name: "Alice",
+    username: "@alice_dev",
+    avatarId: 3,
+    avatarBgColorId: 4,
+  },
+  {
+    id: "u3",
+    name: "Bob",
+    username: "@bob_design",
+    avatarId: 2,
+    avatarBgColorId: 5,
+  },
+  {
+    id: "u4",
+    name: "Charlie",
+    username: "@charlie_pm",
+    avatarId: 5,
+    avatarBgColorId: 1,
+  },
+  {
+    id: "u5",
+    name: "Dave",
+    username: "@dave_qa",
+    avatarId: 4,
+    avatarBgColorId: 3,
+  },
+];
+
 export default function SetupProject() {
   const { fetchedTask, projectMembers } = useTask()
   const { tasks, handleAddTask, handleDeleteTask } = useKanbanBoard(fetchedTask)
@@ -24,9 +71,19 @@ export default function SetupProject() {
   const navigate = useNavigate()
   const { projectId } = useParams()
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [partyMembers, setPartyMembers] =
+    useState<PartyMember[]>(INITIAL_PARTY);
+
+
+
   const handleBacklogAddTask = (task: Task) => {
     handleAddTask("backlog", task)
   }
+
+   const removeMember = (id: string) => {
+    setPartyMembers((prev) => prev.filter((m) => m.id !== id));
+  };
 
   const handleSetupBoss = async () => { 
     try {
@@ -89,7 +146,8 @@ export default function SetupProject() {
         </section>
 
         {/* RIGHT — ESTIMATED BOSS HP */}
-        <aside className="flex flex-col justify-center rounded-xl bg-white p-6 shadow-sm h-[40vh]">
+        <div className="flex flex-col gap-4 h-full">
+        <aside className="flex flex-col justify-center rounded-xl bg-white p-6 shadow-sm h-[15vh]">
           <h3 className="mb-4 text-center  text-lg font-semibold">
             Estimated Boss HP
           </h3>
@@ -99,9 +157,29 @@ export default function SetupProject() {
               {estimatedBossHP.toLocaleString()} HP
             </h1>
           </div>
+            </aside>
 
+
+          <div className="flex flex-col gap-5 ">
+            <PartyMembers
+              members={partyMembers}
+              maxSize={MAX_PARTY_SIZE}
+              removeMember={removeMember}
+              // handleCopyLink={handleCopyLink}
+              isLoading={isLoading}
+            /> 
+
+            {/* <Button
+              variant="default"
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-14 text-lg bg-orange hover:bg-red text-white font-bold rounded-xl border-b-[4px] border-[#d95845] active:border-b-0 active:translate-y-[4px] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Summoning..." : "Start Quest"}
+            </Button>  */}
+          </div>
          
-        </aside>
+      
         
       </div>
        <div
@@ -112,8 +190,7 @@ export default function SetupProject() {
             bg-white
             z-[9999]
             shadow-md
-        "
-        >
+        ">
             <div className="flex w-screen mx-10 justify-between">
                 <button
                     className= "!text-[rgba(148, 139, 129, 1)] px-6 py-2 rounded-md"
@@ -128,6 +205,7 @@ export default function SetupProject() {
                 >
                     Begin Fight!
                 </button>
+          </div>
           </div>
         </div>
     </div>

@@ -21,6 +21,7 @@ import ProtectedLayout from './layouts/ProtectedLayout.tsx';
 import ProjectGuard from './layouts/ProjectGuard.tsx';
 import CreateProjectPage from './pages/project/CreateProject.tsx';
 import SetupProject from './pages/project/SetupProject.tsx';
+import StartProject from './pages/StartProject.tsx';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const router = createBrowserRouter([
@@ -62,7 +63,8 @@ const router = createBrowserRouter([
               { path: "setup", element: <SetupProject /> }, 
             ]
           },
-          { path: "project/create", element: < CreateProjectPage/>},
+          { path: "project/create", element: < StartProject/>},
+          // { path: "start-project", element: < StartProject/>},
           { path: "profile", element: <Profile /> },
           
         ]

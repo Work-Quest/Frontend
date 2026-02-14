@@ -4,12 +4,29 @@ import { useState } from "react"
 import useProjects from "@/hook/useProjects"
 import toast from "react-hot-toast"
 import { useNavigate } from "react-router-dom"
+import { MissionDetails } from "@/sections/start-project/MissionDetails"
+import { PartyMember } from "@/types/User"
+import { Button } from "@/components/ui/button"
 
 const CreateProjectPage = () => {
   const [projectName, setProjectName] = useState("")
   const [dueDate, setDueDate] = useState("")
   const { createProject } = useProjects()
   const navigate = useNavigate()
+
+  const [isLoading, setIsLoading] = useState(false);
+    const [formData, setFormData] = useState<QuestFormData>({
+      questName: "",
+      startDate: "",
+      dueDate: "",
+    });
+  
+    // --- Handlers ---
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setFormData({ ...formData, [name]: value });
+    };
+  
 
 
   const handleCreateProject = async () => { 
@@ -119,6 +136,9 @@ const CreateProjectPage = () => {
       </div>
       
     </div>
+
+
+    
   )
 }
 

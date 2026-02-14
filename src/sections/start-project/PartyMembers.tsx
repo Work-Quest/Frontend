@@ -9,7 +9,7 @@ interface PartyMembersProps {
   members: PartyMember[];
   maxSize: number;
   removeMember: (id: string) => void;
-  handleCopyLink: () => void;
+  // handleCopyLink: () => void;
   isLoading: boolean;
 }
 
@@ -17,7 +17,7 @@ export function PartyMembers({
   members,
   maxSize,
   removeMember,
-  handleCopyLink,
+  // handleCopyLink,
   isLoading,
 }: PartyMembersProps) {
   return (
@@ -50,7 +50,7 @@ export function PartyMembers({
             ({members.length}/{maxSize})
           </span>
         </span>
-        <Button
+        {/* <Button
           type="button"
           variant="orange"
           onClick={handleCopyLink}
@@ -59,7 +59,7 @@ export function PartyMembers({
         >
           <LinkIcon className="w-3 h-3" />
           Copy Link
-        </Button>
+        </Button> */}
       </div>
 
       {/* Scrollable Party List */}
