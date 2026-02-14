@@ -14,10 +14,11 @@ interface PartyMembersProps {
   members: PartyMember[];
   // maxSize: number;
   removeMember: (id: string) => void;
+  canRemoveMember?: (member: PartyMember) => boolean;
   isLoading: boolean;
 }
 
-export function PartyMembers({ members, removeMember, isLoading }: PartyMembersProps) {
+export function PartyMembers({ members, removeMember, canRemoveMember, isLoading }: PartyMembersProps) {
   const { projectId } = useParams<{ projectId: string }>();
   const {users} = useBussinessUser();
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
@@ -162,12 +163,12 @@ export function PartyMembers({ members, removeMember, isLoading }: PartyMembersP
             </div>
 
             {/* Remove Button (Only for non-leaders) */}
-            {!member.isLeader && (
+            {Boolean(canRemoveMember ? canRemoveMember(member) : !member.isLeader) && (
               <button
                 type="button"
                 disabled={isLoading}
                 onClick={() => removeMember(member.id)}
-                className="p-1.5 text-gray-400 hover:text-red hover:bg-red/10 rounded-full transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-0"
+                className="p-1.5 text-gray-400 hover:text-red hover:bg-red/10 rounded-full transition-colors group-hover:opacity-100 disabled:opacity-0"
                 title="Remove from party"
               >
                 <X size={14} />

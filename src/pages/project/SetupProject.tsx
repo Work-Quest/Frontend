@@ -12,6 +12,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { PartyMembers } from "@/sections/start-project/PartyMembers"
 import { useMemo, useState } from "react"
 import { PartyMember } from "@/types/User"
+import { useAuth } from "@/context/AuthContext"
 
 
 const PRIORITY_HP: Record<string, number> = {
@@ -26,9 +27,10 @@ export default function SetupProject() {
   const { fetchedTask } = useTask()
   const { tasks, handleAddTask, handleDeleteTask } = useKanbanBoard(fetchedTask)
   const { setupBoss, getProjectOwner } = useProjects()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const { projectId } = useParams()
-  const { projectMembers } = useProjectMembers(projectId)
+  const { projectMembers, leaveProject, refetchProjectMembers } = useProjectMembers(projectId)
 
   const [isLoading] = useState(false);
   const handleBacklogAddTask = (task: Task) => {
@@ -64,6 +66,22 @@ export default function SetupProject() {
       }
     })
   }, [getProjectOwner, projectId, projectMembers])
+
+  const handleLeaveProject = async () => {
+    try {
+      await leaveProject()
+      toast.success("Left project successfully.")
+      // After leaving, user no longer has access to this project routes.
+      navigate("/home", { replace: true })
+    } catch (err: any) {
+      const apiMsg = err?.response?.data?.error || err?.response?.data?.message
+      toast.error(apiMsg || "Failed to leave project.")
+      console.error(err)
+    } finally {
+      // Best-effort refresh if we stay on page for any reason.
+      refetchProjectMembers().catch(() => {})
+    }
+  }
 
   const handleSetupBoss = async () => { 
     try {
@@ -144,7 +162,13 @@ export default function SetupProject() {
             <PartyMembers
               members={partyMembers}
               // maxSize={MAX_PARTY_SIZE}
-              removeMember={() => {}}
+              removeMember={() => handleLeaveProject()}
+              canRemoveMember={(m) => {
+                // Only allow "remove" (leave) for the current user.
+                const currentUsername = (user?.username || "").toString().trim().toLowerCase()
+                const memberUsername = (m.username || "").toString().trim().replace(/^@/, "").toLowerCase()
+                return Boolean(currentUsername) && currentUsername === memberUsername && !m.isLeader
+              }}
               // handleCopyLink={handleCopyLink}
               isLoading={isLoading}
             /> 

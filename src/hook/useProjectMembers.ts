@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { get } from "@/Api"
+import { get, post } from "@/Api"
 import type { UserStatus } from "@/types/User"
 
 export function useProjectMembers(projectId?: string) {
@@ -22,6 +22,14 @@ export function useProjectMembers(projectId?: string) {
     } finally {
       setMembersLoading(false)
     }
+  }, [projectId])
+
+  const leaveProject = useCallback(async () => {
+    if (!projectId) throw new Error("Missing project id")
+    return await post<{ project_id: string }, { message?: string; error?: string }>(
+      "/api/project/member/leave/",
+      { project_id: projectId },
+    )
   }, [projectId])
 
   // Keep project members fresh ("realtime" via polling + refetch on focus).
@@ -66,6 +74,7 @@ export function useProjectMembers(projectId?: string) {
     projectMembers,
     membersLoading,
     membersError,
+    leaveProject,
     refetchProjectMembers,
     setProjectMembers,
   }
