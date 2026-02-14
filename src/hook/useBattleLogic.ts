@@ -1,22 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { ENTITY_CONFIG } from '@/config/battleConfig';
 import { User, BossState, GameActionPayload } from '@/types/battleTypes';
+import type { UserStatus } from "@/types/User"
 
-export const useBattleLogic = (initialUsers: number = 5) => {
+type ProjectMemberLike = UserStatus
+
+export const useBattleLogic = (initial: number | ProjectMemberLike[] = 5) => {
     const [hasInitialized, setHasInitialized] = useState(false);
     
-    const [numUsers, setNumUsers] = useState(initialUsers);
+    const initialCount = useMemo(() => (typeof initial === "number" ? initial : initial.length), [initial])
+    const initialMembers = useMemo(() => (typeof initial === "number" ? null : initial), [initial])
+
+    const [numUsers, setNumUsers] = useState(initialCount);
     const [boss, setBoss] = useState<BossState>({ id: 'b01', status: 'idle', hp: 5000, maxHp: 5000 });
     const [users, setUsers] = useState<User[]>([]);
     const [isSequenceRunning, setIsSequenceRunning] = useState(false);
 
     useEffect(() => {
-        if (!hasInitialized) {
-            setUsers(Array.from({ length: numUsers }, (_, i) => ({
-                uid: i + 1, charId: 'c01', status: 'idle', slot: i, name: `Hero ${i + 1}`, hp: 100, maxHp: 100
-            })));
+        if (hasInitialized) return
+
+        // New behavior: if a project-member list is provided, initialize users from that.
+        if (initialMembers) {
+            setNumUsers(initialMembers.length)
+            setUsers(
+                initialMembers.map((m, i) => {
+                    const backendStatus = String(m.status || "")
+                    const isDead = backendStatus.toLowerCase() === "dead"
+
+                    const hp = Number.isFinite(m.hp) ? m.hp : 0
+                    const maxHp = Math.max(hp, 100)
+
+                    return {
+                        uid: String(m.id),
+                        charId: "c01",
+                        status: isDead ? "dead" : "idle",
+                        slot: i,
+                        name: m.name || m.username || `Hero ${i + 1}`,
+                        hp,
+                        maxHp,
+                    } satisfies User
+                })
+            )
+            return
         }
-    }, [numUsers, hasInitialized]);
+
+        // Back-compat for BattlePlayground: still allow number-based dummy users.
+        setNumUsers(initialCount)
+        setUsers(
+            Array.from({ length: initialCount }, (_, i) => ({
+                uid: String(i + 1),
+                charId: "c01",
+                status: "idle",
+                slot: i,
+                name: `Hero ${i + 1}`,
+                hp: 100,
+                maxHp: 100,
+            }))
+        )
+    }, [initialCount, initialMembers, hasInitialized]);
 
     const wait = (ms: number) => new Promise(res => setTimeout(res, ms));
 

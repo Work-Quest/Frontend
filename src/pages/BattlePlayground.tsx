@@ -10,7 +10,7 @@ const BattlePlayground = () => {
     handleGameAction
   } = useBattleLogic(5);
 
-  const [payloadText, setPayloadText] = useState<string>('{\n  "act": "ATTACK",\n  "userId": 1\n}');
+  const [payloadText, setPayloadText] = useState<string>('{\n  "act": "ATTACK",\n  "userId": "1"\n}');
   const [lastLog, setLastLog] = useState<string | null>(null);
   const [errorLog, setErrorLog] = useState<string | null>(null);
 
@@ -24,11 +24,11 @@ const BattlePlayground = () => {
       maxHp: 10000
     },
     users: [
-      { uid: 1, charId: "c01", name: "Arthur", hp: 120, maxHp: 120, status: "idle", slot: 0 },
-      { uid: 2, charId: "c01", name: "Lancelot", hp: 100, maxHp: 100, status: "idle", slot: 1 },
-      { uid: 3, charId: "c01", name: "Merlin", hp: 80, maxHp: 80, status: "idle", slot: 2 },
-      { uid: 4, charId: "c01", name: "Gawain", hp: 150, maxHp: 150, status: "idle", slot: 3 },
-      { uid: 5, charId: "c01", name: "Percival", hp: 90, maxHp: 90, status: "idle", slot: 4 }
+      { uid: "1", charId: "c01", name: "Arthur", hp: 120, maxHp: 120, status: "idle", slot: 0 },
+      { uid: "2", charId: "c01", name: "Lancelot", hp: 100, maxHp: 100, status: "idle", slot: 1 },
+      { uid: "3", charId: "c01", name: "Merlin", hp: 80, maxHp: 80, status: "idle", slot: 2 },
+      { uid: "4", charId: "c01", name: "Gawain", hp: 150, maxHp: 150, status: "idle", slot: 3 },
+      { uid: "5", charId: "c01", name: "Percival", hp: 90, maxHp: 90, status: "idle", slot: 4 }
     ]
   };
 
@@ -93,19 +93,19 @@ const BattlePlayground = () => {
                     ⚡ Initialize Game
                 </button>
 
-                <button onClick={() => setPreset({ act: "ATTACK", userId: 1 })} className="text-left text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-blue-300 border border-slate-700 transition-colors">
+                <button onClick={() => setPreset({ act: "ATTACK", userId: "1" })} className="text-left text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-blue-300 border border-slate-700 transition-colors">
                     Hero 1 Attack
                 </button>
-                <button onClick={() => setPreset({ act: "BOSS_ATTACK_USER", userId: 1 })} className="text-left text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-orange-300 border border-slate-700 transition-colors">
+                <button onClick={() => setPreset({ act: "BOSS_ATTACK_USER", userId: "1" })} className="text-left text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-orange-300 border border-slate-700 transition-colors">
                     Boss Hit Hero 1
                 </button>
                 <button onClick={() => setPreset({ act: "BOSS_ULTIMATE" })} className="text-left text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-red-300 border border-slate-700 transition-colors">
                     Boss Ultimate
                 </button>
-                <button onClick={() => setPreset({ act: "DIE", userId: 1 })} className="text-left text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-gray-400 border border-slate-700 transition-colors">
+                <button onClick={() => setPreset({ act: "DIE", userId: "1" })} className="text-left text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-gray-400 border border-slate-700 transition-colors">
                     Hero 1 Die
                 </button>
-                <button onClick={() => setPreset({ act: "REVIVE", userId: 1 })} className="text-left text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-green-300 border border-slate-700 transition-colors">
+                <button onClick={() => setPreset({ act: "REVIVE", userId: "1" })} className="text-left text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded text-green-300 border border-slate-700 transition-colors">
                     Hero 1 Revive
                 </button>
                 <div className="h-px bg-slate-800 my-1" />

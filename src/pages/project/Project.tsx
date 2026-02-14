@@ -11,6 +11,7 @@ import ReviewTask from "@/sections/project/ReviewTask";
 import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard";
 import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
 import { useTask } from "@/hook/useTask";
+import ProjectBattle from "@/sections/project/ProjectBattle";
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
    const { fetchedTask, projectMembers } = useTask();
@@ -44,14 +45,15 @@ const ProjectPage: React.FC = () => {
 
       {/* Main content */}
       <main className="flex-1 flex flex-col bg-offWhite overflow-hidden">
-        <BossPlaceholder isVisible={showBossPlaceholder} />
+        {/* <BossPlaceholder isVisible={showBossPlaceholder} /> */}
+        <ProjectBattle projectMembers={projectMembers ?? []} />
         <ToggleButton
           isVisible={showBossPlaceholder}
           onClick={toggleBossPlaceholder}
         />
 
         {/* Kanban board */}
-        <section className="flex-1 overflow-y-auto pt-6">
+        <section className="flex-1 overflow-y-auto pt-6 z-40">
           <ScrollArea className="h-full" type="always">
             <KanbanBoard
               tasks={tasks}

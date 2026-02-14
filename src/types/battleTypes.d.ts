@@ -1,5 +1,5 @@
 export interface User {
-    uid: number;
+    uid: string;
     charId: string;
     status: 'idle' | 'walking_in' | 'attacking' | 'walking_out' | 'shifting_forward' | 'shifting_backward' | 'damage' | 'dead';
     slot: number;
@@ -16,11 +16,11 @@ export interface BossState {
 }
 
 export type GameActionPayload =
-    | { act: 'ATTACK'; userId: number }
-    | { act: 'DIE'; userId: number }
-    | { act: 'REVIVE'; userId: number }
+    | { act: 'ATTACK'; userId: string }
+    | { act: 'DIE'; userId: string }
+    | { act: 'REVIVE'; userId: string }
     | { act: 'BOSS_ULTIMATE' }
-    | { act: 'BOSS_ATTACK_USER'; userId: number }
+    | { act: 'BOSS_ATTACK_USER'; userId: string }
     | { act: 'BOSS_DIE' }
     | { act: 'BOSS_REVIVE' }
     | { act: 'SETUP_GAME'; users: User[]; boss: BossState };
