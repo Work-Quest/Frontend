@@ -47,7 +47,6 @@ export function MissionDetails({
       </div>
 
       {/* Dates Row */}
-        
         <div className="grid gap-2">
           <Label
             htmlFor="dueDate"
