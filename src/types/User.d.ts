@@ -39,3 +39,11 @@ export interface PartyMember {
   avatarBgColorId: number;
   isLeader?: boolean;
 }
+
+export type BusinessUser = {
+  id: string;
+  username: string;
+  name: string;
+  email: string;
+  profile_img: string | null;
+};

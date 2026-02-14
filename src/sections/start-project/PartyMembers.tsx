@@ -1,9 +1,14 @@
 // src/sections/start-project/PartyMembers.tsx
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Link as LinkIcon, X } from "lucide-react";
+import { X } from "lucide-react";
 import { getAvatarColor, getAvatarPath } from "@/lib/avatarConstants";
 import { PartyMember } from "@/types/User";
+import MultiCombobox from "@/components/ui/multicombobox";
+import useBussinessUser from "@/hook/useBussinessUser";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { post } from "@/Api";
+import toast, { Toaster } from "react-hot-toast";
+import { useParams } from "react-router-dom";
 
 interface PartyMembersProps {
   members: PartyMember[];
@@ -18,8 +23,81 @@ export function PartyMembers({
   maxSize,
   removeMember,
   // handleCopyLink,
-  isLoading,
+  isLoading
 }: PartyMembersProps) {
+  const { projectId } = useParams<{ projectId: string }>();
+  const {users, loading} = useBussinessUser();
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [inviteSubmitting, setInviteSubmitting] = useState(false);
+
+  const memberOptions = users.map((u) => ({
+    value: u.id,
+    label: `@${u.username} (${u.name})`,
+  }));
+
+  type InviteResponse = {
+    project_id: string;
+    invited: { email: string; token: string; expired_at: string }[];
+    failed: { email: string; error: string }[];
+    error?: string;
+  };
+
+  async function handleInvite(){
+    // if (isLoading || loading || inviteSubmitting) return;
+    if (!projectId) {
+      toast.error("Missing project id.");
+      return;
+    }
+    // if (members.length >= maxSize) {
+    //   toast.error("Party is full.");
+    //   return;
+    // }
+    if (selectedMembers.length === 0) {
+      toast.error("Please select at least 1 user to invite.");
+      return;
+    }
+
+    const partyMemberIds = new Set(members.map((m) => m.id));
+    const uniqueUserIds = Array.from(new Set(selectedMembers)).filter(
+      (id) => !partyMemberIds.has(id)
+    );
+
+    console.log(uniqueUserIds)
+    
+    if (uniqueUserIds.length === 0) {
+      toast.error("All selected users are already in your party.");
+      return;
+    }
+
+    try {
+      setInviteSubmitting(true);
+      const res = await post<{ user_ids: string[] }, InviteResponse>(
+        `/api/project/${projectId}/invite/`,
+        { user_ids: uniqueUserIds }
+      );
+
+      if (res.failed?.length) {
+        toast.error(`Failed to invite ${res.failed.length} user(s).`);
+        console.error("Invite failures:", res.failed);
+      }
+      if (res.invited?.length) {
+        toast.success(`Invited ${res.invited.length} user(s)!`);
+      }
+
+      setSelectedMembers([]);
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 403) {
+        toast.error("Only the project owner can invite members.");
+      } else {
+        toast.error("Failed to send invites.");
+      }
+      console.error(err);
+    } finally {
+      setInviteSubmitting(false);
+    }
+
+  }
   return (
     <div className="bg-white rounded-2xl border border-brown/10 shadow-sm p-5 md:p-6 flex flex-col gap-6 flex-1">
       <div className="flex items-center gap-3 border-b border-offWhite pb-4">
@@ -27,17 +105,28 @@ export function PartyMembers({
           Summon Party Members
         </h3>
       </div>
-
+      <Toaster />
       {/* Search Bar */}
-      <div className="relative group">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-lightBrown group-hover:text-orange transition-colors w-4 h-4" />
-        <Input
-          placeholder="Search for adventurers..."
-          disabled={isLoading}
-          className="h-11 pl-10 text-sm bg-offWhite border border-brown/20 rounded-full focus-visible:ring-2 focus-visible:ring-orange focus-visible:border-orange transition-all placeholder:text-gray-400"
-        />
+      <div className="flex items-baseline-last gap-2">
+        <MultiCombobox
+          label="Invite adventurers"
+          placeholder="Search adventurers..."
+          searchPlaceholder="Search adventurers..."
+          options={memberOptions}
+          value={selectedMembers}
+          onChange={setSelectedMembers} 
+          />
+        <Button
+          type="button"
+          onClick={handleInvite}
+          // disabled={
+            // members.length >= maxSize ||
+            // selectedMembers.length === 0
+          // }
+        >
+          Invite
+        </Button>
       </div>
-
       {/* Header Row with Dynamic Count */}
       <div className="flex items-center justify-between mt-1">
         <span className="font-bold text-darkBrown text-sm">

@@ -8,7 +8,6 @@ import { Task } from "@/sections/project/KanbanBoard/types"
 import useProjects from "@/hook/useProjects"
 import toast from "react-hot-toast"
 import { useNavigate, useParams } from "react-router-dom"
-import { Button } from "@/components/ui/button"
 import { PartyMembers } from "@/sections/start-project/PartyMembers"
 import { useState } from "react"
 import { PartyMember } from "@/types/User"
@@ -71,7 +70,7 @@ export default function SetupProject() {
   const navigate = useNavigate()
   const { projectId } = useParams()
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [partyMembers, setPartyMembers] =
     useState<PartyMember[]>(INITIAL_PARTY);
 

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { Button } from "./ui/button"
 import { FcGoogle } from "react-icons/fc"
 import { Input } from "./ui/input"
@@ -14,6 +14,7 @@ import { useGoogleLogin } from "@react-oauth/google"
 function Form({ method = "register" }: { method?: "login" | "register" }) {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation() as any
   const [showPassword, setShowPassword] = useState(false)
   const { checkAuth } = useAuth()
 
@@ -72,7 +73,11 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
       // After success
       if (method === "login") {
         await checkAuth()
-        navigate("/home")
+        const from = location?.state?.from as
+          | { pathname?: string; search?: string; hash?: string }
+          | undefined
+        const redirectTo = `${from?.pathname || "/home"}${from?.search || ""}${from?.hash || ""}`
+        navigate(redirectTo, { replace: true })
         toast.success("Login successful!")
       } else {
         navigate("/login")
@@ -100,7 +105,11 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
     })
 
     await checkAuth()
-    navigate("/home")
+    const from = location?.state?.from as
+      | { pathname?: string; search?: string; hash?: string }
+      | undefined
+    const redirectTo = `${from?.pathname || "/home"}${from?.search || ""}${from?.hash || ""}`
+    navigate(redirectTo, { replace: true })
   },
   onError: () => {
     console.log("Google Login Failed")
