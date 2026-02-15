@@ -8,7 +8,11 @@ import { post, del, patch } from '@/Api';
 import { useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-export const useKanbanBoard = (initialTasks: Tasks) => {
+type UseKanbanBoardOptions = {
+  onMovedToDone?: (taskId: string) => void | Promise<void>
+}
+
+export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOptions) => {
   const [tasks, setTasks] = useState<Tasks>(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
   const { projectId } = useParams<{ projectId: string }>();
@@ -83,13 +87,13 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
       status: TaskStatus
     ) => {
       try {
-        await patch<{ status: string }, TaskResponse>(
+        return await patch<{ status: string }, TaskResponse>(
           `/api/project/${projectId}/tasks/${taskId}/move/`,
           {status}
         );
       } catch (err) {
         console.error(err);
-        toast.error("Failed to update task status");
+        throw err;
       }
 };
 
@@ -129,6 +133,7 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
     }
 
     if (!targetStatus || targetStatus === activeContainer) return;
+    const toStatus: TaskStatus = targetStatus;
 
     // Optimistic UI
     setTasks((prev) => {
@@ -145,7 +150,7 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
         [activeContainer]: prev[activeContainer].filter(
           (item) => item.id !== taskId
         ),
-        [targetStatus]: [...prev[targetStatus], movedTask],
+        [toStatus]: [...prev[toStatus], movedTask],
       };
     });
 
@@ -153,7 +158,7 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
   }
 
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) {
       if (dragStartTasksSnapshotRef.current) {
@@ -207,7 +212,17 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
 
       // Only persist when the task is dropped into a different column
       if (originContainer && containerId && originContainer !== containerId) {
-        void updateTaskStatus(taskId, containerId as TaskStatus);
+        try {
+          await updateTaskStatus(taskId, containerId as TaskStatus);
+          if (containerId === "done") {
+            await options?.onMovedToDone?.(taskId);
+          }
+        } catch {
+          toast.error("Failed to update task status");
+          if (dragStartTasksSnapshotRef.current) {
+            setTasks(dragStartTasksSnapshotRef.current);
+          }
+        }
       }
       setActiveId(null);
       dragStartContainerRef.current = null;
@@ -251,7 +266,17 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
 
     // Only persist when the task is dropped into a different column
     if (originContainer && overContainer && originContainer !== overContainer) {
-      void updateTaskStatus(taskId, overContainer as TaskStatus);
+      try {
+        await updateTaskStatus(taskId, overContainer as TaskStatus);
+        if (overContainer === "done") {
+          await options?.onMovedToDone?.(taskId);
+        }
+      } catch {
+        toast.error("Failed to update task status");
+        if (dragStartTasksSnapshotRef.current) {
+          setTasks(dragStartTasksSnapshotRef.current);
+        }
+      }
     }
     setActiveId(null);
     dragStartContainerRef.current = null;

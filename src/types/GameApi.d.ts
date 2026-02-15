@@ -50,15 +50,23 @@ export type GameStatusResponse = {
 }
 
 export type PlayerAttackRequest = {
-  player_id: string
   task_id: string
 }
 
-export type PlayerAttackResult = {
+export type PlayerAttackEntry = {
   player_id: string
   task_id: string
   damage: number
   score: number
+  boss_hp: number
+  boss_max_hp: number
+}
+
+export type PlayerAttackResult = {
+  task_id: string
+  attacks: PlayerAttackEntry[]
+  skipped: Array<{ player_id: string; reason: string }>
+  total_damage: number
   boss_hp: number
   boss_max_hp: number
 }
