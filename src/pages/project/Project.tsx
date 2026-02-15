@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react";
-import { DAMAGE_LOGS, HP_DATA, PROJECT_DATA } from "@/sections/project/constants";
+import { HP_DATA, PROJECT_DATA } from "@/sections/project/constants";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ToggleButton from "@/components/ToggleButton";
 import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard";
@@ -15,11 +15,14 @@ import { useParams } from "react-router-dom";
 import { useGame } from "@/hook/useGame";
 import toast from "react-hot-toast";
 import type { GameActionPayload } from "@/types/battleTypes";
+import useLog from "@/hook/useLog";
+import { useAuth } from "@/context/AuthContext";
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
   const { projectId } = useParams<{ projectId: string }>();
+  const { logs } = useLog(projectId, { pollIntervalMs: 3000 });
   const { fetchedTask, projectMembers } = useTask();
-  const { playerAttack } = useGame();
+  const { playerAttack, gameStatus } = useGame();
   const [payloadBatch, setPayloadBatch] = useState<GameActionPayload[] | null>(
     null
   );
@@ -96,13 +99,26 @@ const ProjectPage: React.FC = () => {
     setShowBossPlaceholder((prev) => !prev);
   };
 
+  const { user } = useAuth()
+  const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id)
+  const HP_DATA = {
+    boss: {
+      current: gameStatus?.boss_status?.hp ?? 50,
+      max: gameStatus?.boss_status?.max_hp ?? 100,
+    },
+    player: {
+      current: me?.hp ?? 100,
+      max: me?.max_hp ?? 100,
+    },
+  }
+
   return (
     <div className="flex h-[calc(100vh-148px)] w-full">
       {/* Left sidebar */}
       <aside className="w-125 flex-shrink-0 bg-offWhite border-r border-cream">
         <ScrollArea className="h-full" type="always">
           <ProjectDetailCard hpData={HP_DATA} projectData={PROJECT_DATA} />
-          <DamageLog logs={DAMAGE_LOGS} />
+          <DamageLog logs={logs} />
           <ReviewTask />
         </ScrollArea>
       </aside>

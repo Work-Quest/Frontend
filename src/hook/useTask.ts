@@ -20,6 +20,11 @@ export const useTask = () => {
     return response;
   };
 
+  const fetchTaskById = async (projectId: string, taskId: string): Promise<TaskResponse> => {
+    const response = await get<TaskResponse>(`/api/project/${projectId}/tasks/${taskId}/`);
+    return response;
+  };
+
   const fetchMembers = async(projectId: string): Promise<UserStatus[]> => {
     const response = await get<UserStatus[]>(`/api/project/${projectId}/members/`);
     return response;
@@ -64,12 +69,20 @@ export const useTask = () => {
     return null;
   }, [activeId, fetchedTask]);
 
+  const getTaskById = useCallback(async (taskId: string, explicitProjectId?: string): Promise<Task> => {
+    const pid = explicitProjectId ?? projectId;
+    if (!pid) throw new Error("projectId is required to fetch task by id");
+    const taskResponse = await fetchTaskById(pid, taskId);
+    return mapTaskResponseToTask(taskResponse);
+  }, [projectId]);
+
   return {
     fetchedTask,
     setFetchedTasks,
     activeId,
     findActiveTask,
     projectMembers,
-    setProjectMember
+    setProjectMember,
+    getTaskById,
   };
 };

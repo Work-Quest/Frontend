@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { useParams } from "react-router-dom"
 import { get, post } from "@/Api"
 import type {
   BossAttackRequest,
@@ -26,11 +27,19 @@ type UseGameState = {
   error: string | null
 }
 
-export function useGame() {
+export function useGame(explicitProjectId?: string) {
+  const { projectId: routeProjectId } = useParams<{ projectId: string }>()
+  const projectId = useMemo(
+    () => explicitProjectId ?? routeProjectId ?? null,
+    [explicitProjectId, routeProjectId]
+  )
+
   const [state, setState] = useState<UseGameState>({
     loading: false,
     error: null,
   })
+
+  const [gameStatus, setGameStatus] = useState<GameStatusResponse | null>(null)
 
   const call = useCallback(async <T,>(fn: () => Promise<T>): Promise<T> => {
     setState({ loading: true, error: null })
@@ -146,6 +155,18 @@ export function useGame() {
     )
   }, [call])
 
+  const refreshGameStatus = useCallback(async () => {
+    if (!projectId) return null
+    const data = await getGameStatus(projectId)
+    setGameStatus(data)
+    return data
+  }, [projectId, getGameStatus])
+
+  useEffect(() => {
+    if (!projectId) return
+    void refreshGameStatus()
+  }, [projectId, refreshGameStatus])
+
   // -----------------
   // Items / effects
   // -----------------
@@ -183,6 +204,8 @@ export function useGame() {
     error: state.error,
 
     // boss
+    gameStatus,
+    refreshGameStatus,
     getProjectBoss,
     getBossStatus,
     bossAttack,

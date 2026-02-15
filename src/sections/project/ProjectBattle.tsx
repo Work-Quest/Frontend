@@ -92,7 +92,7 @@ const ProjectBattle = ({
 
         const patch = {
           id: configId,
-          status: (isDead ? "dead" : "idle") as const,
+          status: isDead ? ("dead" as const) : ("idle" as const),
           hp: projectBoss.hp,
           maxHp: projectBoss.max_hp,
         }
