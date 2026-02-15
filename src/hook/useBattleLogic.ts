@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { ENTITY_CONFIG } from '@/config/battleConfig';
 import { User, BossState, GameActionPayload } from '@/types/battleTypes';
 import type { UserStatus } from "@/types/User"
@@ -15,6 +15,9 @@ export const useBattleLogic = (initial: number | ProjectMemberLike[] = 5) => {
     const [boss, setBoss] = useState<BossState>({ id: 'b01', status: 'idle', hp: 5000, maxHp: 5000 });
     const [users, setUsers] = useState<User[]>([]);
     const [isSequenceRunning, setIsSequenceRunning] = useState(false);
+    // Use a ref so "sequence running" flips synchronously inside async handlers.
+    // This prevents back-to-back calls from slipping through before React state updates.
+    const sequenceRunningRef = useRef(false);
 
     useEffect(() => {
         if (hasInitialized) return
@@ -62,7 +65,12 @@ export const useBattleLogic = (initial: number | ProjectMemberLike[] = 5) => {
     const wait = (ms: number) => new Promise(res => setTimeout(res, ms));
 
     const handleGameAction = async (payload: GameActionPayload) => {
-        if (isSequenceRunning) return;
+        if (sequenceRunningRef.current) return;
+
+        const setSequenceRunning = (v: boolean) => {
+            sequenceRunningRef.current = v;
+            setIsSequenceRunning(v);
+        };
 
         if (payload.act === 'SETUP_GAME') {
             setHasInitialized(true); // Stop the useEffect from overwriting this
@@ -90,7 +98,7 @@ export const useBattleLogic = (initial: number | ProjectMemberLike[] = 5) => {
 
         if (payload.act === 'BOSS_ATTACK_USER') {
             if (boss.status === 'dead' || boss.status === 'hidden') return;
-            setIsSequenceRunning(true);
+            setSequenceRunning(true);
             const bossConfig = ENTITY_CONFIG.bosses[boss.id as keyof typeof ENTITY_CONFIG.bosses]?.actions.attack;
             
             setBoss(prev => ({ ...prev, status: 'moving_in' }));
@@ -110,13 +118,13 @@ export const useBattleLogic = (initial: number | ProjectMemberLike[] = 5) => {
             await wait(1000);
 
             setBoss(prev => ({ ...prev, status: 'idle' }));
-            setIsSequenceRunning(false);
+            setSequenceRunning(false);
             return;
         }
 
         if (payload.act === 'BOSS_ULTIMATE') {
             if (boss.status === 'dead' || boss.status === 'hidden') return;
-            setIsSequenceRunning(true);
+            setSequenceRunning(true);
             const bossConfig = ENTITY_CONFIG.bosses[boss.id as keyof typeof ENTITY_CONFIG.bosses]?.actions.attack;
 
             setBoss(prev => ({ ...prev, status: 'moving_in' }));
@@ -136,7 +144,7 @@ export const useBattleLogic = (initial: number | ProjectMemberLike[] = 5) => {
             await wait(1000);
 
             setBoss(prev => ({ ...prev, status: 'idle' }));
-            setIsSequenceRunning(false);
+            setSequenceRunning(false);
             return;
         }
 
@@ -147,7 +155,7 @@ export const useBattleLogic = (initial: number | ProjectMemberLike[] = 5) => {
 
         if (payload.act === 'ATTACK') {
             if (targetUser.status === 'dead' || boss.status === 'hidden') return;
-            setIsSequenceRunning(true);
+            setSequenceRunning(true);
             const attackerOldSlot = targetUser.slot;
 
             const setStatus = (idx: number, s: User['status']) => {
@@ -176,7 +184,7 @@ export const useBattleLogic = (initial: number | ProjectMemberLike[] = 5) => {
 
             await wait(1000);
             setUsers(prev => prev.map(u => u.status === 'dead' ? u : { ...u, status: 'idle' }));
-            setIsSequenceRunning(false);
+            setSequenceRunning(false);
 
         } else if (payload.act === 'DIE') {
             const deadSlot = targetUser.slot;

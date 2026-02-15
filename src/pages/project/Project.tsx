@@ -25,6 +25,10 @@ const ProjectPage: React.FC = () => {
   );
   const [payloadBatchNonce, setPayloadBatchNonce] = useState(0);
   const [bossRefreshNonce, setBossRefreshNonce] = useState(0);
+  const [bossUpdate, setBossUpdate] = useState<{ hp: number; maxHp: number } | null>(
+    null
+  );
+  const [bossUpdateNonce, setBossUpdateNonce] = useState(0);
 
   const handleMovedToDone = React.useCallback(
     async (taskId: string) => {
@@ -36,10 +40,34 @@ const ProjectPage: React.FC = () => {
         const skipped = res.result.skipped?.length ?? 0;
         if (attacked > 0) toast.success(`Boss attacked by ${attacked} assignee(s)`);
         if (skipped > 0) toast(`Skipped ${skipped} assignee(s)`);
+        const bossPhaseAdvanced = !!res.result.boss_phase_advanced;
+        const bossWasDefeated = bossPhaseAdvanced || (res.result.boss_hp ?? 0) <= 0;
+
+        if (bossPhaseAdvanced) {
+          const phaseLabel =
+            typeof res.result.boss_phase === "number"
+              ? `Phase ${res.result.boss_phase}`
+              : "next phase";
+          toast.success(`Boss advanced to ${phaseLabel}!`);
+        }
 
         const actions: GameActionPayload[] = (res.result.attacks ?? []).map(
           (a) => ({ act: "ATTACK", userId: String(a.player_id) })
         );
+
+        // Boss transition animations:
+        // - If boss was defeated and advances phase: die animation first, then revive to new max HP.
+        // - If boss was defeated and does NOT advance phase: die animation only.
+        if (bossWasDefeated) actions.push({ act: "BOSS_DIE" });
+        if (bossPhaseAdvanced) actions.push({ act: "BOSS_REVIVE" });
+
+        // Pass boss HP/maxHp updates down, but ProjectBattle will apply them only
+        // when it is safe (e.g., before BOSS_REVIVE or after queue finishes).
+        if (typeof res.result.boss_hp === "number" && typeof res.result.boss_max_hp === "number") {
+          setBossUpdate({ hp: res.result.boss_hp, maxHp: res.result.boss_max_hp });
+          setBossUpdateNonce((n) => n + 1);
+        }
+        
         if (actions.length > 0) {
           setPayloadBatch(actions);
           setPayloadBatchNonce((n) => n + 1);
@@ -87,6 +115,8 @@ const ProjectPage: React.FC = () => {
           payloadBatch={payloadBatch}
           payloadBatchNonce={payloadBatchNonce}
           bossRefreshNonce={bossRefreshNonce}
+          bossUpdate={bossUpdate}
+          bossUpdateNonce={bossUpdateNonce}
         />
         <ToggleButton
           isVisible={showBossPlaceholder}

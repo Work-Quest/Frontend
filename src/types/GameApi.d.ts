@@ -60,6 +60,8 @@ export type PlayerAttackEntry = {
   score: number
   boss_hp: number
   boss_max_hp: number
+  boss_phase?: number
+  boss_phase_advanced?: boolean
 }
 
 export type PlayerAttackResult = {
@@ -69,6 +71,8 @@ export type PlayerAttackResult = {
   total_damage: number
   boss_hp: number
   boss_max_hp: number
+  boss_phase?: number
+  boss_phase_advanced?: boolean
 }
 
 export type PlayerAttackResponse = {
