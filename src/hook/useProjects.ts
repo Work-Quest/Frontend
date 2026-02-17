@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import type { Project } from "@/types/Project"
 import { get, post } from "@/Api"
 import type { BatchDeleteResponse } from "@/types/ProjectApi"
-import type { SetupBossResponse } from "@/types/GameApi"
+import type { MessageResponse, SetupBossResponse } from "@/types/GameApi"
 
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -157,6 +157,21 @@ export function useProjects() {
     }
   }
 
+  const revivePlayer = async (projectId: string, payload: { player_id: string }) => {
+    if (!projectId) throw new Error("No project selected")
+    if (!payload?.player_id) throw new Error("player_id is required")
+
+    try {
+      return await post<{ player_id: string }, MessageResponse>(
+        `/api/game/project/${projectId}/project_member/revive/`,
+        payload
+      )
+    } catch (err) {
+      console.error(err)
+      throw new Error("Failed to revive player")
+    }
+  }
+
   
 
   return {
@@ -169,6 +184,7 @@ export function useProjects() {
     updateProject,
     deleteProject,
     closeProject,
+    revivePlayer,
     setupBoss,
   }
 }

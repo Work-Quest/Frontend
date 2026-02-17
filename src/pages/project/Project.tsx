@@ -11,9 +11,6 @@ import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard";
 import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
 import { useTask } from "@/hook/useTask";
 import { useProjectMembers } from "@/hook/useProjectMembers";
-import { useParams } from "react-router-dom";
-
-
 import ProjectBattle from "@/sections/project/ProjectBattle";
 import { useParams } from "react-router-dom";
 import { useGame } from "@/hook/useGame";
@@ -22,6 +19,7 @@ import type { GameActionPayload } from "@/types/battleTypes";
 import useLog from "@/hook/useLog";
 import { useAuth } from "@/context/AuthContext";
 import { useOverdueBossAttack } from "@/hook/useOverdueBossAttack";
+
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
   const { projectId } = useParams<{ projectId: string }>()
