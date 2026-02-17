@@ -10,7 +10,9 @@ type ProjectBossResponse = {
 export default function ProjectGuard() {
   const { projectId } = useParams()
   const location = useLocation()
-  const [allowed, setAllowed] = useState<boolean | null>(null)
+  const [guardStatus, setGuardStatus] = useState<
+    "loading" | "active" | "closed" | "forbidden"
+  >("loading")
   const [bossSetup, setBossSetup] = useState<boolean | null>(null)
 
   const isSetupRoute = useMemo(() => {
@@ -25,9 +27,24 @@ export default function ProjectGuard() {
     const checkAccess = async () => {
       try {
         await get(`/api/project/${projectId}/access/`)
-        setAllowed(true)
+        setGuardStatus("active")
       } catch {
-        setAllowed(false)
+        // Access can be denied because the project is closed (status != Working).
+        // In that case, redirect to the project-end page instead of showing NotFound.
+        try {
+          const projects = await get<Array<{ project_id: string; status?: string }>>(
+            "/api/project/get_user_project/"
+          )
+          const p = projects?.find((x) => String(x.project_id) === String(projectId))
+          const status = String(p?.status ?? "").toLowerCase()
+          if (p && (status === "closed" || status === "done")) {
+            setGuardStatus("closed")
+            return
+          }
+        } catch {
+          // ignore; fall through to forbidden
+        }
+        setGuardStatus("forbidden")
       }
     }
 
@@ -36,6 +53,7 @@ export default function ProjectGuard() {
 
   useEffect(() => {
     if (!projectId) return
+    if (guardStatus !== "active") return
 
     const fetchBoss = async () => {
       try {
@@ -50,14 +68,23 @@ export default function ProjectGuard() {
     }
 
     fetchBoss()
-  }, [projectId, location.pathname])
+  }, [projectId, location.pathname, guardStatus])
 
-  if (allowed === null || bossSetup === null) {
+  if (guardStatus === "loading") {
     return <div>Loading...</div>
 }
 
-  if (!allowed) {
+  if (guardStatus === "closed") {
+    return <Navigate replace to="/project-end" state={{ projectId }} />
+  }
+
+  if (guardStatus === "forbidden") {
     return <div><NotFound></NotFound></div>
+  }
+
+  // active project: wait for boss setup check
+  if (bossSetup === null) {
+    return <div>Loading...</div>
   }
 
   // Routing rule:

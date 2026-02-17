@@ -14,6 +14,18 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
   const taskName = p?.task?.task_name as string | undefined
   const actorName = p?.actor?.username as string | undefined
 
+  if (log.event_type === "BOSS_ATTACK"){
+    const targetName = p?.target?.username as string | undefined
+    const damage = typeof p?.damage === "number" ? (p.damage as number) : 0
+    return {
+      id: log.id,
+      action: taskName ?? log.event_type,
+      timestamp: log.created_at,
+      damageValue: -(damage),
+      participants: [targetName].filter(Boolean) as string[],
+  }
+  }
+
   return {
     id: log.id,
     action: taskName ?? log.event_type,

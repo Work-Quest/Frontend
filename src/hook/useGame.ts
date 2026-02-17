@@ -85,6 +85,15 @@ export function useGame(explicitProjectId?: string) {
     [call]
   )
 
+  const setupSpecialBoss = useCallback(async (projectId: string) => {
+    return call(() =>
+      post<{}, { message: string; boss: BossData }>(
+        `/api/game/project/${projectId}/boss/setup/special/`,
+        {}
+      )
+    )
+  }, [call])
+
   // -----------------
   // Project member actions
   // -----------------
@@ -209,6 +218,7 @@ export function useGame(explicitProjectId?: string) {
     getProjectBoss,
     getBossStatus,
     bossAttack,
+    setupSpecialBoss,
 
     // player actions
     playerAttack,

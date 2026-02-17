@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HP_DATA, PROJECT_DATA } from "@/sections/project/constants";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ToggleButton from "@/components/ToggleButton";
@@ -17,12 +17,13 @@ import toast from "react-hot-toast";
 import type { GameActionPayload } from "@/types/battleTypes";
 import useLog from "@/hook/useLog";
 import { useAuth } from "@/context/AuthContext";
+import { useOverdueBossAttack } from "@/hook/useOverdueBossAttack";
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
   const { projectId } = useParams<{ projectId: string }>();
-  const { logs } = useLog(projectId, { pollIntervalMs: 3000 });
+  const { logs, loading: logsLoading } = useLog(projectId, { pollIntervalMs: 3000 });
   const { fetchedTask, projectMembers } = useTask();
-  const { playerAttack, gameStatus } = useGame();
+  const { playerAttack, bossAttack, gameStatus } = useGame();
   const [payloadBatch, setPayloadBatch] = useState<GameActionPayload[] | null>(
     null
   );
@@ -32,6 +33,16 @@ const ProjectPage: React.FC = () => {
     null
   );
   const [bossUpdateNonce, setBossUpdateNonce] = useState(0);
+
+  const enqueueActions = React.useCallback((actions: GameActionPayload[]) => {
+    if (!actions || actions.length === 0) return
+    setPayloadBatch(actions)
+    setPayloadBatchNonce((n) => n + 1)
+  }, [])
+
+  const bumpBossRefresh = React.useCallback(() => {
+    setBossRefreshNonce((n) => n + 1)
+  }, [])
 
   const handleMovedToDone = React.useCallback(
     async (taskId: string) => {
@@ -61,7 +72,10 @@ const ProjectPage: React.FC = () => {
         // Boss transition animations:
         // - If boss was defeated and advances phase: die animation first, then revive to new max HP.
         // - If boss was defeated and does NOT advance phase: die animation only.
-        if (bossWasDefeated) actions.push({ act: "BOSS_DIE" });
+        if (bossWasDefeated) {
+          actions.push({ act: "BOSS_DIE" });
+        }
+
         if (bossPhaseAdvanced) actions.push({ act: "BOSS_REVIVE" });
 
         // Pass boss HP/maxHp updates down, but ProjectBattle will apply them only
@@ -71,18 +85,36 @@ const ProjectPage: React.FC = () => {
           setBossUpdateNonce((n) => n + 1);
         }
         
-        if (actions.length > 0) {
-          setPayloadBatch(actions);
-          setPayloadBatchNonce((n) => n + 1);
-        }
-        setBossRefreshNonce((n) => n + 1);
+        enqueueActions(actions)
+        bumpBossRefresh()
       } catch (err) {
         console.error(err);
         toast.error("Attack failed");
       }
     },
-    [playerAttack, projectId]
+    [playerAttack, projectId, enqueueActions, bumpBossRefresh]
   );
+
+  const overdueAttack = useOverdueBossAttack({
+    projectId,
+    tasks: fetchedTask,
+    logs,
+    logsLoading,
+    bossAttack,
+    enqueueActions,
+    bumpBossRefresh,
+    enabled: true,
+  })
+
+  useEffect(() => {
+    if (overdueAttack.attackedTaskId) {
+      toast.error("Overdue task! Boss attacked!")
+    }
+    if (overdueAttack.error) {
+      // Silent-ish: show only in console; you can toast if you want
+      console.error(overdueAttack.error)
+    }
+  }, [overdueAttack.attackedTaskId, overdueAttack.error])
 
   const {
     tasks,

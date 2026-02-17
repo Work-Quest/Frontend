@@ -101,6 +101,29 @@ export function useProjects() {
     }
   }
 
+  const closeProject = async (projectId: string) => {
+    if (!projectId) {
+      throw new Error("No project selected")
+    }
+
+    try {
+      const closed = await post<{ project_id: string }, Project>(
+        "/api/project/close/",
+        { project_id: projectId }
+      )
+
+      // Update local state with returned project payload
+      setProjects(prev =>
+        prev.map(p => (p.project_id === projectId ? { ...p, ...closed } : p))
+      )
+
+      return closed
+    } catch (err) {
+      console.error(err)
+      throw new Error("Failed to close project")
+    }
+  }
+
   const setupBoss = async (projectId: string) => {
     if (!projectId) {
       throw new Error("No project selected")
@@ -128,6 +151,7 @@ export function useProjects() {
     createProject,
     updateProject,
     deleteProject,
+    closeProject,
     setupBoss,
   }
 }
