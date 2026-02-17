@@ -19,8 +19,9 @@ import AuthLayout from './layouts/AuthLayout.tsx'
 import MainLayout from './layouts/MainLayout.tsx'
 import ProtectedLayout from './layouts/ProtectedLayout.tsx';
 import ProjectGuard from './layouts/ProjectGuard.tsx';
-import CreateProjectPage from './pages/project/CreateProject.tsx';
 import SetupProject from './pages/project/SetupProject.tsx';
+import StartProject from './pages/StartProject.tsx';
+import JoinProject from "./pages/project/JoinProject.tsx"
 import BattlePlayground from './pages/BattlePlayground.tsx';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
@@ -55,6 +56,8 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Landing /> },
           { path: "project-end", element: <ProjectEnd /> },
+          { path: "join", element: <JoinProject /> },
+          { path: "join/:token", element: <JoinProject /> },
           {
             path: "project/:projectId",
             element: <ProjectGuard />,
@@ -63,7 +66,7 @@ const router = createBrowserRouter([
               { path: "setup", element: <SetupProject /> },
             ]
           },
-          { path: "project/create", element: < CreateProjectPage /> },
+          { path: "project/create", element: < StartProject/>},
           { path: "profile", element: <Profile /> },
           {
             path: "/battle-test",

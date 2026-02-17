@@ -10,6 +10,10 @@ import ReviewTask from "@/sections/project/ReviewTask";
 import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard";
 import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
 import { useTask } from "@/hook/useTask";
+import { useProjectMembers } from "@/hook/useProjectMembers";
+import { useParams } from "react-router-dom";
+
+
 import ProjectBattle from "@/sections/project/ProjectBattle";
 import { useParams } from "react-router-dom";
 import { useGame } from "@/hook/useGame";
@@ -20,9 +24,10 @@ import { useAuth } from "@/context/AuthContext";
 import { useOverdueBossAttack } from "@/hook/useOverdueBossAttack";
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
-  const { projectId } = useParams<{ projectId: string }>();
+  const { projectId } = useParams<{ projectId: string }>()
+  const { fetchedTask } = useTask();
+  const { projectMembers } = useProjectMembers(projectId)
   const { logs, loading: logsLoading } = useLog(projectId, { pollIntervalMs: 3000 });
-  const { fetchedTask, projectMembers } = useTask();
   const { playerAttack, bossAttack, gameStatus } = useGame();
   const [payloadBatch, setPayloadBatch] = useState<GameActionPayload[] | null>(
     null
