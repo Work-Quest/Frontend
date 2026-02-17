@@ -129,7 +129,7 @@ const ProjectBattle = ({
       await closeProject(projectId)
       toast.success("Project closed")
       // Best-effort: send user back to projects list (adjust if your route differs)
-      navigate("/projects")
+      navigate("/project-end")
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to close project")
     } finally {

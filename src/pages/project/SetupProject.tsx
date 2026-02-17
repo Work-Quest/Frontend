@@ -30,7 +30,11 @@ export default function SetupProject() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { projectId } = useParams()
-  const { projectMembers, leaveProject, refetchProjectMembers } = useProjectMembers(projectId)
+  // Poll members so the party list updates as people join/leave without refreshing the page.
+  const { projectMembers, leaveProject, refetchProjectMembers } = useProjectMembers(projectId, {
+    pollIntervalMs: 5000,
+    refetchOnFocus: true,
+  })
 
   const [isLoading] = useState(false);
   const handleBacklogAddTask = (task: Task) => {
