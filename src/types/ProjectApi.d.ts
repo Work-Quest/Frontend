@@ -6,8 +6,3 @@ export type BatchDeleteResponse = {
   }[]
 }
 
-
-
-
-
-

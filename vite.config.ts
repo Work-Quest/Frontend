@@ -9,21 +9,17 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    host: true,
+    strictPort: true, 
+    port: 5173,
+    watch: {
+      usePolling: true,
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  server: {
-    host: true,
-    port: 5173,
-    strictPort: true,
-    // Match the production nginx behavior: frontend calls /api/* and Vite proxies to Django.
-    proxy: {
-      "/api": {
-        target: "http://backend:8000",
-        changeOrigin: true,
-      },
     },
   },
 })

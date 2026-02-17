@@ -22,12 +22,13 @@ import ProjectGuard from './layouts/ProjectGuard.tsx';
 import SetupProject from './pages/project/SetupProject.tsx';
 import StartProject from './pages/StartProject.tsx';
 import JoinProject from "./pages/project/JoinProject.tsx"
+import BattlePlayground from './pages/BattlePlayground.tsx';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <AuthLayout />, 
+    element: <AuthLayout />,
     children: [
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
@@ -44,14 +45,14 @@ const router = createBrowserRouter([
     ],
   },
 
-  
+
   //protected routes
   {
     path: "/",
-    element: <MainLayout />, 
+    element: <MainLayout />,
     children: [
-      { 
-        element: <ProtectedLayout />,  
+      {
+        element: <ProtectedLayout />,
         children: [
           { index: true, element: <Landing /> },
           { path: "project-end", element: <ProjectEnd /> },
@@ -62,31 +63,34 @@ const router = createBrowserRouter([
             element: <ProjectGuard />,
             children: [
               { index: true, element: <Project /> },
-              { path: "setup", element: <SetupProject /> }, 
+              { path: "setup", element: <SetupProject /> },
             ]
           },
           { path: "project/create", element: < StartProject/>},
-          // { path: "start-project", element: < StartProject/>},
           { path: "profile", element: <Profile /> },
-          
+          {
+            path: "/battle-test",
+            element: <BattlePlayground />,
+          }
+
         ]
       }
     ]
-    
-  }, 
+
+  },
   {
     path: "/home",
-    element: <MainLayout className='bg-lightOrange'/>, 
+    element: <MainLayout className='bg-lightOrange' />,
     children: [
-      { 
-        element: <ProtectedLayout />,  
+      {
+        element: <ProtectedLayout />,
         children: [
-        { index: true, element: <Home />},
+          { index: true, element: <Home /> },
         ]
       }
     ]
   }
-  
+
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -98,4 +102,3 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </GoogleOAuthProvider>
   </React.StrictMode>
 );
-
