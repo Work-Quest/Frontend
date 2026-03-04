@@ -9,7 +9,6 @@ import useProjects from "@/hook/useProjects"
 import toast from "react-hot-toast"
 import { useNavigate, useParams } from "react-router-dom"
 
-
 const PRIORITY_HP: Record<string, number> = {
   Low: 1000,
   Medium: 2000,
@@ -19,7 +18,8 @@ const PRIORITY_HP: Record<string, number> = {
 
 export default function SetupProject() {
   const { fetchedTask, projectMembers } = useTask()
-  const { tasks, handleAddTask, handleDeleteTask } = useKanbanBoard(fetchedTask)
+  const { tasks, handleAddTask, handleUpdateTask, handleDeleteTask } =
+    useKanbanBoard(fetchedTask)
   const { setupBoss } = useProjects()
   const navigate = useNavigate()
   const { projectId } = useParams()
@@ -28,7 +28,7 @@ export default function SetupProject() {
     handleAddTask("backlog", task)
   }
 
-  const handleSetupBoss = async () => { 
+  const handleSetupBoss = async () => {
     try {
       if (!projectId) {
         toast.error("Missing project id.")
@@ -82,7 +82,9 @@ export default function SetupProject() {
                 key={task.id}
                 id={task.id}
                 task={task}
+                projectMember={projectMembers ?? []}
                 onDelete={handleDeleteTask}
+                onUpdateTask={handleUpdateTask}
               />
             ))
           )}
@@ -99,12 +101,9 @@ export default function SetupProject() {
               {estimatedBossHP.toLocaleString()} HP
             </h1>
           </div>
-
-         
         </aside>
-        
       </div>
-       <div
+      <div
         className="
             fixed bottom-0 left-0
             w-screen h-[70px]
@@ -113,23 +112,23 @@ export default function SetupProject() {
             z-[9999]
             shadow-md
         "
-        >
-            <div className="flex w-screen mx-10 justify-between">
-                <button
-                    className= "!text-[rgba(148, 139, 129, 1)] px-6 py-2 rounded-md"
-                    type="button"
-                    onClick={() => navigate(`/home`)}
-                >
-                    retreat
-                </button>
-                <button
-                    className="!bg-[rgba(215,206,197,1)] !text-[rgba(148, 139, 129, 1)] px-6 py-2 rounded-md"
-                    onClick={handleSetupBoss}
-                >
-                    Begin Fight!
-                </button>
-          </div>
+      >
+        <div className="flex w-screen mx-10 justify-between">
+          <button
+            className="!text-[rgba(148, 139, 129, 1)] px-6 py-2 rounded-md"
+            type="button"
+            onClick={() => navigate(`/home`)}
+          >
+            retreat
+          </button>
+          <button
+            className="!bg-[rgba(215,206,197,1)] !text-[rgba(148, 139, 129, 1)] px-6 py-2 rounded-md"
+            onClick={handleSetupBoss}
+          >
+            Begin Fight!
+          </button>
         </div>
+      </div>
     </div>
   )
 }

@@ -11,21 +11,30 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { useState, useEffect } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { X, Filter } from "lucide-react"
-import { ClipLoader } from "react-spinners";
+import LoadingSpinner from "@/components/LoadingSpinner"
 import { IoAddCircle } from "react-icons/io5"
 
 type ProjectTabProps = {
   data: Project[]
   onFilterChange: (filters: FilterState) => void
-  onUpdateProject: (projectId: string, data: {
-    project_name: string
-    deadline: string
-    status: string
-  }) => Promise<Project>
+  onUpdateProject: (
+    projectId: string,
+    data: {
+      project_name: string
+      deadline: string
+      status: string
+    },
+  ) => Promise<Project>
   loading?: boolean
   onDelete: (projectId: string) => void
 }
@@ -35,7 +44,13 @@ export interface FilterState {
   owner: string | null
 }
 
-export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDelete, loading }: ProjectTabProps) {
+export default function ProjectTab({
+  data,
+  onFilterChange,
+  onUpdateProject,
+  onDelete,
+  loading,
+}: ProjectTabProps) {
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<FilterState>({
     status: null,
@@ -47,8 +62,12 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
     const calculateItemsPerPage = () => {
       const cardHeight = 72
       const fixedElementsHeight = 300
-      const availableHeight = window.innerHeight - 140 - 60 - 80 - fixedElementsHeight
-      const calculatedItems = Math.max(3, Math.ceil(availableHeight / cardHeight))
+      const availableHeight =
+        window.innerHeight - 140 - 60 - 80 - fixedElementsHeight
+      const calculatedItems = Math.max(
+        3,
+        Math.ceil(availableHeight / cardHeight),
+      )
       setItemsPerPage(calculatedItems)
     }
 
@@ -59,7 +78,10 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
 
   const totalPages = Math.ceil(data.length / itemsPerPage)
 
-  const paginatedData = data.slice((page - 1) * itemsPerPage, page * itemsPerPage)
+  const paginatedData = data.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage,
+  )
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -73,8 +95,12 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
     setPage(1)
   }
 
-  const uniqueStatuses = Array.from(new Set(data.map((project) => project.status)))
-  const uniqueOwners = Array.from(new Set(data.map((project) => project.owner_username)))
+  const uniqueStatuses = Array.from(
+    new Set(data.map((project) => project.status)),
+  )
+  const uniqueOwners = Array.from(
+    new Set(data.map((project) => project.owner_username)),
+  )
 
   const updateStatusFilter = (status: string | null) => {
     handleFilterChange({ ...filters, status })
@@ -89,8 +115,6 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
   }
 
   const hasActiveFilters = filters.status || filters.owner
-
-
 
   return (
     <div className="flex gap-4 h-full">
@@ -120,7 +144,9 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
 
               {/* Status Filter */}
               <div>
-                <p className="!text-brown !font-bold mb-3 text-sm uppercase tracking-wide">Status</p>
+                <p className="!text-brown !font-bold mb-3 text-sm uppercase tracking-wide">
+                  Status
+                </p>
                 <div className="space-y-2">
                   <Button
                     size="sm"
@@ -159,8 +185,13 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
 
               {/* Owner Filter */}
               <div>
-                <p className="!text-brown !font-bold mb-3 text-sm uppercase tracking-wide">Owner</p>
-                <Select value={filters.owner || ""} onValueChange={(value) => updateOwnerFilter(value || null)}>
+                <p className="!text-brown !font-bold mb-3 text-sm uppercase tracking-wide">
+                  Owner
+                </p>
+                <Select
+                  value={filters.owner || ""}
+                  onValueChange={(value) => updateOwnerFilter(value || null)}
+                >
                   <SelectTrigger className="w-full !bg-offWhite !border-veryLightBrown !border-2 text-brown focus:!outline-none active:!border-lightBrown !font-['Baloo_2']">
                     <SelectValue placeholder="All Owners" />
                   </SelectTrigger>
@@ -170,7 +201,9 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
                       <SelectItem key={owner} value={owner}>
                         <div className="flex items-center">
                           <div className="w-6 h-6 bg-orange/20 rounded-full flex items-center justify-center mr-2">
-                            <span className="text-xs font-bold text-orange">{owner.charAt(0).toUpperCase()}</span>
+                            <span className="text-xs font-bold text-orange">
+                              {owner.charAt(0).toUpperCase()}
+                            </span>
                           </div>
                           {owner}
                         </div>
@@ -183,18 +216,32 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
               {/* Active Filters Display */}
               {hasActiveFilters && (
                 <div>
-                  <h4 className="!text-brown !font-bold mb-3 text-sm uppercase tracking-wide">Active Filters</h4>
+                  <h4 className="!text-brown !font-bold mb-3 text-sm uppercase tracking-wide">
+                    Active Filters
+                  </h4>
                   <div className="flex flex-wrap gap-2">
                     {filters.status && (
-                      <Badge variant="secondary" className="bg-orange/20 text-orange">
+                      <Badge
+                        variant="secondary"
+                        className="bg-orange/20 text-orange"
+                      >
                         Status: {filters.status}
-                        <X className="w-3 h-3 ml-1 cursor-pointer" onClick={() => updateStatusFilter(null)} />
+                        <X
+                          className="w-3 h-3 ml-1 cursor-pointer"
+                          onClick={() => updateStatusFilter(null)}
+                        />
                       </Badge>
                     )}
                     {filters.owner && (
-                      <Badge variant="secondary" className="bg-orange/20 text-orange">
+                      <Badge
+                        variant="secondary"
+                        className="bg-orange/20 text-orange"
+                      >
                         Owner: {filters.owner}
-                        <X className="w-3 h-3 ml-1 cursor-pointer" onClick={() => updateOwnerFilter(null)} />
+                        <X
+                          className="w-3 h-3 ml-1 cursor-pointer"
+                          onClick={() => updateOwnerFilter(null)}
+                        />
                       </Badge>
                     )}
                   </div>
@@ -204,7 +251,11 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
               {/* Results Count */}
               <div className="pt-4 border-t border-veryLightBrown">
                 <p className="text-sm text-brown/70">
-                  You have <span className="font-semibold text-brown">{data.length}</span> projects
+                  You have{" "}
+                  <span className="font-semibold text-brown">
+                    {data.length}
+                  </span>{" "}
+                  projects
                 </p>
               </div>
             </div>
@@ -224,29 +275,31 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
           </div>
 
           {/* Add New Project */}
-          <a href="/project/create" >
-            <div 
-              className="bg-orange/20 border-2 border-orange border-dashed rounded-md hover:bg-orange/30 flex items-center justify-center p-3 m-4 cursor-pointer flex-shrink-0 transition-colors h-12">
+          <a href="/project/create">
+            <div className="bg-orange/20 border-2 border-orange border-dashed rounded-md hover:bg-orange/30 flex items-center justify-center p-3 m-4 cursor-pointer flex-shrink-0 transition-colors h-12">
               <IoAddCircle className="w-5 h-5 text-orange" />
               <p className="!text-orange !font-bold ml-2">Add new project</p>
             </div>
           </a>
-          
+
           {/* Project List */}
           {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <ClipLoader
-                loading={loading}     
-                color="gray"         
-                size={100}
-              />
+            <div className="flex-1 flex flex-col items-center justify-center gap-4">
+              <LoadingSpinner size="lg" />
+              <p className="font-['Baloo_2'] text-brown/70 text-sm">
+                Loading quests...
+              </p>
             </div>
           ) : (
             <div className="flex flex-col px-4 gap-2 flex-1 overflow-auto min-h-0">
               {paginatedData.length > 0 ? (
                 paginatedData.map((project) => (
                   <div key={project.project_id} className="h-16 flex-shrink-0">
-                    <ProjectTabCard project={project} onUpdateProject={onUpdateProject} onDelete={onDelete} />
+                    <ProjectTabCard
+                      project={project}
+                      onUpdateProject={onUpdateProject}
+                      onDelete={onDelete}
+                    />
                   </div>
                 ))
               ) : (
@@ -284,7 +337,10 @@ export default function ProjectTab({ data, onFilterChange, onUpdateProject, onDe
                         } else {
                           pageNumber = page - 1 + index
                         }
-                        pageNumber = Math.min(Math.max(pageNumber, 1), totalPages)
+                        pageNumber = Math.min(
+                          Math.max(pageNumber, 1),
+                          totalPages,
+                        )
                         return (
                           <PaginationItem key={pageNumber}>
                             <PaginationLink

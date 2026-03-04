@@ -2,6 +2,7 @@ import { Outlet, useLocation, useParams, Navigate } from "react-router-dom"
 import { useEffect, useMemo, useState } from "react"
 import { get } from "@/Api"
 import NotFound from "@/pages/NotFound"
+import LoadingScreen from "@/components/LoadingScreen"
 
 type ProjectBossResponse = {
   boss: string | null
@@ -40,7 +41,7 @@ export default function ProjectGuard() {
     const fetchBoss = async () => {
       try {
         const data = await get<ProjectBossResponse>(
-          `/api/game/project/${projectId}/boss/`
+          `/api/game/project/${projectId}/boss/`,
         )
         setBossSetup(Boolean(data?.boss))
       } catch {
@@ -53,11 +54,19 @@ export default function ProjectGuard() {
   }, [projectId, location.pathname])
 
   if (allowed === null || bossSetup === null) {
-    return <div>Loading...</div>
-}
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <LoadingScreen message="Checking your quest access..." />
+      </div>
+    )
+  }
 
   if (!allowed) {
-    return <div><NotFound></NotFound></div>
+    return (
+      <div>
+        <NotFound></NotFound>
+      </div>
+    )
   }
 
   // Routing rule:

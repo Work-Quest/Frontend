@@ -1,7 +1,11 @@
-"use client"
+"use client";
 
 import React, { useState } from "react";
-import { DAMAGE_LOGS, HP_DATA, PROJECT_DATA } from "@/sections/project/constants";
+import {
+  DAMAGE_LOGS,
+  HP_DATA,
+  PROJECT_DATA,
+} from "@/sections/project/constants";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import BossPlaceholder from "@/sections/project/BossPlaceholder";
 import ToggleButton from "@/components/ToggleButton";
@@ -13,8 +17,8 @@ import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
 import { useTask } from "@/hook/useTask";
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
-   const { fetchedTask, projectMembers } = useTask();
-   console.log("Fetched tasks in ProjectPage:", fetchedTask);
+  const { fetchedTask, projectMembers } = useTask();
+  console.log("Fetched tasks in ProjectPage:", fetchedTask);
 
   const {
     tasks,
@@ -24,6 +28,7 @@ const ProjectPage: React.FC = () => {
     handleDragEnd,
     findActiveTask,
     handleAddTask,
+    handleUpdateTask,
     handleDeleteTask,
   } = useKanbanBoard(fetchedTask);
 
@@ -56,6 +61,7 @@ const ProjectPage: React.FC = () => {
             <KanbanBoard
               tasks={tasks}
               onAddTask={handleAddTask}
+              onUpdateTask={handleUpdateTask}
               onDeleteTask={handleDeleteTask}
               onDragStart={handleDragStart}
               onDragOver={handleDragOver}

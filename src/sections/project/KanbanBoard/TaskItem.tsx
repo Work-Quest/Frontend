@@ -1,17 +1,33 @@
-import React, { useState } from "react";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { IoTrashOutline } from "react-icons/io5";
-import { Task } from "./types";
-import { DeleteConfirmationOverlay } from "./DeleteConfirmationOverlay";
+import React, { useState } from "react"
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { MoreVertical, Pencil, Trash2 } from "lucide-react"
+import { Task } from "./types"
+import { UserStatus } from "@/types/User"
+import { DeleteConfirmationOverlay } from "./DeleteConfirmationOverlay"
+import { EditTaskOverlay } from "./EditTaskOverlay"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface TaskItemProps {
-  id: string;
-  task: Task;
-  onDelete?: (taskId: string) => void;
+  id: string
+  task: Task
+  projectMember: UserStatus[]
+  onDelete?: (taskId: string) => void
+  onUpdateTask?: (task: Task) => void
 }
 
-export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
+export const TaskItem: React.FC<TaskItemProps> = ({
+  id,
+  task,
+  projectMember,
+  onDelete,
+  onUpdateTask,
+}) => {
   const {
     attributes,
     listeners,
@@ -19,21 +35,22 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ id })
 
-  const [showOverlay, setShowOverlay] = useState(false);
+  const [showDeleteOverlay, setShowDeleteOverlay] = useState(false)
+  const [showEditOverlay, setShowEditOverlay] = useState(false)
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-  };
+  }
 
   const handleDelete = () => {
-    if (!task.id) return;
-    onDelete?.(task.id);
-    setShowOverlay(false);
-  };
+    if (!task.id) return
+    onDelete?.(task.id)
+    setShowDeleteOverlay(false)
+  }
 
   return (
     <>
@@ -49,27 +66,46 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
         } flex flex-col gap-2 transition-all cursor-grab active:cursor-grabbing`}
       >
         <div className="flex justify-between items-start">
-          <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">{task.title}</h4>
-          <div
-            className="cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              setShowOverlay(true)
-            }}
-            {...{
-              "data-no-dnd": true,
-              onPointerDown: (e) => {
-                e.stopPropagation()
-              },
-              onKeyDown: (e) => {
-                e.stopPropagation()
-              },
-              draggable: false,
-            }}
-          >
-            <IoTrashOutline className="text-darkBrown hover:text-red text-xl hover:scale-110 transition-transform" />
-          </div>
+          <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">
+            {task.title}
+          </h4>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="p-1 rounded hover:bg-cream/50 text-brown hover:text-darkBrown transition-colors"
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="min-w-[140px] bg-offWhite border-lightBrown font-['Baloo_2']"
+            >
+              <DropdownMenuItem
+                className="cursor-pointer focus:bg-cream"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowEditOverlay(true)
+                }}
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowDeleteOverlay(true)
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="h-px bg-brown w-full"></div>
@@ -79,10 +115,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
               task.priority === "Low"
                 ? "tag-priority-low"
                 : task.priority === "Medium"
-                ? "tag-priority-medium"
-                : task.priority === "High"
-                ? "tag-priority-high"
-                : "tag-priority-urgent"
+                  ? "tag-priority-medium"
+                  : task.priority === "High"
+                    ? "tag-priority-high"
+                    : "tag-priority-urgent"
             }`}
           >
             {task.priority}
@@ -98,13 +134,24 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
         </div>
       </div>
 
-      {showOverlay && (
+      {showDeleteOverlay && (
         <DeleteConfirmationOverlay
           task={task}
-          onCancel={() => setShowOverlay(false)}
+          onCancel={() => setShowDeleteOverlay(false)}
           onConfirm={handleDelete}
         />
       )}
+
+      <EditTaskOverlay
+        task={task}
+        open={showEditOverlay}
+        onOpenChange={setShowEditOverlay}
+        projectMember={projectMember}
+        onUpdateTask={(updated) => {
+          onUpdateTask?.(updated)
+          setShowEditOverlay(false)
+        }}
+      />
     </>
-  );
-};
+  )
+}

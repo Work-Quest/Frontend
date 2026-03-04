@@ -1,20 +1,24 @@
-'use client'
+"use client"
 
-import { useId, useState } from 'react'
-import { CheckIcon, ChevronsUpDownIcon, XIcon } from 'lucide-react'
+import { useId, useState } from "react"
+import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react"
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList
-} from '@/components/ui/command'
-import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+  CommandList,
+} from "@/components/ui/command"
+import { Label } from "@/components/ui/label"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 export type MultiComboboxOption = {
   value: string
@@ -29,35 +33,42 @@ type MultiComboboxProps = {
   value: string[]
   onChange: (value: string[]) => void
   disabled?: boolean
+  triggerClassName?: string
 }
 
 const MultiCombobox = ({
   label,
-  placeholder = 'Select option',
-  searchPlaceholder = 'Search...',
+  placeholder = "Select option",
+  searchPlaceholder = "Search...",
   options,
   value,
   onChange,
-  disabled = false
+  disabled = false,
+  triggerClassName,
 }: MultiComboboxProps) => {
   const id = useId()
   const [open, setOpen] = useState(false)
 
   const toggleSelection = (val: string) => {
     onChange(
-      value.includes(val)
-        ? value.filter(v => v !== val)
-        : [...value, val]
+      value.includes(val) ? value.filter((v) => v !== val) : [...value, val],
     )
   }
 
   const removeSelection = (val: string) => {
-    onChange(value.filter(v => v !== val))
+    onChange(value.filter((v) => v !== val))
   }
 
   return (
     <div className="w-full space-y-2">
-      {label && <Label htmlFor={id}>{label}</Label>}
+      {label && (
+        <Label
+          htmlFor={id}
+          className="font-['Baloo_2'] font-bold text-darkBrown"
+        >
+          {label}
+        </Label>
+      )}
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -67,12 +78,15 @@ const MultiCombobox = ({
             role="combobox"
             aria-expanded={open}
             disabled={disabled}
-            className="h-auto min-h-8 w-full justify-between hover:bg-transparent"
+            className={
+              triggerClassName ??
+              "h-auto min-h-8 w-full justify-between hover:!bg-transparent"
+            }
           >
             <div className="flex flex-wrap items-center gap-1 pr-2.5">
               {value.length > 0 ? (
-                value.map(val => {
-                  const option = options.find(o => o.value === val)
+                value.map((val) => {
+                  const option = options.find((o) => o.value === val)
                   if (!option) return null
 
                   return (
@@ -82,7 +96,7 @@ const MultiCombobox = ({
                         variant="ghost"
                         size="icon"
                         className="size-4"
-                        onClick={e => {
+                        onClick={(e) => {
                           e.stopPropagation()
                           removeSelection(val)
                         }}
@@ -96,9 +110,7 @@ const MultiCombobox = ({
                   )
                 })
               ) : (
-                <span className="text-muted-foreground">
-                  {placeholder}
-                </span>
+                <span className="text-brown/50">{placeholder}</span>
               )}
             </div>
 
@@ -109,14 +121,14 @@ const MultiCombobox = ({
           </Button>
         </PopoverTrigger>
 
-<PopoverContent className="w-(--radix-popper-anchor-width) p-0 pointer-events-auto">
+        <PopoverContent className="w-(--radix-popper-anchor-width) p-0 pointer-events-auto">
           <Command>
             <CommandInput placeholder={searchPlaceholder} />
             <CommandList>
               <CommandEmpty>No result found.</CommandEmpty>
 
               <CommandGroup>
-                {options.map(option => (
+                {options.map((option) => (
                   <CommandItem
                     key={option.value}
                     value={option.value}
