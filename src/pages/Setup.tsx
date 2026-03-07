@@ -7,22 +7,7 @@ import { Check } from 'lucide-react'
 // import { post } from "@/Api"
 import toast from 'react-hot-toast'
 import { useAuth } from '@/context/AuthContext'
-
-// --- CONSTANTS ---
-const AVATAR_COUNT = 6
-const AVATAR_OPTIONS = Array.from({ length: AVATAR_COUNT }, (_, i) => i + 1)
-
-const BG_COLORS = [
-  '#EF4444', // Red
-  '#F97316', // Orange
-  '#EAB308', // Yellow
-  '#14B8A6', // Teal
-  '#3B82F6', // Blue
-  '#6366F1', // Indigo
-  '#A855F7', // Purple
-  '#EC4899', // Pink
-  '#78716C', // Stone
-]
+import { AVATAR_IDS, PRESET_COLORS } from '@/constants/avatar'
 
 function Setup() {
   const navigate = useNavigate()
@@ -31,8 +16,8 @@ function Setup() {
   const [loading, setLoading] = useState(false)
 
   // State for selections
-  const [selectedAvatar, setSelectedAvatar] = useState<number>(1)
-  const [selectedColor, setSelectedColor] = useState<string>(BG_COLORS[1])
+  const [selectedAvatar, setSelectedAvatar] = useState<number>(AVATAR_IDS[0])
+  const [selectedColor, setSelectedColor] = useState<string>(PRESET_COLORS[0].value)
 
   const [formData, setFormData] = useState({
     displayName: '',
@@ -52,7 +37,7 @@ function Setup() {
       name: formData.displayName,
       username: formData.username,
       avatarId: selectedAvatar,
-      avatarColor: selectedColor,
+      backgroundColor: selectedColor,
     }
 
     try {
@@ -85,17 +70,6 @@ function Setup() {
         {/* LEFT SIDE - Form */}
         <div className="w-full md:w-1/2 h-full flex justify-center items-center overflow-y-auto custom-scrollbar">
           <div className="w-full max-w-lg px-[8%] py-10 flex flex-col gap-5">
-            {/* Header */}
-            <div className="flex flex-col items-center">
-              <img src="/logo/favicon.svg" alt="icon" className="h-10 mb-2" draggable="false" />
-              <h2 className="text-3xl font-bold text-red font-['Baloo_2']">
-                Identity Registration
-              </h2>
-              <p className="text-lightBrown font-medium">
-                Set up your profile so your party can find you
-              </p>
-            </div>
-
             {/* --- AVATAR PREVIEW & SELECTION --- */}
             <div className="flex flex-col items-center gap-4">
               {/* Main Preview Circle */}
@@ -116,7 +90,7 @@ function Setup() {
                   CHOOSE AVATAR
                 </Label>
                 <div className="flex justify-center gap-3 flex-wrap">
-                  {AVATAR_OPTIONS.map((num) => (
+                  {AVATAR_IDS.map((num) => (
                     <div
                       key={num}
                       onClick={() => setSelectedAvatar(num)}
@@ -142,14 +116,14 @@ function Setup() {
                   CHOOSE BACKGROUND
                 </Label>
                 <div className="flex justify-center gap-2 flex-wrap px-4">
-                  {BG_COLORS.map((color) => (
+                  {PRESET_COLORS.map((color) => (
                     <div
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
+                      key={color.value}
+                      onClick={() => setSelectedColor(color.value)}
                       className="w-8 h-8 rounded-full cursor-pointer flex items-center justify-center shadow-sm hover:scale-110 transition-transform border border-white/50"
-                      style={{ backgroundColor: color }}
+                      style={{ backgroundColor: color.value }}
                     >
-                      {selectedColor === color && (
+                      {selectedColor === color.value && (
                         <Check size={16} className="text-white drop-shadow-md" />
                       )}
                     </div>

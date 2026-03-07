@@ -5,27 +5,22 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { User } from "lucide-react"
 import toast from "react-hot-toast"
+import { AVATAR_IDS, PRESET_COLORS } from "@/constants/avatar"
+
+type Profile = {
+  name: string
+  username: string
+  avatarId: number
+  backgroundColor: string
+}
 
 // Mock data - ready for API: useProfile(), updateProfile(profile)
-const MOCK_PROFILE = {
+const MOCK_PROFILE: Profile = {
   name: "Atikarn Kruaykriangkrai",
   username: "littleJohn",
   avatarId: 1,
-  backgroundColor: "#ff995a",
+  backgroundColor: PRESET_COLORS[0].value,
 }
-
-const AVATAR_IDS = [1, 2, 3, 4, 5, 6, 7, 8] as const
-
-const PRESET_COLORS = [
-  { value: "#ff995a", label: "Orange" },
-  { value: "#70BEFF", label: "Blue" },
-  { value: "#F76652", label: "Red" },
-  { value: "#F7E352", label: "Yellow" },
-  { value: "#2EBF49", label: "Green" },
-  { value: "#948B81", label: "Brown" },
-  { value: "#FFC3AB", label: "Peach" },
-  { value: "#2F3E65", label: "Navy" },
-]
 
 const inputStyle =
   "w-full rounded-lg !border-brown !border-2 px-4 py-3 font-['Baloo_2'] text-darkBrown placeholder:text-brown/50 focus:outline-none focus:ring-2 focus:ring-orange/50 focus:!border-orange !bg-cream transition-all disabled:opacity-70 disabled:cursor-not-allowed"
@@ -33,7 +28,7 @@ const inputStyle =
 export default function EditProfile() {
   const navigate = useNavigate()
   // TODO: replace with useProfile() or get from API
-  const [profile, setProfile] = useState(MOCK_PROFILE)
+  const [profile, setProfile] = useState<Profile>(MOCK_PROFILE)
 
   const { name, username, avatarId, backgroundColor } = profile
 
