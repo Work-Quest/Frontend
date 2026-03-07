@@ -1,24 +1,13 @@
-export interface UserInfo {
-    user_name: string;
-    work_category: string;
-    team_work: number;
-    work_speed: number;
-    overall_quality_score: number;
-    work_load_per_day: string;
-  }
-  
-  export interface FeedbackResponse {
-    assigned_role: string;
-    feedback: string;
-    overall_quality_score: number;
-    role_explanation: string;
-    team_work: number;
-    user_name: string;
-    work_category: string;
-    work_load_per_day: string;
-    work_speed: number;
-  }
-  
-  export interface FeedbackProps {
-    users: UserInfo[];
-  }
+export interface FeedbackResponse {
+  feedback_id: string
+  project_member_id: string
+  project_id: string
+  feedback_text: string | null
+  overall_quality_score: number | null
+  team_work: number | null
+  strength: string | null
+  work_load_per_day: string | null
+  work_speed: string | null
+  diligence: number | null
+  created_at: string
+}

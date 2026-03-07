@@ -55,7 +55,6 @@ const router = createBrowserRouter([
         element: <ProtectedLayout />,
         children: [
           { index: true, element: <Landing /> },
-          { path: "project-end", element: <ProjectEnd /> },
           { path: "join", element: <JoinProject /> },
           { path: "join/:token", element: <JoinProject /> },
           {
@@ -64,6 +63,7 @@ const router = createBrowserRouter([
             children: [
               { index: true, element: <Project /> },
               { path: "setup", element: <SetupProject /> },
+              { path: "project-end", element: <ProjectEnd /> },
             ]
           },
           { path: "project/create", element: < StartProject/>},
