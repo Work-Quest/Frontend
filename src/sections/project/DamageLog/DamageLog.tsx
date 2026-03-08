@@ -1,11 +1,10 @@
 "use client"
 
-import React, { act, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../Header";
 import DamageLogItem from "./DamageLogItem";
 import { Button } from "@/components/ui/button";
 import { DamageLogProps } from "./types";
-import {useTask } from "@/hook/useTask";
 
 const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
   const [showCount, setShowCount] = useState(3);
