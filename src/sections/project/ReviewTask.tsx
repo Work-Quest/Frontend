@@ -9,7 +9,7 @@ const ReviewTask = () => {
         textColor="!text-offWhite"
         text="Review Task"
       />
-      <Button variant="shadow" className="w-full !bg-brown !text-offWhite my-4">
+      <Button variant="shadow" className="w-full !bg-brown !text-offWhite m-4 flex w-[calc(100%-24px)]">
         Review
       </Button>
     </div>

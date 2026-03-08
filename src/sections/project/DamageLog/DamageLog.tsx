@@ -52,7 +52,7 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
   }, []);
 
   return (
-    <div className="w-full pr-3 self-stretch bg-offWhite inline-flex flex-col justify-start items-start">
+    <div className="flex w-full pr-3 bg-offWhite inline-flex flex-col justify-start items-start">
       <Header bgColor="bg-orange" textColor="text-offWhite" text="Damage Log" />
       {damageLogs.length > 0 ? (
         damageLogs.slice(0, showCount).map((log) => <DamageLogItem key={log.id} log={log} />)
@@ -61,7 +61,7 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
           No damage logs yet
         </p>
       )}
-      <Button variant="shadow" className="!bg-orange mr-4 w-full my-4">
+      <Button variant="shadow" className="!bg-orange m-4 flex w-full w-[calc(100%-24px)]">
         See More
       </Button>
     </div>
