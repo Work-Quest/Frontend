@@ -55,7 +55,6 @@ export const useTask = () => {
     return null;
   }, [activeId, fetchedTask]);
 
-
   return {
     fetchedTask,
     setFetchedTasks,
