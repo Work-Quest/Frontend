@@ -2,7 +2,9 @@ export type Project = {
   project_id: string;          
   project_name: string;
   status: "Working" | "Done"; 
-  owner_id: string;            
+  // Backend returns `owner` (BusinessUser id). Some older frontend code used `owner_id`.
+  owner?: string;
+  owner_id?: string;            
   owner_username: string;
   created_at: string;          
   deadline: string;            

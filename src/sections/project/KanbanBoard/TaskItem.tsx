@@ -8,10 +8,12 @@ import { DeleteConfirmationOverlay } from "./DeleteConfirmationOverlay";
 interface TaskItemProps {
   id: string;
   task: Task;
+  disabled?: boolean;
   onDelete?: (taskId: string) => void;
 }
 
-export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
+export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, onDelete }) => {
+  const isDone = disabled || task.status === "done";
   const {
     attributes,
     listeners,
@@ -19,7 +21,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ id, disabled });
 
   const [showOverlay, setShowOverlay] = useState(false);
 
@@ -40,16 +42,30 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
-        className={`p-3 rounded-lg border border-brown ${
+        {...(disabled ? {} : attributes)}
+        {...(disabled ? {} : listeners)}
+        className={`p-3 rounded-lg border ${
+          isDone
+            ? "border-gray-300 bg-gray-100"
+            : "border-brown bg-offWhite"
+        } ${
           isDragging
             ? "border-dashed scale-105 bg-white/80 shadow-lg"
-            : "bg-offWhite shadow-sm hover:shadow-md hover:scale-[1.01]"
-        } flex flex-col gap-2 transition-all cursor-grab active:cursor-grabbing`}
+            : isDone
+              ? "shadow-sm"
+              : "shadow-sm hover:shadow-md hover:scale-[1.01]"
+        } flex flex-col gap-2 transition-all ${
+          disabled ? "cursor-default" : "cursor-grab active:cursor-grabbing"
+        }`}
       >
         <div className="flex justify-between items-start">
-          <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">{task.title}</h4>
+          <h4
+            className={`text-base font-medium font-['Baloo_2'] ${
+              isDone ? "text-gray-700" : "text-darkBrown"
+            }`}
+          >
+            {task.title}
+          </h4>
           <div
             className="cursor-pointer"
             onClick={(e) => {
@@ -68,11 +84,17 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, onDelete }) => {
               draggable: false,
             }}
           >
-            <IoTrashOutline className="text-darkBrown hover:text-red text-xl hover:scale-110 transition-transform" />
+            <IoTrashOutline
+              className={`text-xl hover:scale-110 transition-transform ${
+                isDone
+                  ? "text-gray-600 hover:text-red"
+                  : "text-darkBrown hover:text-red"
+              }`}
+            />
           </div>
         </div>
 
-        <div className="h-px bg-brown w-full"></div>
+        <div className={`h-px w-full ${isDone ? "bg-gray-300" : "bg-brown"}`}></div>
         <div className="flex flex-wrap gap-2">
           <div
             className={`tag tag-priority ${
