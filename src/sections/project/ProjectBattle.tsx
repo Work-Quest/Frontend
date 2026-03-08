@@ -9,6 +9,8 @@ import { ENTITY_CONFIG } from "@/config/battleConfig"
 import type { GameActionPayload } from "@/types/battleTypes"
 import toast from "react-hot-toast"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/context/AuthContext"
+import NotificationDialog from "@/components/NotificationDialog"
 
 type ProjectBattleProps = {
   projectMembers: UserStatus[]
@@ -88,11 +90,37 @@ const ProjectBattle = ({
   }, [bossUpdateNonce]) // intentionally only keyed by nonce
 
   const { projectId } = useParams<{ projectId: string }>()
-  const { getProjectBoss, setupSpecialBoss } = useGame()
-  const { closeProject } = useProjects()
+  const { getProjectBoss, setupSpecialBoss, gameStatus, refreshGameStatus } = useGame()
+  const { closeProject, revivePlayer } = useProjects()
   const navigate = useNavigate()
   const [isClosing, setIsClosing] = useState(false)
   const [isSettingUpSpecialBoss, setIsSettingUpSpecialBoss] = useState(false)
+  const deadUsers = useMemo(
+    () => (users ?? []).filter((u) => u.status === "dead"),
+    [users]
+  )
+  const { user } = useAuth()
+  const myMemberId = useMemo(() => {
+    const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id)
+    return me?.project_member_id ? String(me.project_member_id) : null
+  }, [gameStatus?.user_statuses, user?.id])
+  const isMeDead = useMemo(() => {
+    if (!myMemberId) return false
+    return deadUsers.some((u) => String(u.uid) === myMemberId)
+  }, [deadUsers, myMemberId])
+
+  const handleReviveMe = async () => {
+    if (!projectId || !myMemberId) return
+    try {
+      await revivePlayer(projectId, { player_id: myMemberId })
+      toast.success("Revived!")
+      // Update battle UI immediately (so the overlay disappears) by queuing a local revive animation.
+      setActionQueue((prev) => [...prev, { act: "REVIVE", userId: myMemberId }])
+      await refreshGameStatus()
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to revive")
+    }
+  }
 
   const handleEndJourney = async () => {
     if (!projectId) return
@@ -101,7 +129,7 @@ const ProjectBattle = ({
       await closeProject(projectId)
       toast.success("Project closed")
       // Best-effort: send user back to projects list (adjust if your route differs)
-      navigate("/projects")
+      navigate("/project-end")
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to close project")
     } finally {
@@ -150,6 +178,9 @@ const ProjectBattle = ({
     }
     return map
   }, [])
+
+  // NOTE: We intentionally show the "hero fallen" overlay persistently
+  // whenever any user is dead (until they are revived).
 
   useEffect(() => {
     if (!projectId) return
@@ -270,6 +301,26 @@ const ProjectBattle = ({
                 >
                   End your journey here
                 </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isMeDead && boss.status !== "hidden" && boss.status !== "dead" && ( 
+        <div className="absolute bottom-0 left-0 right-0 flex z-[998] h-[22%] bg-black gap-4 items-center justify-center">
+          <div className="text-center items-end flex font-mono tracking-widest gap-4">
+            <h1 className="text-red-400 text-2xl">You Die</h1>
+            <div className="mt-3 flex items-center justify-center pointer-events-auto">
+              <NotificationDialog
+                title="Revive?"
+                description="Do you want to revive? you score will be reduced to half and continue the battle? 
+                If you choose not to revive, you can still watch the battle and continue working, but you won't earn points until you revive."
+                trigger={
+                  <button className="!bg-green-600 hover:!bg-green-700 text-white font-bold py-2 px-4 rounded">
+                    Revive
+                  </button>
+                }
+                onConfirm={handleReviveMe}
+              />
             </div>
           </div>
         </div>

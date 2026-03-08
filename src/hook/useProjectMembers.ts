@@ -4,10 +4,26 @@ import { useCallback, useEffect, useState } from "react"
 import { get, post } from "@/Api"
 import type { UserStatus } from "@/types/User"
 
-export function useProjectMembers(projectId?: string) {
+type UseProjectMembersOptions = {
+  /**
+   * Polling interval in ms. Set to 0 to disable polling.
+   * Default: 5000
+   */
+  pollIntervalMs?: number
+  /**
+   * Refetch immediately when returning to the tab/window.
+   * Default: true
+   */
+  refetchOnFocus?: boolean
+}
+
+export function useProjectMembers(projectId?: string, options: UseProjectMembersOptions = {}) {
   const [projectMembers, setProjectMembers] = useState<UserStatus[] | null>(null)
   const [membersLoading, setMembersLoading] = useState(false)
   const [membersError, setMembersError] = useState<string | null>(null)
+
+  const pollIntervalMs = options.pollIntervalMs ?? 5000
+  const refetchOnFocus = options.refetchOnFocus ?? true
 
   const refetchProjectMembers = useCallback(async () => {
     if (!projectId) return
@@ -37,38 +53,53 @@ export function useProjectMembers(projectId?: string) {
     if (!projectId) return
 
     let cancelled = false
+    let inFlight = false
     let intervalId: number | undefined
 
     const refetchMembers = async () => {
+      if (inFlight) return
+      inFlight = true
       try {
         const members = await get<UserStatus[]>(`/api/project/${projectId}/members/`)
         if (!cancelled) setProjectMembers(members)
       } catch (error) {
         // Best-effort; keep last known members.
         console.error("Error fetching project members:", error)
+      } finally {
+        inFlight = false
       }
     }
 
     // Initial + polling.
     refetchMembers()
-    intervalId = window.setInterval(refetchMembers, 5000)
+    if (pollIntervalMs > 0) {
+      intervalId = window.setInterval(refetchMembers, pollIntervalMs)
+    }
 
     // Refetch immediately when the user comes back to the tab.
     const onVisibility = () => {
+      if (!refetchOnFocus) return
       if (document.visibilityState === "visible") refetchMembers()
     }
-    const onFocus = () => refetchMembers()
+    const onFocus = () => {
+      if (!refetchOnFocus) return
+      refetchMembers()
+    }
 
-    document.addEventListener("visibilitychange", onVisibility)
-    window.addEventListener("focus", onFocus)
+    if (refetchOnFocus) {
+      document.addEventListener("visibilitychange", onVisibility)
+      window.addEventListener("focus", onFocus)
+    }
 
     return () => {
       cancelled = true
-      if (intervalId) window.clearInterval(intervalId)
-      document.removeEventListener("visibilitychange", onVisibility)
-      window.removeEventListener("focus", onFocus)
+      if (intervalId !== undefined) window.clearInterval(intervalId)
+      if (refetchOnFocus) {
+        document.removeEventListener("visibilitychange", onVisibility)
+        window.removeEventListener("focus", onFocus)
+      }
     }
-  }, [projectId])
+  }, [projectId, pollIntervalMs, refetchOnFocus])
 
   return {
     projectMembers,
