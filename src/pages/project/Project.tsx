@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react";
-import { HP_DATA, PROJECT_DATA } from "@/sections/project/constants";
+import { PROJECT_DATA } from "@/sections/project/constants";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ToggleButton from "@/components/ToggleButton";
 import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard";
