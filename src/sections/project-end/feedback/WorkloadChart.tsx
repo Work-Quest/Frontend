@@ -1,16 +1,18 @@
-interface WorkloadChartProps {
-  work_load_per_day: string;
-}
+const WorkloadChart = ({ work_load_per_day }: { work_load_per_day: string }) => {
+  let loads: number[] = []
+  try {
+    const parsed = JSON.parse(work_load_per_day || "[]")
+    loads = Array.isArray(parsed) ? parsed : []
+  } catch {
+    loads = []
+  }
 
-const WorkloadChart = ({ work_load_per_day }: WorkloadChartProps) => {
   return (
     <div className="mb-4">
       <p className="!text-md !font-bold mb-1">Last 30 Days Daily Workload</p>
       <div className="flex items-center gap-1">
         <p className="!text-sm !text-lightBrown">Month Ago</p>
-        {JSON.parse(work_load_per_day)
-          .slice(-30)
-          .map((load: number, i: number) => (
+        {loads.slice(-30).map((load: number, i: number) => (
             <div 
               key={i} 
               className="h-8 w-full bg-blue-500 rounded"

@@ -21,6 +21,12 @@ export default function ProjectGuard() {
     return normalized.endsWith(`/project/${projectId}/setup`)
   }, [location.pathname, projectId])
 
+  const isProjectEndRoute = useMemo(() => {
+    if (!projectId) return false
+    const normalized = location.pathname.replace(/\/+$/, "")
+    return normalized.endsWith(`/project/${projectId}/project-end`)
+  }, [location.pathname, projectId])
+
   useEffect(() => {
     if (!projectId) return
 
@@ -75,7 +81,18 @@ export default function ProjectGuard() {
 }
 
   if (guardStatus === "closed") {
-    return <Navigate replace to="/project-end" state={{ projectId }} />
+    // If the project is closed, allow the nested /project-end route to render.
+    // Otherwise redirect the user to it.
+    if (isProjectEndRoute) {
+      return <Outlet />
+    }
+    return (
+      <Navigate
+        replace
+        to={`/project/${projectId}/project-end`}
+        state={{ projectId }}
+      />
+    )
   }
 
   if (guardStatus === "forbidden") {
@@ -90,7 +107,7 @@ export default function ProjectGuard() {
   // Routing rule:
   // - boss NOT set up => user can only access /setup
   // - boss IS set up => user can only access the main project page (index)
-  if (bossSetup === false && !isSetupRoute) {
+  if (bossSetup === false && !isSetupRoute && !isProjectEndRoute) {
     return <Navigate replace to={`/project/${projectId}/setup`} />
   }
 
