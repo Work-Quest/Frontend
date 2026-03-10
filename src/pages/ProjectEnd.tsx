@@ -3,6 +3,8 @@ import Leaderboard from "@/components/Leaderboard";
 import type { UserScore } from "../sections/project-end/User.ts";
 import Achievement from "@/sections/project-end/Achievement.tsx";
 import Feedback from "@/sections/project-end/feedback/Feedback.tsx";
+import { useParams } from "react-router-dom";
+
 
 const userMockData: UserScore[] = [
     {
@@ -67,16 +69,16 @@ const userMockData: UserScore[] = [
     },
 ]
 
-export const userInfoMockData = [
-    {
-        "user_name": "Ejqjn28",
-        "work_load_per_day": "[7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,3,6,7,1]",
-        "team_work": 65.27,
-        "work_category": "Testing",
-        "work_speed": 36.31,
-        "overall_quality_score": 53.45
-    }
-]
+// export const userInfoMockData = [
+//     {
+//         "user_name": "Ejqjn28",
+//         "work_load_per_day": "[7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,3,6,7,1]",
+//         "team_work": 65.27,
+//         "work_category": "Testing",
+//         "work_speed": 36.31,
+//         "overall_quality_score": 53.45
+//     }
+// ]
 
 export const tagMockData = [
     "Last-minute Best friend",
@@ -84,6 +86,8 @@ export const tagMockData = [
 ]
 
 function ProjectEnd() {
+    const { projectId } = useParams()
+
     return (
         <div className="flex flex-col min-h-screen p-4">
             {/* Header Section */}
@@ -117,7 +121,7 @@ function ProjectEnd() {
                 </div>
             </div>
             <Achievement tags={tagMockData} />
-            <Feedback users={userInfoMockData} />
+            <Feedback projectId={projectId ?? ""} />
         </div>
     );
 }

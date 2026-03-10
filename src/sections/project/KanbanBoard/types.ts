@@ -33,17 +33,17 @@ export interface Tasks {
 
 
 export const PRIORITY_MAP: Record<number, TaskPriority> = {
-  0: 'Low',
-  1: 'Medium',
-  2: 'High',
-  3: 'Urgent',
+  1: 'Low',
+  2: 'Medium',
+  3: 'High',
+  4: 'Urgent',
 }
 
 export const PRIORITY_TO_NUMBER: Record<TaskPriority, number> = {
-  Low: 0,
-  Medium: 1,
-  High: 2,
-  Urgent: 3,
+  Low: 1,
+  Medium: 2,
+  High: 3,
+  Urgent: 4,
 }
 
 // -----------------------------

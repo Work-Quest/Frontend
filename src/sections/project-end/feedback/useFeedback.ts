@@ -1,46 +1,34 @@
-import { useState } from "react";
-import { UserInfo, FeedbackResponse } from "./types";
-import { post } from "@/Api";
+import { FeedbackResponse } from "./types"
+import { get } from "@/Api"
+import { useCallback, useRef, useState } from "react"
 
-const useFeedback = () => {
-  const [feedbackData, setFeedbackData] = useState<Record<string, FeedbackResponse>>({});
-  const [loading, setLoading] = useState<Record<string, boolean>>({});
-  const [error, setError] = useState<Record<string, string>>({});
 
-  const fetchFeedback = async (user: UserInfo) => {
-    if (loading[user.user_name]) return;
+const useFeedback = (projectId: string) => {
+  const [feedback, setFeedback] = useState<FeedbackResponse | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const inFlightRef = useRef(false)
 
-    setLoading(prev => ({ ...prev, [user.user_name]: true }));
-
+  const fetchFeedback = useCallback(async () => {
+    if (!projectId) return
+    if (inFlightRef.current) return
+    inFlightRef.current = true
+    setLoading(true)
+    setError(null)
     try {
-      const data = await post<UserInfo, FeedbackResponse>("/feedback", user);
-      setFeedbackData(prev => ({ ...prev, [user.user_name]: data }));
-      setError(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[user.user_name];
-        return newErrors;
-      });
+      const data = await get<FeedbackResponse>(
+        `/api/project/${projectId}/feedback/`
+      )
+      setFeedback(data)
     } catch (err) {
-      console.error('Feedback request failed:', err);
-      setError(prev => ({
-        ...prev,
-        [user.user_name]: err instanceof Error ? err.message : "Failed to fetch feedback"
-      }));
+      setError(err instanceof Error ? err.message : "Failed to fetch feedback")
     } finally {
-      setLoading(prev => {
-        const newLoading = { ...prev };
-        delete newLoading[user.user_name];
-        return newLoading;
-      });
+      inFlightRef.current = false
+      setLoading(false)
     }
-  };
+  }, [projectId])
 
-  return {
-    feedbackData,
-    loading,
-    error,
-    fetchFeedback
-  };
+  return { feedback, loading, error, fetchFeedback };
 };
 
 export default useFeedback;

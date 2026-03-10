@@ -1,15 +1,31 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import type { Project } from "@/types/Project"
 import { get, post } from "@/Api"
 import type { BatchDeleteResponse } from "@/types/ProjectApi"
-import type { SetupBossResponse } from "@/types/GameApi"
+import type { MessageResponse, SetupBossResponse } from "@/types/GameApi"
 
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const getProjectOwner = useCallback(
+    (projectId?: string) => {
+      if (!projectId) return null
+      const project = projects.find((p) => p.project_id === projectId)
+      if (!project) return null
+
+      // Backend serializer uses `owner`, older frontend types used `owner_id`.
+      const ownerId = (project as any).owner_id ?? (project as any).owner ?? null
+      const ownerUsername = (project as any).owner_username ?? null
+
+      if (!ownerId && !ownerUsername) return null
+      return { owner_id: ownerId, owner_username: ownerUsername }
+    },
+    [projects],
+  )
 
   const fetchProjects = async () => {
     try {
@@ -101,6 +117,29 @@ export function useProjects() {
     }
   }
 
+  const closeProject = async (projectId: string) => {
+    if (!projectId) {
+      throw new Error("No project selected")
+    }
+
+    try {
+      const closed = await post<{ project_id: string }, Project>(
+        "/api/project/close/",
+        { project_id: projectId }
+      )
+
+      // Update local state with returned project payload
+      setProjects(prev =>
+        prev.map(p => (p.project_id === projectId ? { ...p, ...closed } : p))
+      )
+
+      return closed
+    } catch (err) {
+      console.error(err)
+      throw new Error("Failed to close project")
+    }
+  }
+
   const setupBoss = async (projectId: string) => {
     if (!projectId) {
       throw new Error("No project selected")
@@ -118,16 +157,34 @@ export function useProjects() {
     }
   }
 
+  const revivePlayer = async (projectId: string, payload: { player_id: string }) => {
+    if (!projectId) throw new Error("No project selected")
+    if (!payload?.player_id) throw new Error("player_id is required")
+
+    try {
+      return await post<{ player_id: string }, MessageResponse>(
+        `/api/game/project/${projectId}/project_member/revive/`,
+        payload
+      )
+    } catch (err) {
+      console.error(err)
+      throw new Error("Failed to revive player")
+    }
+  }
+
   
 
   return {
     projects,
     loading,
     error,
+    getProjectOwner,
     fetchProjects,
     createProject,
     updateProject,
     deleteProject,
+    closeProject,
+    revivePlayer,
     setupBoss,
   }
 }

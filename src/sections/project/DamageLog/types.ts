@@ -1,3 +1,5 @@
+import { ProjectLogEntry } from "@/types/LogApi";
+
 export type DamageLogEntry = {
   id: string;
   action: string;
@@ -8,5 +10,15 @@ export type DamageLogEntry = {
 };
 
 export type DamageLogProps = {
-  logs?: DamageLogEntry[];
+  logs?: ProjectLogEntry[];
 };
+
+// export type ProjectLogEntry = {
+//   id: string
+//   project_id: string
+//   actor_type: "user" | "boss" | "system" | string
+//   actor_id: string | null
+//   event_type: string
+//   payload: Record<string, unknown>
+//   created_at: string
+// }

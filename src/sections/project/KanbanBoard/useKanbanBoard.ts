@@ -16,26 +16,32 @@ import { post, del, patch, put } from "@/Api"
 import { useParams } from "react-router-dom"
 import toast from "react-hot-toast"
 
-export const useKanbanBoard = (initialTasks: Tasks) => {
-  const [tasks, setTasks] = useState<Tasks>(initialTasks)
-  const [activeId, setActiveId] = useState<string | null>(null)
-  const { projectId } = useParams<{ projectId: string }>()
-  const lastSentStatusRef = useRef<Record<string, TaskStatus>>({})
+type UseKanbanBoardOptions = {
+  onMovedToDone?: (taskId: string) => void | Promise<void>
+}
 
-  // Add this useEffect to update tasks when initialTasks changes
-  useEffect(() => {
-    setTasks(initialTasks)
-  }, [initialTasks])
+export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOptions) => {
+  const [tasks, setTasks] = useState<Tasks>(initialTasks);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const { projectId } = useParams<{ projectId: string }>();
+  const dragStartContainerRef = useRef<TaskStatus | null>(null);
+  const dragStartTasksSnapshotRef = useRef<Tasks | null>(null);
+
+   // Add this useEffect to update tasks when initialTasks changes
+   useEffect(() => {
+    setTasks(initialTasks);
+  }, [initialTasks]);
+
 
   const findContainer = (id: string) => {
-    if (id in tasks) return id as keyof Tasks
+    if (id in tasks) return id as keyof Tasks;
     for (const [container, containerTasks] of Object.entries(tasks)) {
       if (containerTasks.some((task: { id: string }) => task.id === id)) {
-        return container as keyof Tasks
+        return container as keyof Tasks;
       }
     }
-    return null
-  }
+    return null;
+  };
 
   const handleAddTask = async (columnId: TaskStatus, task: Task) => {
     try {
@@ -104,26 +110,24 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
       console.error(err)
       toast.error("Failed to update task")
     }
-  }
+  };
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      await del(`/api/project/${projectId}/tasks/${taskId}/delete/`)
-      setTasks((prev) => {
-        const newTasks = { ...prev }
-        for (const column in newTasks) {
-          newTasks[column as keyof Tasks] = newTasks[
-            column as keyof Tasks
-          ].filter((task) => task.id !== taskId)
-        }
-        return newTasks
-      })
-      toast.success("Task deleted successflly")
-    } catch (err) {
-      console.error(err)
-      toast.error("Failed to add task")
-    }
+    await del(`/api/project/${projectId}/tasks/${taskId}/delete/`);
+    setTasks(prev => {
+      const newTasks = {...prev};
+      for (const column in newTasks) {
+        newTasks[column as keyof Tasks] = newTasks[column as keyof Tasks].filter(task => task.id !== taskId);
+      }
+      return newTasks;
+    });
+    toast.success("Task deleted successflly")
+  } catch(err) {
+      console.error(err);
+      toast.error("Failed to add task");
   }
+  };
 
   const updateTaskStatus = async (taskId: string, status: TaskStatus) => {
     try {
@@ -138,28 +142,41 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
   }
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string)
-  }
+    const taskId = event.active.id as string;
+    setActiveId(taskId);
+    dragStartContainerRef.current = findContainer(taskId) as TaskStatus | null;
 
-  const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event
-    if (!over) return
+    // Snapshot tasks so we can revert if the drag is cancelled / dropped outside.
+    dragStartTasksSnapshotRef.current = Object.fromEntries(
+      Object.entries(tasks).map(([k, v]) => [k, [...v]])
+    ) as unknown as Tasks;
+  };
 
-    const taskId = active.id as string
-    const activeContainer = findContainer(taskId)
-    if (!activeContainer) return
+  function handleDragOver(event: DragOverEvent) {
+    const { active, over } = event;
+    if (!over) return;
 
-    let targetStatus: TaskStatus | null = null
+    const taskId = active.id as string;
+    const activeContainer = findContainer(taskId);
+    if (!activeContainer) return;
+
+    // Tasks in Done cannot be moved out (we'll also enforce on dragEnd).
+    if (activeContainer === 'done') return;
+
+    let targetStatus: TaskStatus | null = null;
 
     if (over.id.toString().startsWith("column-")) {
-      targetStatus = over.id.toString().replace("column-", "") as TaskStatus
+      targetStatus = over.id
+        .toString()
+        .replace("column-", "") as TaskStatus;
     } else {
-      const overContainer = findContainer(over.id as string)
-      if (!overContainer) return
-      targetStatus = overContainer
+      const overContainer = findContainer(over.id as string);
+      if (!overContainer) return;
+      targetStatus = overContainer;
     }
 
-    if (!targetStatus || targetStatus === activeContainer) return
+    if (!targetStatus || targetStatus === activeContainer) return;
+    const toStatus: TaskStatus = targetStatus;
 
     // Optimistic UI
     setTasks((prev) => {
@@ -167,99 +184,152 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
       const activeIndex = activeItems.findIndex((item) => item.id === taskId)
       if (activeIndex === -1) return prev
 
-      const movedTask = activeItems[activeIndex]
+    const movedTask = activeItems[activeIndex];
 
       return {
         ...prev,
         [activeContainer]: prev[activeContainer].filter(
-          (item) => item.id !== taskId,
+          (item) => item.id !== taskId
         ),
-        [targetStatus]: [...prev[targetStatus], movedTask],
-      }
-    })
+        [toStatus]: [...prev[toStatus], movedTask],
+      };
+    });
 
-    console.log("target:", targetStatus)
-
-    // Async DB update (non-blocking)
-    if (lastSentStatusRef.current[taskId] !== targetStatus) {
-      lastSentStatusRef.current[taskId] = targetStatus
-      void updateTaskStatus(taskId, targetStatus)
-    }
+    console.log("target:", targetStatus);
   }
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
     if (!over) {
-      setActiveId(null)
-      return
+      if (dragStartTasksSnapshotRef.current) {
+        setTasks(dragStartTasksSnapshotRef.current);
+      }
+      setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
+      return;
     }
 
-    const activeContainer = findContainer(active.id as string)
+    const taskId = active.id as string;
+    const originContainer = dragStartContainerRef.current;
+
+    const activeContainer = findContainer(active.id as string);
     if (!activeContainer) {
-      setActiveId(null)
-      return
+      if (dragStartTasksSnapshotRef.current) {
+        setTasks(dragStartTasksSnapshotRef.current);
+      }
+      setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
+      return;
     }
+    
+    if (over.id.toString().startsWith('column-')) {
+      const containerId = over.id.toString().replace('column-', '') as keyof Tasks;
 
-    if (over.id.toString().startsWith("column-")) {
-      const containerId = over.id
-        .toString()
-        .replace("column-", "") as keyof Tasks
+      // Tasks cannot be moved OUT of done.
+      if (originContainer === 'done' && containerId !== 'done') {
+        if (dragStartTasksSnapshotRef.current) {
+          setTasks(dragStartTasksSnapshotRef.current);
+        }
+        setActiveId(null);
+        dragStartContainerRef.current = null;
+        dragStartTasksSnapshotRef.current = null;
+        return;
+      }
+
       if (activeContainer !== containerId) {
-        setTasks((prev) => {
-          const activeItems = prev[activeContainer]
-          const activeIndex = activeItems.findIndex(
-            (item) => item.id === active.id,
-          )
+        setTasks(prev => {
+          const activeItems = prev[activeContainer];
+          const activeIndex = activeItems.findIndex(item => item.id === active.id);
           return {
             ...prev,
-            [activeContainer]: prev[activeContainer].filter(
-              (item) => item.id !== active.id,
-            ),
-            [containerId]: [
-              ...prev[containerId],
-              prev[activeContainer][activeIndex],
-            ],
+            [activeContainer]: prev[activeContainer].filter(item => item.id !== active.id),
+            [containerId]: [...prev[containerId], prev[activeContainer][activeIndex]]
+          };
+        });
+      }
+
+      // Only persist when the task is dropped into a different column
+      if (originContainer && containerId && originContainer !== containerId) {
+        try {
+          await updateTaskStatus(taskId, containerId as TaskStatus);
+          if (containerId === "done") {
+            await options?.onMovedToDone?.(taskId);
           }
-        })
+        } catch {
+          toast.error("Failed to update task status");
+          if (dragStartTasksSnapshotRef.current) {
+            setTasks(dragStartTasksSnapshotRef.current);
+          }
+        }
       }
-      setActiveId(null)
-      return
+      setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
+      return;
     }
-
-    const overContainer = findContainer(over.id as string)
+    
+    const overContainer = findContainer(over.id as string);
     if (!overContainer) {
-      setActiveId(null)
-      return
+      if (dragStartTasksSnapshotRef.current) {
+        setTasks(dragStartTasksSnapshotRef.current);
+      }
+      setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
+      return;
     }
 
+    // Tasks cannot be moved OUT of done.
+    if (originContainer === 'done' && overContainer !== 'done') {
+      if (dragStartTasksSnapshotRef.current) {
+        setTasks(dragStartTasksSnapshotRef.current);
+      }
+      setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
+      return;
+    }
+    
     if (activeContainer === overContainer) {
-      const activeIndex = tasks[activeContainer].findIndex(
-        (task) => task.id === active.id,
-      )
-      const overIndex = tasks[overContainer].findIndex(
-        (task) => task.id === over.id,
-      )
-
+      const activeIndex = tasks[activeContainer].findIndex(task => task.id === active.id);
+      const overIndex = tasks[overContainer].findIndex(task => task.id === over.id);
+      
       if (activeIndex !== overIndex) {
-        setTasks((prev) => ({
+        setTasks(prev => ({
           ...prev,
-          [overContainer]: arrayMove(
-            prev[overContainer],
-            activeIndex,
-            overIndex,
-          ),
-        }))
+          [overContainer]: arrayMove(prev[overContainer], activeIndex, overIndex)
+        }));
       }
     }
-    setActiveId(null)
-  }
+
+    // Only persist when the task is dropped into a different column
+    if (originContainer && overContainer && originContainer !== overContainer) {
+      try {
+        await updateTaskStatus(taskId, overContainer as TaskStatus);
+        if (overContainer === "done") {
+          await options?.onMovedToDone?.(taskId);
+        }
+      } catch {
+        toast.error("Failed to update task status");
+        if (dragStartTasksSnapshotRef.current) {
+          setTasks(dragStartTasksSnapshotRef.current);
+        }
+      }
+    }
+    setActiveId(null);
+    dragStartContainerRef.current = null;
+    dragStartTasksSnapshotRef.current = null;
+  };
 
   const findActiveTask = () => {
-    if (!activeId) return null
-    const container = findContainer(activeId)
-    if (!container) return null
-    return tasks[container].find((task) => task.id === activeId) || null
-  }
+    if (!activeId) return null;
+    const container = findContainer(activeId);
+    if (!container) return null;
+    return tasks[container].find(task => task.id === activeId) || null;
+  };
 
   return {
     tasks,
@@ -271,5 +341,5 @@ export const useKanbanBoard = (initialTasks: Tasks) => {
     handleAddTask,
     handleUpdateTask,
     handleDeleteTask,
-  }
-}
+  };
+};

@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { mapTaskResponseToTask, Task, TaskResponse, Tasks } from "../sections/project/KanbanBoard/types";
 import { get } from "@/Api";
-import { UserStatus } from "@/types/User";
 
 export const useTask = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -12,16 +11,10 @@ export const useTask = () => {
     inProgress: [],
     done: [],
   });
-  const [projectMembers, setProjectMember] = useState<UserStatus[] | null>(null);
   const [activeId] = useState<string | null>(null);
 
   const fetchTasks = async (projectId: string): Promise<TaskResponse[]> => {
     const response = await get<TaskResponse[]>(`/api/project/${projectId}/tasks/`);
-    return response;
-  };
-
-  const fetchMembers = async(projectId: string): Promise<UserStatus[]> => {
-    const response = await get<UserStatus[]>(`/api/project/${projectId}/members/`);
     return response;
   };
 
@@ -42,8 +35,6 @@ export const useTask = () => {
               organizedTasks[task.status as keyof Tasks].push(mappedTask);
             }
           });
-          const members = await fetchMembers(projectId);
-          setProjectMember(members)
           setFetchedTasks(organizedTasks);
         } catch (error) {
           console.error("Error fetching tasks:", error);
@@ -69,7 +60,5 @@ export const useTask = () => {
     setFetchedTasks,
     activeId,
     findActiveTask,
-    projectMembers,
-    setProjectMember
   };
 };

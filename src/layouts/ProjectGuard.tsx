@@ -11,7 +11,9 @@ type ProjectBossResponse = {
 export default function ProjectGuard() {
   const { projectId } = useParams()
   const location = useLocation()
-  const [allowed, setAllowed] = useState<boolean | null>(null)
+  const [guardStatus, setGuardStatus] = useState<
+    "loading" | "active" | "closed" | "forbidden"
+  >("loading")
   const [bossSetup, setBossSetup] = useState<boolean | null>(null)
 
   const isSetupRoute = useMemo(() => {
@@ -20,15 +22,36 @@ export default function ProjectGuard() {
     return normalized.endsWith(`/project/${projectId}/setup`)
   }, [location.pathname, projectId])
 
+  const isProjectEndRoute = useMemo(() => {
+    if (!projectId) return false
+    const normalized = location.pathname.replace(/\/+$/, "")
+    return normalized.endsWith(`/project/${projectId}/project-end`)
+  }, [location.pathname, projectId])
+
   useEffect(() => {
     if (!projectId) return
 
     const checkAccess = async () => {
       try {
         await get(`/api/project/${projectId}/access/`)
-        setAllowed(true)
+        setGuardStatus("active")
       } catch {
-        setAllowed(false)
+        // Access can be denied because the project is closed (status != Working).
+        // In that case, redirect to the project-end page instead of showing NotFound.
+        try {
+          const projects = await get<Array<{ project_id: string; status?: string }>>(
+            "/api/project/get_user_project/"
+          )
+          const p = projects?.find((x) => String(x.project_id) === String(projectId))
+          const status = String(p?.status ?? "").toLowerCase()
+          if (p && (status === "closed" || status === "done")) {
+            setGuardStatus("closed")
+            return
+          }
+        } catch {
+          // ignore; fall through to forbidden
+        }
+        setGuardStatus("forbidden")
       }
     }
 
@@ -37,11 +60,12 @@ export default function ProjectGuard() {
 
   useEffect(() => {
     if (!projectId) return
+    if (guardStatus !== "active") return
 
     const fetchBoss = async () => {
       try {
         const data = await get<ProjectBossResponse>(
-          `/api/game/project/${projectId}/boss/`,
+          `/api/game/project/${projectId}/boss/`
         )
         setBossSetup(Boolean(data?.boss))
       } catch {
@@ -51,9 +75,9 @@ export default function ProjectGuard() {
     }
 
     fetchBoss()
-  }, [projectId, location.pathname])
+  }, [projectId, location.pathname, guardStatus])
 
-  if (allowed === null || bossSetup === null) {
+  if (guardStatus === 'loading' || bossSetup === null) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingScreen message="Checking your quest access..." />
@@ -61,18 +85,29 @@ export default function ProjectGuard() {
     )
   }
 
-  if (!allowed) {
+  if (guardStatus === "closed") {
+    // If the project is closed, allow the nested /project-end route to render.
+    // Otherwise redirect the user to it.
+    if (isProjectEndRoute) {
+      return <Outlet />
+    }
     return (
-      <div>
-        <NotFound></NotFound>
-      </div>
+      <Navigate
+        replace
+        to={`/project/${projectId}/project-end`}
+        state={{ projectId }}
+      />
     )
+  }
+
+  if (guardStatus === "forbidden") {
+    return <div><NotFound></NotFound></div>
   }
 
   // Routing rule:
   // - boss NOT set up => user can only access /setup
   // - boss IS set up => user can only access the main project page (index)
-  if (bossSetup === false && !isSetupRoute) {
+  if (bossSetup === false && !isSetupRoute && !isProjectEndRoute) {
     return <Navigate replace to={`/project/${projectId}/setup`} />
   }
 

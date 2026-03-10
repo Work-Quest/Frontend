@@ -14,6 +14,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 interface TaskItemProps {
+  id: string;
+  task: Task;
+  disabled?: boolean;
+  onDelete?: (taskId: string) => void;
   id: string
   task: Task
   projectMember: UserStatus[]
@@ -28,6 +32,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onDelete,
   onUpdateTask,
 }) => {
+export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, onDelete }) => {
+  const isDone = disabled || task.status === "done";
   const {
     attributes,
     listeners,
@@ -35,7 +41,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id })
+  } = useSortable({ id, disabled });
 
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false)
   const [showEditOverlay, setShowEditOverlay] = useState(false)
@@ -44,7 +50,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-  }
+  };
 
   const handleDelete = () => {
     if (!task.id) return
@@ -57,13 +63,21 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
-        className={`p-3 rounded-lg border border-brown ${
+        {...(disabled ? {} : attributes)}
+        {...(disabled ? {} : listeners)}
+        className={`p-3 rounded-lg border ${
+          isDone
+            ? "border-gray-300 bg-gray-100"
+            : "border-brown bg-offWhite"
+        } ${
           isDragging
             ? "border-dashed scale-105 bg-white/80 shadow-lg"
-            : "bg-offWhite shadow-sm hover:shadow-md hover:scale-[1.01]"
-        } flex flex-col gap-2 transition-all cursor-grab active:cursor-grabbing`}
+            : isDone
+              ? "shadow-sm"
+              : "shadow-sm hover:shadow-md hover:scale-[1.01]"
+        } flex flex-col gap-2 transition-all ${
+          disabled ? "cursor-default" : "cursor-grab active:cursor-grabbing"
+        }`}
       >
         <div className="flex justify-between items-start">
           <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">
@@ -108,7 +122,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           </DropdownMenu>
         </div>
 
-        <div className="h-px bg-brown w-full"></div>
+        <div className={`h-px w-full ${isDone ? "bg-gray-300" : "bg-brown"}`}></div>
         <div className="flex flex-wrap gap-2">
           <div
             className={`tag tag-priority ${
@@ -153,5 +167,5 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         }}
       />
     </>
-  )
-}
+  );
+};
