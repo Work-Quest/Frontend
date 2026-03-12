@@ -58,6 +58,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     }),
   )
 
+  const activeTask = findActiveTask()
+  const activeAssignees =
+    activeTask?.assigneesName?.length ? activeTask.assigneesName : activeTask?.assignees ?? []
+
   return (
     <div className="p-4">
       <DndContext
@@ -96,34 +100,31 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               style={{ boxShadow: "0 8px 12px rgba(0, 0, 0, 0.15)" }}
             >
               <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">
-                {findActiveTask()?.title}
+                {activeTask?.title}
               </h4>
               <div className="h-px bg-brown w-full"></div>
               <div className="flex flex-wrap gap-2">
                 <div
                   className={`tag tag-priority ${
-                    findActiveTask()?.priority === "Low"
+                    activeTask?.priority === "Low"
                       ? "tag-priority-low"
-                      : findActiveTask()?.priority === "Medium"
+                      : activeTask?.priority === "Medium"
                         ? "tag-priority-medium"
-                        : findActiveTask()?.priority === "High"
+                        : activeTask?.priority === "High"
                           ? "tag-priority-high"
                           : "tag-priority-urgent"
                   }`}
                 >
-                  {findActiveTask()?.priority}
+                  {activeTask?.priority}
                 </div>
                 <div className="tag tag-iteration">
-                  {findActiveTask()?.iteration}
+                  {activeTask?.iteration}
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                {(findActiveTask()?.assigneesName?.length
-                  ? findActiveTask()?.assigneesName
-                  : findActiveTask()?.assignees ?? []
-                ).map((assignee) => (
+                {activeAssignees.map((assignee) => (
                   <div
-                    key={`${findActiveTask()?.id}-${assignee}`}
+                    key={`${activeTask?.id ?? "task"}-${assignee}`}
                     className="tag tag-name"
                   >
                     {assignee}
