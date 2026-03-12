@@ -43,7 +43,6 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
   const [deadline, setDeadline] = useState<string>("");
   const [defaultDeadline, setDefaultDeadline] = useState<string>("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-
   // Derive project deadline from global projects list
   useEffect(() => {
     if (!projectId || !projects || projects.length === 0) return;
@@ -59,11 +58,17 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
     setDefaultDeadline(formatted);
   }, [projectId, projects]);
 
-    const memberOptions = React.useMemo<MultiComboboxOption[]>(() => {
-    return projectMember?.map(member => ({
-      value: member.id,
-      label: member.name
-    })) ?? []
+  const memberOptions = React.useMemo<MultiComboboxOption[]>(() => {
+    return (
+      projectMember?.map((member) => ({
+        value: member.id,
+        label: member.name,
+      })) ?? []
+    )
+  }, [projectMember])
+
+  const memberNameById = React.useMemo(() => {
+    return new Map((projectMember ?? []).map((m) => [m.id, m.name] as const))
   }, [projectMember])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -77,6 +82,9 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
       priority,
       iteration: null,
       assignees: selectedMembers,
+      assigneesName: selectedMembers
+        .map((memberId) => memberNameById.get(memberId) ?? memberId)
+        .filter(Boolean),
       status: columnId,
       description: null,
       deadline: deadline || null,
@@ -193,30 +201,13 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
               />
             </div>
 
-            {/* <div className="space-y-2">
-             
-              <Label
-                htmlFor="assignees"
-                className="font-['Baloo_2'] text-darkBrown"
-              >
-                Assignees (comma separated)
-              </Label>
-              <Input
-                id="assignees"
-                value={assignees}
-                onChange={(e) => setAssignees(e.target.value)}
-                placeholder="You"
-                className="font-['Baloo_2'] text-darkBrown"
-              />
-            </div> */}
-
             <MultiCombobox
               label="Assignees"
               placeholder="Select Assignee"
               searchPlaceholder="Search Assignee"
               options={memberOptions}
               value={selectedMembers}
-            onChange={setSelectedMembers}
+              onChange={setSelectedMembers}
             />
 
             <DialogFooter>

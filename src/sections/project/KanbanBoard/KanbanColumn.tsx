@@ -1,21 +1,19 @@
-import React from "react";
-import { useDroppable } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { TaskItem } from "./TaskItem";
-import { Task, Tasks, TaskStatus } from "./types";
-import { AddTaskOverlay } from "./AddTaskOverlay";
-import { UserStatus } from "@/types/User";
+import React from "react"
+import { useDroppable } from "@dnd-kit/core"
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { TaskItem } from "./TaskItem"
+import { Task, Tasks, TaskStatus } from "./types"
+import { AddTaskOverlay } from "./AddTaskOverlay"
+import { UserStatus } from "@/types/User"
 
 interface KanbanColumnProps {
-  id: keyof Tasks;
-  title: string;
-  tasks: Task[];
-  onAddTask: (column: TaskStatus, task: Task) => void;
-  onDeleteTask: (taskId: string) => void;
-  projectMember: UserStatus[];
+  id: keyof Tasks
+  title: string
+  tasks: Task[]
+  onAddTask: (column: TaskStatus, task: Task) => void
+  onUpdateTask: (task: Task) => void
+  onDeleteTask: (taskId: string) => void
+  projectMember: UserStatus[]
 }
 
 export const KanbanColumn: React.FC<KanbanColumnProps> = ({
@@ -23,16 +21,15 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   title,
   tasks,
   onAddTask,
+  onUpdateTask,
   onDeleteTask,
   projectMember,
 }) => {
-  const { setNodeRef } = useDroppable({ id: `column-${id}` });
+  const { setNodeRef } = useDroppable({ id: `column-${id}` })
 
   const handleAddTask = (task: Task) => {
-    onAddTask(id, task);
-  };
-
-  
+    onAddTask(id, task)
+  }
 
   return (
     <div ref={setNodeRef} className="w-full flex flex-col">
@@ -43,7 +40,11 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         </p>
       </div>
 
-      <AddTaskOverlay columnId={id} projectMember={projectMember} onAddTask={handleAddTask} />
+      <AddTaskOverlay
+        columnId={id}
+        projectMember={projectMember}
+        onAddTask={handleAddTask}
+      />
 
       <SortableContext
         items={tasks.map((task) => task.id)}
@@ -55,11 +56,13 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
               key={task.id}
               id={task.id}
               task={task}
+              projectMember={projectMember}
               onDelete={onDeleteTask}
+              onUpdateTask={onUpdateTask}
             />
           ))}
         </div>
       </SortableContext>
     </div>
-  );
-};
+  )
+}

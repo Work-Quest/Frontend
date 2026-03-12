@@ -5,11 +5,11 @@ export interface Item {
   name: string
 }
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
-
-if (!BASE_URL) {
-  throw new Error("VITE_API_URL is not defined in your .env file")
-}
+// Empty string = same-origin (for Vite dev proxy); undefined = local backend fallback
+const BASE_URL =
+  import.meta.env.VITE_API_URL === ""
+    ? ""
+    : import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
 
 const TIMEOUT_MS = 10000
 
@@ -45,7 +45,7 @@ api.interceptors.request.use(
   (error) => {
     stopLoading()
     return Promise.reject(error)
-  }
+  },
 )
 
 api.interceptors.response.use(
@@ -56,16 +56,15 @@ api.interceptors.response.use(
   (error) => {
     stopLoading()
     return Promise.reject(error)
-  }
+  },
 )
-
 
 // FETCH ITEMS (GET)
 export async function get<T>(url: string): Promise<T> {
   try {
     const res = await api.get<T>(`${url}`)
-     if (!res.status.toString().startsWith("2")) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+    if (!res.status.toString().startsWith("2")) {
+      throw new Error(`HTTP error! status: ${res.status}`)
     }
     return res.data
   } catch (error) {
@@ -79,11 +78,25 @@ export async function post<T, U>(url: string, data: T): Promise<U> {
   try {
     const res = await api.post<U>(`${url}`, data)
     if (!res.status.toString().startsWith("2")) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+      throw new Error(`HTTP error! status: ${res.status}`)
     }
     return res.data
   } catch (error) {
     console.error("Post request failed:", error)
+    throw error
+  }
+}
+
+// PUT DATA (GENERIC)
+export async function put<T, U>(url: string, data: T): Promise<U> {
+  try {
+    const res = await api.put<U>(`${url}`, data)
+    if (!res.status.toString().startsWith("2")) {
+      throw new Error(`HTTP error! status: ${res.status}`)
+    }
+    return res.data
+  } catch (error) {
+    console.error("Put request failed:", error)
     throw error
   }
 }
@@ -93,7 +106,7 @@ export async function patch<T, U>(url: string, data: T): Promise<U> {
   try {
     const res = await api.patch<U>(`${url}`, data)
     if (!res.status.toString().startsWith("2")) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+      throw new Error(`HTTP error! status: ${res.status}`)
     }
     return res.data
   } catch (error) {

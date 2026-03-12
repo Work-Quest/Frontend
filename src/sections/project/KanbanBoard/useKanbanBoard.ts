@@ -1,12 +1,20 @@
 "use client"
 
-import { useEffect, useRef, useState } from 'react';
-import { DragStartEvent, DragOverEvent, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
-import { mapTaskResponseToTask, mapTaskToTaskResponse, Task, TaskResponse, Tasks, TaskStatus } from "./types";
-import { post, del, patch } from '@/Api';
-import { useParams } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { useEffect, useRef, useState } from "react"
+import { DragStartEvent, DragOverEvent, DragEndEvent } from "@dnd-kit/core"
+import { arrayMove } from "@dnd-kit/sortable"
+import {
+  mapTaskResponseToTask,
+  mapTaskToTaskResponse,
+  PRIORITY_TO_NUMBER,
+  Task,
+  TaskResponse,
+  Tasks,
+  TaskStatus,
+} from "./types"
+import { post, del, patch, put } from "@/Api"
+import { useParams } from "react-router-dom"
+import toast from "react-hot-toast"
 
 type UseKanbanBoardOptions = {
   onMovedToDone?: (taskId: string) => void | Promise<void>
@@ -35,33 +43,77 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
     return null;
   };
 
-  const handleAddTask = async (
-    columnId: TaskStatus,
-    task: Task
-  ) => {
+  const handleAddTask = async (columnId: TaskStatus, task: Task) => {
     try {
-      const mappedTask = mapTaskToTaskResponse(task);
-      const res = await post<TaskResponse, TaskResponse>(`/api/project/${projectId}/tasks/create/`, mappedTask);
-      const createdTask = mapTaskResponseToTask(res);
-      console.log("Created Task:", createdTask);
+      const mappedTask = mapTaskToTaskResponse(task)
+      const res = await post<TaskResponse, TaskResponse>(
+        `/api/project/${projectId}/tasks/create/`,
+        mappedTask,
+      )
+      const createdTask = {
+        ...mapTaskResponseToTask(res),
+        // ensure UI shows assignees immediately after submit
+        assignees: task.assignees,
+        assigneesName: task.assigneesName,
+      }
+      console.log("Created Task:", createdTask)
 
-      console.log(task.assignees);
+      console.log(task.assignees)
       if (task.assignees.length > 0) {
         for (const assignee of task.assignees) {
           // Assuming there's an API endpoint to assign users to tasks
-          await post(`/api/project/${projectId}/tasks/${createdTask.id}/assign/`, { "project_member_id": assignee });
-          console.log(`Assigned ${assignee} to task ${createdTask.id}`);
+          await post(
+            `/api/project/${projectId}/tasks/${createdTask.id}/assign/`,
+            { project_member_id: assignee },
+          )
+          console.log(`Assigned ${assignee} to task ${createdTask.id}`)
         }
       }
       // update state without refetch
-      setTasks(prev => ({
+      setTasks((prev) => ({
         ...prev,
         [columnId]: [...prev[columnId], createdTask],
-      }));
-      toast.success("Task added successfully");
+      }))
+      toast.success("Task added successfully")
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to add task");
+      console.error(err)
+      toast.error("Failed to add task")
+    }
+  }
+
+  const handleUpdateTask = async (updatedTask: Task) => {
+    try {
+      const mappedTask = mapTaskToTaskResponse(updatedTask)
+      await put<Record<string, unknown>, TaskResponse>(
+        `/api/project/${projectId}/tasks/${updatedTask.id}/update/`,
+        {
+          task_name: mappedTask.task_name,
+          priority: PRIORITY_TO_NUMBER[updatedTask.priority],
+          description: mappedTask.description,
+          deadline: mappedTask.deadline,
+          status: mappedTask.status,
+        },
+      )
+      setTasks((prev) => {
+        const newTasks = { ...prev }
+        for (const column in newTasks) {
+          const idx = newTasks[column as keyof Tasks].findIndex(
+            (t) => t.id === updatedTask.id,
+          )
+          if (idx !== -1) {
+            newTasks[column as keyof Tasks] = [
+              ...newTasks[column as keyof Tasks],
+            ]
+            newTasks[column as keyof Tasks][idx] = updatedTask
+            break
+          }
+        }
+        return newTasks
+      })
+      toast.success("Task updated successfully")
+    } catch (err) {
+      console.error(err)
+      toast.error("Failed to update task")
     }
   };
 
@@ -82,21 +134,17 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
   }
   };
 
-  const updateTaskStatus = async (
-      taskId: string,
-      status: TaskStatus
-    ) => {
-      try {
-        return await patch<{ status: string }, TaskResponse>(
-          `/api/project/${projectId}/tasks/${taskId}/move/`,
-          {status}
-        );
-      } catch (err) {
-        console.error(err);
-        throw err;
-      }
-};
-
+  const updateTaskStatus = async (taskId: string, status: TaskStatus) => {
+    try {
+      await patch<{ status: string }, TaskResponse>(
+        `/api/project/${projectId}/tasks/${taskId}/move/`,
+        { status },
+      )
+    } catch (err) {
+      console.error(err)
+      toast.error("Failed to update task status")
+    }
+  }
 
   const handleDragStart = (event: DragStartEvent) => {
     const taskId = event.active.id as string;
@@ -137,13 +185,11 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
 
     // Optimistic UI
     setTasks((prev) => {
-      const activeItems = prev[activeContainer];
-      const activeIndex = activeItems.findIndex(
-        (item) => item.id === taskId
-      );
-      if (activeIndex === -1) return prev;
+      const activeItems = prev[activeContainer]
+      const activeIndex = activeItems.findIndex((item) => item.id === taskId)
+      if (activeIndex === -1) return prev
 
-      const movedTask = activeItems[activeIndex];
+    const movedTask = activeItems[activeIndex];
 
       return {
         ...prev,
@@ -298,6 +344,7 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
     handleDragEnd,
     findActiveTask,
     handleAddTask,
+    handleUpdateTask,
     handleDeleteTask,
   };
 };

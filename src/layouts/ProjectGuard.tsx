@@ -2,6 +2,7 @@ import { Outlet, useLocation, useParams, Navigate } from "react-router-dom"
 import { useEffect, useMemo, useState } from "react"
 import { get } from "@/Api"
 import NotFound from "@/pages/NotFound"
+import LoadingScreen from "@/components/LoadingScreen"
 
 type ProjectBossResponse = {
   boss: string | null
@@ -76,9 +77,13 @@ export default function ProjectGuard() {
     fetchBoss()
   }, [projectId, location.pathname, guardStatus])
 
-  if (guardStatus === "loading") {
-    return <div>Loading...</div>
-}
+  if (guardStatus === 'loading') {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <LoadingScreen message="Checking your quest access..." />
+      </div>
+    )
+  }
 
   if (guardStatus === "closed") {
     // If the project is closed, allow the nested /project-end route to render.
@@ -97,11 +102,6 @@ export default function ProjectGuard() {
 
   if (guardStatus === "forbidden") {
     return <div><NotFound></NotFound></div>
-  }
-
-  // active project: wait for boss setup check
-  if (bossSetup === null) {
-    return <div>Loading...</div>
   }
 
   // Routing rule:

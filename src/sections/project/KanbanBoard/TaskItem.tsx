@@ -1,18 +1,36 @@
-import React, { useState } from "react";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { IoTrashOutline } from "react-icons/io5";
-import { Task } from "./types";
-import { DeleteConfirmationOverlay } from "./DeleteConfirmationOverlay";
+import React, { useState } from "react"
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { MoreVertical, Pencil, Trash2 } from "lucide-react"
+import { Task } from "./types"
+import { UserStatus } from "@/types/User"
+import { DeleteConfirmationOverlay } from "./DeleteConfirmationOverlay"
+import { EditTaskOverlay } from "./EditTaskOverlay"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface TaskItemProps {
   id: string;
   task: Task;
   disabled?: boolean;
-  onDelete?: (taskId: string) => void;
+  projectMember: UserStatus[]
+  onDelete?: (taskId: string) => void
+  onUpdateTask?: (task: Task) => void
 }
 
-export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, onDelete }) => {
+export const TaskItem: React.FC<TaskItemProps> = ({
+  id,
+  task,
+  disabled,
+  projectMember,
+  onDelete,
+  onUpdateTask,
+}) => {
+// export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, onDelete }) => {
   const isDone = disabled || task.status === "done";
   const {
     attributes,
@@ -23,7 +41,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, 
     isDragging,
   } = useSortable({ id, disabled });
 
-  const [showOverlay, setShowOverlay] = useState(false);
+  const [showDeleteOverlay, setShowDeleteOverlay] = useState(false)
+  const [showEditOverlay, setShowEditOverlay] = useState(false)
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -32,10 +51,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, 
   };
 
   const handleDelete = () => {
-    if (!task.id) return;
-    onDelete?.(task.id);
-    setShowOverlay(false);
-  };
+    if (!task.id) return
+    onDelete?.(task.id)
+    setShowDeleteOverlay(false)
+  }
 
   return (
     <>
@@ -59,39 +78,46 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, 
         }`}
       >
         <div className="flex justify-between items-start">
-          <h4
-            className={`text-base font-medium font-['Baloo_2'] ${
-              isDone ? "text-gray-700" : "text-darkBrown"
-            }`}
-          >
+          <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">
             {task.title}
           </h4>
-          <div
-            className="cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              setShowOverlay(true)
-            }}
-            {...{
-              "data-no-dnd": true,
-              onPointerDown: (e) => {
-                e.stopPropagation()
-              },
-              onKeyDown: (e) => {
-                e.stopPropagation()
-              },
-              draggable: false,
-            }}
-          >
-            <IoTrashOutline
-              className={`text-xl hover:scale-110 transition-transform ${
-                isDone
-                  ? "text-gray-600 hover:text-red"
-                  : "text-darkBrown hover:text-red"
-              }`}
-            />
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="p-1 rounded hover:bg-cream/50 text-brown hover:text-darkBrown transition-colors"
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="min-w-[140px] bg-offWhite border-lightBrown font-['Baloo_2']"
+            >
+              <DropdownMenuItem
+                className="cursor-pointer focus:bg-cream"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowEditOverlay(true)
+                }}
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowDeleteOverlay(true)
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className={`h-px w-full ${isDone ? "bg-gray-300" : "bg-brown"}`}></div>
@@ -101,10 +127,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, 
               task.priority === "Low"
                 ? "tag-priority-low"
                 : task.priority === "Medium"
-                ? "tag-priority-medium"
-                : task.priority === "High"
-                ? "tag-priority-high"
-                : "tag-priority-urgent"
+                  ? "tag-priority-medium"
+                  : task.priority === "High"
+                    ? "tag-priority-high"
+                    : "tag-priority-urgent"
             }`}
           >
             {task.priority}
@@ -112,21 +138,34 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, 
           <div className="tag tag-iteration">{task.iteration}</div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {task.assignees.map((assignee) => (
-            <div key={`${task.id}-${assignee}`} className="tag tag-name">
-              {assignee}
-            </div>
-          ))}
+          {(task.assigneesName?.length ? task.assigneesName : task.assignees).map(
+            (assignee) => (
+              <div key={`${task.id}-${assignee}`} className="tag tag-name">
+                {assignee}
+              </div>
+            ),
+          )}
         </div>
       </div>
 
-      {showOverlay && (
+      {showDeleteOverlay && (
         <DeleteConfirmationOverlay
           task={task}
-          onCancel={() => setShowOverlay(false)}
+          onCancel={() => setShowDeleteOverlay(false)}
           onConfirm={handleDelete}
         />
       )}
+
+      <EditTaskOverlay
+        task={task}
+        open={showEditOverlay}
+        onOpenChange={setShowEditOverlay}
+        projectMember={projectMember}
+        onUpdateTask={(updated) => {
+          onUpdateTask?.(updated)
+          setShowEditOverlay(false)
+        }}
+      />
     </>
   );
 };
