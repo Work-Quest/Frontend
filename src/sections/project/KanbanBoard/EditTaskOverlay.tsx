@@ -65,6 +65,10 @@ export const EditTaskOverlay: React.FC<EditTaskOverlayProps> = ({
     [projectMember],
   )
 
+  const memberNameById = React.useMemo(() => {
+    return new Map((projectMember ?? []).map((m) => [m.id, m.name] as const))
+  }, [projectMember])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!task) return
@@ -75,6 +79,9 @@ export const EditTaskOverlay: React.FC<EditTaskOverlayProps> = ({
       priority,
       deadline: deadline || null,
       assignees: selectedMembers,
+      assigneesName: selectedMembers
+        .map((memberId) => memberNameById.get(memberId) ?? memberId)
+        .filter(Boolean),
     }
 
     onUpdateTask(updatedTask)

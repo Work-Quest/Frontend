@@ -77,7 +77,7 @@ export default function ProjectGuard() {
     fetchBoss()
   }, [projectId, location.pathname, guardStatus])
 
-  if (guardStatus === 'loading' || bossSetup === null) {
+  if (guardStatus === 'loading') {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <LoadingScreen message="Checking your quest access..." />

@@ -1,27 +1,14 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
-  DAMAGE_LOGS,
-  HP_DATA,
   PROJECT_DATA,
 } from "@/sections/project/constants"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import BossPlaceholder from "@/sections/project/BossPlaceholder"
 import ToggleButton from "@/components/ToggleButton"
 import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard"
-import DamageLog from "@/sections/project/DamageLog/DamageLog"
 import ReviewTask from "@/sections/project/ReviewTask/ReviewTask"
-import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard"
-import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard"
-import { useTask } from "@/hook/useTask"
-import React, { useEffect, useState } from "react";
-import { PROJECT_DATA } from "@/sections/project/constants";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import ToggleButton from "@/components/ToggleButton";
-import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard";
 import DamageLog from "@/sections/project/DamageLog/DamageLog";
-import ReviewTask from "@/sections/project/ReviewTask";
 import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard";
 import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
 import { useTask } from "@/hook/useTask";

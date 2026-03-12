@@ -50,7 +50,12 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
         `/api/project/${projectId}/tasks/create/`,
         mappedTask,
       )
-      const createdTask = mapTaskResponseToTask(res)
+      const createdTask = {
+        ...mapTaskResponseToTask(res),
+        // ensure UI shows assignees immediately after submit
+        assignees: task.assignees,
+        assigneesName: task.assigneesName,
+      }
       console.log("Created Task:", createdTask)
 
       console.log(task.assignees)

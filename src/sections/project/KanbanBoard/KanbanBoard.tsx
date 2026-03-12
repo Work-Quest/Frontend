@@ -118,7 +118,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                {findActiveTask()?.assignees.map((assignee) => (
+                {(findActiveTask()?.assigneesName?.length
+                  ? findActiveTask()?.assigneesName
+                  : findActiveTask()?.assignees ?? []
+                ).map((assignee) => (
                   <div
                     key={`${findActiveTask()?.id}-${assignee}`}
                     className="tag tag-name"

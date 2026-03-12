@@ -18,52 +18,56 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { DamageLogProps } from "./types";
+import {DamageLogEntry, DamageLogProps} from "./types";
 
 const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
   const [showCount, setShowCount] = useState(3);
   const [modalOpen, setModalOpen] = useState(false);
   const [personFilter, setPersonFilter] = useState<string>("only-you");
 
-  const data = logs;
+
+  const damageLogs = useMemo<DamageLogEntry[]>(() => {
+    return logs.map((log) => {
+      const p = log.payload as any;
+      const taskName = p?.task?.task_name as string | undefined;
+      const actorName = p?.actor?.username as string | undefined;
+
+      if (log.event_type === "BOSS_ATTACK") {
+        const targetName = p?.target?.username as string | undefined;
+        const damage = typeof p?.damage === "number" ? (p.damage as number) : 0;
+
+        return {
+          id: log.id,
+          action: taskName ?? log.event_type,
+          timestamp: log.created_at,
+          damageValue: -damage,
+          participants: [targetName].filter(Boolean) as string[],
+        };
+      }
+
+      return {
+        id: log.id,
+        action: taskName ?? log.event_type,
+        timestamp: log.created_at,
+        damageValue: typeof p?.damage === "number" ? (p.damage as number) : 0,
+        participants: [actorName].filter(Boolean) as string[],
+      };
+    });
+  }, [logs]);
 
   const uniqueParticipants = useMemo(() => {
     const set = new Set<string>();
-    data.forEach((log) => log.participants.forEach((p) => set.add(p)));
-    return Array.from(set).sort();
-  }, [data]);
+    damageLogs.forEach((log) => log.participants.forEach((p) => set.add(p)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [damageLogs]);
 
+  // 3) Filter FROM processed logs (since raw logs don't have participants)
   const filteredByPerson = useMemo(() => {
-    if (personFilter === "all" || personFilter === "only-you") return data;
-    return data.filter((log) =>
-      log.participants.some((p) => p.toLowerCase() === personFilter.toLowerCase())
+    if (personFilter === "all" || personFilter === "only-you") return damageLogs;
+    return damageLogs.filter((log) =>
+        log.participants.some((p) => p.toLowerCase() === personFilter.toLowerCase())
     );
-  }, [data, personFilter]);
-  const damageLogs = logs.map((log) => {
-  const p = log.payload as any
-  const taskName = p?.task?.task_name as string | undefined
-  const actorName = p?.actor?.username as string | undefined
-
-  if (log.event_type === "BOSS_ATTACK"){
-    const targetName = p?.target?.username as string | undefined
-    const damage = typeof p?.damage === "number" ? (p.damage as number) : 0
-    return {
-      id: log.id,
-      action: taskName ?? log.event_type,
-      timestamp: log.created_at,
-      damageValue: -(damage),
-      participants: [targetName].filter(Boolean) as string[],
-  }
-  }
-
-  return {
-    id: log.id,
-    action: taskName ?? log.event_type,
-    timestamp: log.created_at,
-    damageValue: typeof p?.damage === "number" ? (p.damage as number) : 0,
-    participants: [actorName].filter(Boolean) as string[],
-  }
-})
+  }, [damageLogs, personFilter]);
 
 
   useEffect(() => {
@@ -91,6 +95,8 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
           No damage logs yet
         </p>
       )}
+
+
       <Button
         variant="shadow"
         className="!bg-orange mr-4 w-full my-4 font-['Baloo_2']"
@@ -122,12 +128,12 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
                 <div className="flex-1 min-h-0 overflow-hidden px-2">
                   <ScrollArea className="h-full">
                     <div className="px-4 pb-4 space-y-3">
-                      {data.length === 0 ? (
+                      {damageLogs.length === 0 ? (
                         <p className="py-6 text-center text-darkBrown/70 font-['Baloo_2']">
                           No damage logs yet
                         </p>
                       ) : (
-                        data.map((log) => (
+                        damageLogs.map((log) => (
                           <DamageLogModalCard key={log.id} log={log} />
                         ))
                       )}

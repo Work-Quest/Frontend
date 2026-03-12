@@ -58,7 +58,7 @@ const MultiCombobox = ({
   const removeSelection = (val: string) => {
     onChange(value.filter((v) => v !== val))
   }
-
+  console.log("combobox", options)
   return (
     <div className="w-full space-y-2">
       {label && (
@@ -121,7 +121,7 @@ const MultiCombobox = ({
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-(--radix-popper-anchor-width) p-0 pointer-events-auto">
+        <PopoverContent className="z-[60] w-(--radix-popper-anchor-width) p-0 pointer-events-auto">
           <Command>
             <CommandInput placeholder={searchPlaceholder} />
             <CommandList>

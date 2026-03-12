@@ -25,7 +25,7 @@ const PRIORITY_HP: Record<string, number> = {
 
 export default function SetupProject() {
   const { fetchedTask } = useTask()
-  const { tasks, handleAddTask, handleDeleteTask } = useKanbanBoard(fetchedTask)
+  const { tasks, handleAddTask, handleDeleteTask, handleUpdateTask } = useKanbanBoard(fetchedTask)
   const { setupBoss, getProjectOwner } = useProjects()
   const { user } = useAuth()
   const navigate = useNavigate()

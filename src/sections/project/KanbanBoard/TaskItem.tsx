@@ -17,9 +17,6 @@ interface TaskItemProps {
   id: string;
   task: Task;
   disabled?: boolean;
-  onDelete?: (taskId: string) => void;
-  id: string
-  task: Task
   projectMember: UserStatus[]
   onDelete?: (taskId: string) => void
   onUpdateTask?: (task: Task) => void
@@ -28,11 +25,12 @@ interface TaskItemProps {
 export const TaskItem: React.FC<TaskItemProps> = ({
   id,
   task,
+  disabled,
   projectMember,
   onDelete,
   onUpdateTask,
 }) => {
-export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, onDelete }) => {
+// export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, onDelete }) => {
   const isDone = disabled || task.status === "done";
   const {
     attributes,
@@ -140,11 +138,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, 
           <div className="tag tag-iteration">{task.iteration}</div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {task.assignees.map((assignee) => (
-            <div key={`${task.id}-${assignee}`} className="tag tag-name">
-              {assignee}
-            </div>
-          ))}
+          {(task.assigneesName?.length ? task.assigneesName : task.assignees).map(
+            (assignee) => (
+              <div key={`${task.id}-${assignee}`} className="tag tag-name">
+                {assignee}
+              </div>
+            ),
+          )}
         </div>
       </div>
 
