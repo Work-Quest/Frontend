@@ -19,6 +19,7 @@ export type GameActionPayload =
     | { act: 'ATTACK'; userId: string }
     | { act: 'DIE'; userId: string }
     | { act: 'REVIVE'; userId: string }
+    | { act: 'SUPPORT'; userId: string }
     | { act: 'BOSS_ULTIMATE' }
     | { act: 'BOSS_ATTACK_USER'; userId: string }
     | { act: 'BOSS_DIE' }

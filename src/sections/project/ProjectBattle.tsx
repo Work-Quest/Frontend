@@ -325,7 +325,12 @@ const ProjectBattle = ({
           </div>
         </div>
       )}
-      <BattleScene users={users} boss={boss} />
+      <BattleScene 
+        users={users} 
+        boss={boss} 
+        projectId={projectId ?? null}
+        myProjectMemberId={myMemberId}
+      />
     </div>
   );
 };

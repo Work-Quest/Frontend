@@ -209,6 +209,21 @@ export const useBattleLogic = (initial: number | ProjectMemberLike[] = 5) => {
             }));
             await wait(1000);
             setUsers(prev => prev.map(u => (u.status === 'shifting_backward') ? { ...u, status: 'idle' } : u));
+        } else if (payload.act === 'SUPPORT') {
+            // Placeholder: reuse die animation until a dedicated support animation exists.
+            // TODO: replace SUPPORT placeholder with real support animation (e.g., buff glow / item pop).
+            if (targetUser.status === 'dead') return;
+            setSequenceRunning(true);
+            setUsers(prev => prev.map(u => {
+                if (u.uid === payload.userId) return { ...u, status: 'dead' };
+                return u;
+            }));
+            await wait(userConfig.actions.dead.duration || 1000);
+            setUsers(prev => prev.map(u => {
+                if (u.uid === payload.userId) return { ...u, status: 'idle' };
+                return u;
+            }));
+            setSequenceRunning(false);
         }
     };
 

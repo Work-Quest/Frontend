@@ -14,6 +14,9 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 import type { ReviewLogEntry, ReviewHistoryEntry, ReviewTaskData } from './types'
+import toast from 'react-hot-toast'
+import { post } from '@/Api'
+import { useGame } from '@/hook/useGame'
 
 const COMMENT_PREVIEW_LEN = 90
 
@@ -22,9 +25,27 @@ type ReviewTaskModalProps = {
   onOpenChange: (open: boolean) => void
   /** Single source: pass API data here later; when null/undefined use mock. */
   data: ReviewTaskData
+  projectId: string | null
+  onSupportApplied?: (receiverProjectMemberIds: string[]) => void
 }
 
-export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({ open, onOpenChange, data }) => {
+type ReviewReportResponseRow = {
+  id: string
+  report: {
+    report_id: string
+  }
+  receiver: {
+    project_member_id: string
+  }
+}
+
+export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
+  open,
+  onOpenChange,
+  data,
+  projectId,
+  onSupportApplied,
+}) => {
   const { latestLogs, otherLogsOptions, history } = data
 
   const defaultLatestSelectedId = latestLogs[1]?.id ?? latestLogs[0]?.id ?? ''
@@ -34,6 +55,9 @@ export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({ open, onOpenCh
   const [selectedOtherLogId, setSelectedOtherLogId] = useState<string>('')
   const [reviewText, setReviewText] = useState('')
   const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  const { playerSupport } = useGame(projectId ?? undefined)
 
   const selectedOtherLog = otherLogsOptions.find((log) => log.id === selectedOtherLogId)
 
@@ -50,25 +74,45 @@ export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({ open, onOpenCh
   }
 
   const handleSubmitReview = async () => {
+    if (!projectId) return
     if (!selectedLogId || !reviewText.trim()) return
+    if (submitting) return
 
     const allLogs = [...latestLogs, ...otherLogsOptions]
     const targetLog = allLogs.find((log) => log.id === selectedLogId)
     if (!targetLog) return
 
-    const payload = {
-      logId: targetLog.id,
-      source: selectedSource,
-      comment: reviewText.trim(),
+    setSubmitting(true)
+    try {
+      // 1) Create review report (enforces no-self-review + one-per-task-per-reviewer in backend)
+      const created = await post<
+        { task_id: string; description: string },
+        ReviewReportResponseRow[]
+      >(`/api/project/${projectId}/review/report/`, {
+        task_id: String(targetLog.id),
+        description: reviewText.trim(),
+      })
+
+      const reportId = created?.[0]?.report?.report_id
+      if (!reportId) throw new Error('Review created but report_id is missing')
+
+      // 2) Trigger support (buff/effect/item) for the review receivers
+      const supportRes = await playerSupport(projectId, { report_id: String(reportId) })
+      const receiverIds =
+        supportRes?.result?.applied?.map((a: any) => String(a.receiver_id)).filter(Boolean) ?? []
+
+      // 3) Close modal and notify parent to animate receivers
+      setReviewText('')
+      onOpenChange(false)
+      onSupportApplied?.(receiverIds)
+      toast.success('Review submitted')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to submit review'
+      toast.error(msg)
+      console.error(e)
+    } finally {
+      setSubmitting(false)
     }
-
-    // TODO: replace with API call, e.g.:
-    // await submitReview(payload)
-    // and then refresh data / close modal based on response.
-    console.log('Review payload (mock):', payload)
-
-    setReviewText('')
-    onOpenChange(false)
   }
 
   return (
@@ -176,10 +220,10 @@ export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({ open, onOpenCh
             <Button
               variant="orange"
               className="px-6 font-['Baloo_2']"
-              disabled={!selectedLogId || !reviewText.trim()}
+              disabled={!projectId || submitting || !selectedLogId || !reviewText.trim()}
               onClick={handleSubmitReview}
             >
-              Submit Review
+              {submitting ? 'Submitting…' : 'Submit Review'}
             </Button>
           </div>
         </div>

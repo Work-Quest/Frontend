@@ -139,6 +139,7 @@ const ProjectPage: React.FC = () => {
 
   const { user } = useAuth()
   const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id)
+  const myProjectMemberId = me?.project_member_id ? String(me.project_member_id) : null
   const HP_DATA = {
     boss: {
       current: gameStatus?.boss_status?.hp ?? 50,
@@ -157,7 +158,18 @@ const ProjectPage: React.FC = () => {
         <ScrollArea className="h-full" type="always">
           <ProjectDetailCard hpData={HP_DATA} projectData={PROJECT_DATA} />
           <DamageLog logs={logs} />
-          <ReviewTask />
+          <ReviewTask
+            projectId={projectId ?? null}
+            doneTasks={tasks.done}
+            myProjectMemberId={myProjectMemberId}
+            onSupportApplied={(receiverIds) => {
+              const actions: GameActionPayload[] = (receiverIds ?? []).map((id) => ({
+                act: "SUPPORT",
+                userId: String(id),
+              }))
+              enqueueActions(actions)
+            }}
+          />
         </ScrollArea>
       </aside>
 
