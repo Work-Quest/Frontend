@@ -142,21 +142,27 @@ export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId
     const [statusEffects, setStatusEffects] = useState<StatusEffectEntry[]>([]);
 
     // Fetch items when projectId or myProjectMemberId changes
-    const refreshItems = React.useCallback(async () => {
+    const refreshItems = React.useCallback(async (opts?: { silent?: boolean }) => {
         if (!projectId || !myProjectMemberId) {
             setItems(null);
             return;
         }
 
         try {
-            setLoadingItems(true);
+            if (!opts?.silent) {
+                setLoadingItems(true);
+            }
             const data = await getMyItems(projectId);
             setItems(data);
         } catch (error) {
             console.error('Failed to fetch items:', error);
-            toast.error('Failed to load items');
+            if (!opts?.silent) {
+                toast.error('Failed to load items');
+            }
         } finally {
-            setLoadingItems(false);
+            if (!opts?.silent) {
+                setLoadingItems(false);
+            }
         }
     }, [projectId, myProjectMemberId, getMyItems]);
 
@@ -164,8 +170,46 @@ export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId
         refreshItems();
     }, [refreshItems]);
 
+    // Long-poll loop for items: request -> wait -> request (no overlap).
+    useEffect(() => {
+        if (!projectId || !myProjectMemberId) return
+
+        const pollIntervalMs = 5000
+        const enabled = true
+
+        if (!enabled) return
+        if (!pollIntervalMs || pollIntervalMs <= 0) return
+
+        let cancelled = false
+        let timer: number | null = null
+
+        const sleep = (ms: number) =>
+            new Promise<void>((resolve) => {
+                timer = window.setTimeout(() => resolve(), ms)
+            })
+
+        const loop = async () => {
+            // Start after initial load; keep refreshing silently.
+            while (!cancelled) {
+                try {
+                    await refreshItems({ silent: true })
+                } catch {
+                    // keep polling even if a request fails
+                }
+                await sleep(pollIntervalMs)
+            }
+        }
+
+        void loop()
+
+        return () => {
+            cancelled = true
+            if (timer) window.clearTimeout(timer)
+        }
+    }, [projectId, myProjectMemberId, refreshItems])
+
     // Fetch status effects when projectId or myProjectMemberId changes
-    const refreshEffects = React.useCallback(async () => {
+    const refreshEffects = React.useCallback(async (opts?: { silent?: boolean }) => {
         if (!projectId || !myProjectMemberId) {
             setStatusEffects([]);
             return;
@@ -194,6 +238,44 @@ export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId
     useEffect(() => {
         refreshEffects();
     }, [refreshEffects]);
+
+    // Long-poll loop for effects: request -> wait -> request (no overlap).
+    useEffect(() => {
+        if (!projectId || !myProjectMemberId) return
+
+        const pollIntervalMs = 5000
+        const enabled = true
+
+        if (!enabled) return
+        if (!pollIntervalMs || pollIntervalMs <= 0) return
+
+        let cancelled = false
+        let timer: number | null = null
+
+        const sleep = (ms: number) =>
+            new Promise<void>((resolve) => {
+                timer = window.setTimeout(() => resolve(), ms)
+            })
+
+        const loop = async () => {
+            // Start after initial load; keep refreshing silently.
+            while (!cancelled) {
+                try {
+                    await refreshEffects({ silent: true })
+                } catch {
+                    // keep polling even if a request fails
+                }
+                await sleep(pollIntervalMs)
+            }
+        }
+
+        void loop()
+
+        return () => {
+            cancelled = true
+            if (timer) window.clearTimeout(timer)
+        }
+    }, [projectId, myProjectMemberId, refreshEffects])
 
     // Group effects by effect_id and count stacks
     const groupedEffects = useMemo(() => {

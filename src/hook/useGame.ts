@@ -27,7 +27,19 @@ type UseGameState = {
   error: string | null
 }
 
-export function useGame(explicitProjectId?: string) {
+export type UseGameOptions = {
+  /**
+   * If set, will continuously refetch game status while the component is mounted.
+   * This is "long polling" style (request -> wait -> request) to avoid overlaps.
+   */
+  pollIntervalMs?: number
+  /**
+   * Enable/disable polling (default: true)
+   */
+  enabled?: boolean
+}
+
+export function useGame(explicitProjectId?: string, options?: UseGameOptions) {
   const { projectId: routeProjectId } = useParams<{ projectId: string }>()
   const projectId = useMemo(
     () => explicitProjectId ?? routeProjectId ?? null,
@@ -40,6 +52,9 @@ export function useGame(explicitProjectId?: string) {
   })
 
   const [gameStatus, setGameStatus] = useState<GameStatusResponse | null>(null)
+
+  const pollIntervalMs = options?.pollIntervalMs
+  const enabled = options?.enabled ?? true
 
   const call = useCallback(async <T,>(fn: () => Promise<T>): Promise<T> => {
     setState({ loading: true, error: null })
@@ -164,17 +179,61 @@ export function useGame(explicitProjectId?: string) {
     )
   }, [call])
 
-  const refreshGameStatus = useCallback(async () => {
+  const refreshGameStatus = useCallback(async (opts?: { silent?: boolean }) => {
     if (!projectId) return null
-    const data = await getGameStatus(projectId)
-    setGameStatus(data)
-    return data
+    if (!opts?.silent) {
+      // Could add loading state here if needed
+    }
+    try {
+      const data = await getGameStatus(projectId)
+      setGameStatus(data)
+      return data
+    } catch (error) {
+      if (!opts?.silent) {
+        console.error("Error fetching game status:", error)
+      }
+      throw error
+    }
   }, [projectId, getGameStatus])
 
   useEffect(() => {
     if (!projectId) return
     void refreshGameStatus()
   }, [projectId, refreshGameStatus])
+
+  // Long-poll loop for game status: request -> wait -> request (no overlap).
+  useEffect(() => {
+    if (!projectId) return
+    if (!enabled) return
+    if (!pollIntervalMs || pollIntervalMs <= 0) return
+
+    let cancelled = false
+    let timer: number | null = null
+
+    const sleep = (ms: number) =>
+      new Promise<void>((resolve) => {
+        timer = window.setTimeout(() => resolve(), ms)
+      })
+
+    const loop = async () => {
+      // Start after initial load; keep refreshing silently.
+      while (!cancelled) {
+        try {
+          await refreshGameStatus({ silent: true })
+        } catch {
+          // keep polling even if a request fails
+        }
+        await sleep(pollIntervalMs)
+      }
+    }
+
+    void loop()
+
+    return () => {
+      cancelled = true
+      if (timer) window.clearTimeout(timer)
+    }
+  }, [projectId, enabled, pollIntervalMs, refreshGameStatus])
 
   // -----------------
   // Items / effects
