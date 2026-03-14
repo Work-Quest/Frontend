@@ -73,9 +73,9 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1920) {
-        setShowCount(4);
-      } else {
         setShowCount(3);
+      } else {
+        setShowCount(2);
       }
     };
 

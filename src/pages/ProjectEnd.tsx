@@ -4,6 +4,7 @@ import type { UserScore } from "../sections/project-end/User.ts";
 import Achievement from "@/sections/project-end/Achievement.tsx";
 import Feedback from "@/sections/project-end/feedback/Feedback.tsx";
 import { useParams } from "react-router-dom";
+import { useProjectEndSummary } from "@/hook/useProjectEndSummary";
 
 
 const userMockData: UserScore[] = [
@@ -69,16 +70,6 @@ const userMockData: UserScore[] = [
     },
 ]
 
-// export const userInfoMockData = [
-//     {
-//         "user_name": "Ejqjn28",
-//         "work_load_per_day": "[7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,6,6,7,5,7,7,6,6,5,3,6,7,1]",
-//         "team_work": 65.27,
-//         "work_category": "Testing",
-//         "work_speed": 36.31,
-//         "overall_quality_score": 53.45
-//     }
-// ]
 
 export const tagMockData = [
     "Last-minute Best friend",
@@ -87,6 +78,28 @@ export const tagMockData = [
 
 function ProjectEnd() {
     const { projectId } = useParams()
+    const { summary, loading, error } = useProjectEndSummary(projectId)
+
+    // Use real data if available, otherwise fall back to mock data
+    const userData = summary?.users ?? userMockData
+    const tags = summary ? [] : tagMockData // TODO: Get real tags from API when available
+    const hasScoreReductions = summary?.reduction_percent;
+
+    if (loading) {
+        return (
+            <div className="flex flex-col min-h-screen p-4 items-center justify-center">
+                <p className="text-darkBrown">Loading project summary...</p>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col min-h-screen p-4 items-center justify-center">
+                <p className="text-red-600">Error: {error}</p>
+            </div>
+        )
+    }
 
     return (
         <div className="flex flex-col min-h-screen p-4">
@@ -95,17 +108,22 @@ function ProjectEnd() {
                 <h2 className="text-2xl md:text-3xl font-bold !text-white">Project End!</h2>
             </div>
 
+            {hasScoreReductions && (
+                <div className="mt-2 bg-cream rounded-lg items-center border-2 border-red">
+                    <p className="font-bold !text-red px-2">Delay Penalty {summary.reduction_percent}% score reduction </p>
+                </div>
+            )}
             {/* Main Content */}
             <div className="flex flex-col lg:flex-row flex-1">
                 {/* Left Section - Leaderboard */}
                 <div className="w-full lg:w-1/3 xl:w-2/5 p-4 bg-offWhite overflow-auto">
-                    <Leaderboard user={userMockData} />
+                    <Leaderboard user={userData} />
                 </div>
 
                 {/* Right Section - Team Summary Boxes */}
                 <div className="w-full lg:w-2/3 xl:w-3/4 p-4 bg-offWhite overflow-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                        {userMockData.map((user) => (
+                        {userData.map((user) => (
                             <TeamSummaryBox
                                 key={user.username}
                                 user={{
@@ -118,9 +136,12 @@ function ProjectEnd() {
                             />
                         ))}
                     </div>
+
                 </div>
             </div>
-            <Achievement tags={tagMockData} />
+
+
+            <Achievement tags={tags} />
             <Feedback projectId={projectId ?? ""} />
         </div>
     );

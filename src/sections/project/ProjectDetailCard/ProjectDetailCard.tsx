@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "../Header";
 import DeadlineBox from "./DeadlineBox";
 import EstimateBox from "./EstimateBox";
 import HpBar from "./HpBar";
+import MemberScoresModal from "./MemberScoresModal";
+import type { GameStatusResponse } from "@/types/GameApi";
+import {Button} from "@/components/ui/button.tsx";
 
 type ProjectDetailCardProps = {
   hpData?: {
@@ -12,14 +15,21 @@ type ProjectDetailCardProps = {
   projectData?: {
     deadline?: string;
     daysLeft?: number;
+    delayedDays?: number;
+    isDelayed?: boolean;
     estimatedTime?: number;
   };
+  userScore?: number;
+  gameStatus?: GameStatusResponse | null;
 };
 
 const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
   hpData = {},
   projectData = {},
+  userScore = 0,
+  gameStatus,
 }) => {
+  const [isScoresModalOpen, setIsScoresModalOpen] = useState(false);
   const bossHp = hpData?.boss?.current || 0;
   const maxBossHp = hpData?.boss?.max || 100;
   const playerHp = hpData?.player?.current || 0;
@@ -62,6 +72,25 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* User Score Section */}
+      <div className="self-stretch flex px-4 sm:px-6 pb-4 bf">
+        <Button
+          onClick={() => setIsScoresModalOpen(true)}
+          className="w-full px-4 py-3 bg-orange rounded-lg justify-between hover:bg-cream/80 justify-between transition-colors cursor-pointer"
+        >
+          {/*<div className="flex gap-10  items-center ">*/}
+            <span className="text-darkBrown font-bold text-sm sm:text-base">Your Score</span>
+            <span className="text-orange font-bold text-lg sm:text-xl">{userScore.toLocaleString()}</span>
+          {/*</div>*/}
+        </Button>
+      </div>
+
+      <MemberScoresModal
+        open={isScoresModalOpen}
+        onOpenChange={setIsScoresModalOpen}
+        gameStatus={gameStatus}
+      />
     </div>
   );
 };

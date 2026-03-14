@@ -10,4 +10,6 @@ export type Project = {
   deadline: string;            
   total_tasks: number;
   completed_tasks: number;
+  deadline_decision?: "closed" | "continued" | null;
+  deadline_decision_date?: string | null;
   };

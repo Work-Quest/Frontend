@@ -1,9 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import {
-  PROJECT_DATA,
-} from "@/sections/project/constants"
+import React, { useState, useEffect, useMemo } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import ToggleButton from "@/components/ToggleButton"
 import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard"
@@ -14,7 +11,7 @@ import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
 import { useTask } from "@/hook/useTask";
 import { useProjectMembers } from "@/hook/useProjectMembers";
 import ProjectBattle from "@/sections/project/ProjectBattle";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useGame } from "@/hook/useGame";
 import toast from "react-hot-toast";
 import type { GameActionPayload } from "@/types/battleTypes";
@@ -24,10 +21,17 @@ import { useOverdueBossAttack } from "@/hook/useOverdueBossAttack";
 import { POLLING_CONFIG } from "@/config/pollingConfig";
 import { getActionKey } from "@/utils/actionDeduplication";
 import { useAnimationSync } from "@/hook/useAnimationSync";
+import { useProjects } from "@/hook/useProjects";
+import DeadlineWarningModal from "@/sections/project/DeadlineWarningModal";
+import NotificationDialog from "@/components/NotificationDialog";
+import { Button } from "@/components/ui/button";
+import Header from "@/sections/project/Header";
 
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
   const { projectId } = useParams<{ projectId: string }>()
+  const { projects, closeProject } = useProjects()
+  const navigate = useNavigate()
   const { fetchedTask } = useTask({ pollIntervalMs: POLLING_CONFIG.tasks.interval });
   const { projectMembers } = useProjectMembers(projectId)
   const { logs, loading: logsLoading } = useLog(projectId, { pollIntervalMs: POLLING_CONFIG.logs.interval });
@@ -177,6 +181,85 @@ const ProjectPage: React.FC = () => {
   const { user } = useAuth()
   const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id)
   const myProjectMemberId = me?.project_member_id ? String(me.project_member_id) : null
+  
+  // Get current project from projects list
+  const project = useMemo(() => {
+    if (!projectId || !projects) return null
+    return projects.find((p) => p.project_id === projectId) ?? null
+  }, [projectId, projects])
+
+  // Calculate days left from deadline
+  const daysLeft = useMemo(() => {
+    if (!project?.deadline) return undefined
+    const deadlineDate = new Date(project.deadline)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    deadlineDate.setHours(0, 0, 0, 0)
+    const diffTime = deadlineDate.getTime() - today.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }, [project?.deadline])
+
+  // Check if deadline has passed
+  const isDelayed = useMemo(() => {
+    return daysLeft !== undefined && daysLeft < 0
+  }, [daysLeft])
+
+  const delayedDays = useMemo(() => {
+    if (!isDelayed) return 0
+    return Math.abs(daysLeft ?? 0)
+  }, [isDelayed, daysLeft])
+
+  // Check if deadline warning should be shown
+  const [showDeadlineWarning, setShowDeadlineWarning] = useState(false)
+  
+  useEffect(() => {
+    if (!projectId || !project?.deadline) return
+    
+    // Check if deadline has passed and decision hasn't been made
+    if (isDelayed && !project.deadline_decision) {
+      // Check localStorage to see if user has already seen this warning
+      const warningKey = `deadline_warning_seen_${projectId}`
+      const hasSeenWarning = localStorage.getItem(warningKey)
+      
+      if (!hasSeenWarning) {
+        setShowDeadlineWarning(true)
+      }
+    }
+  }, [projectId, project?.deadline, project?.deadline_decision, isDelayed])
+
+  const handleDeadlineContinue = () => {
+    if (projectId) {
+      const warningKey = `deadline_warning_seen_${projectId}`
+      localStorage.setItem(warningKey, 'true')
+      setShowDeadlineWarning(false)
+      // Refresh game status to get updated scores
+      if (gameStatus) {
+        // Trigger a refresh by updating a dependency
+        window.location.reload()
+      }
+    }
+  }
+
+  // Format deadline for display
+  const formattedDeadline = useMemo(() => {
+    if (!project?.deadline) return undefined
+    return new Date(project.deadline).toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    })
+  }, [project?.deadline])
+
+  // Create PROJECT_DATA with real values (excluding estimatedTime)
+  const PROJECT_DATA = useMemo(() => ({
+    deadline: formattedDeadline,
+    daysLeft: isDelayed ? undefined : daysLeft,
+    delayedDays: isDelayed ? delayedDays : undefined,
+    isDelayed: isDelayed,
+    estimatedTime: undefined,
+  }), [formattedDeadline, daysLeft, isDelayed, delayedDays])
+
   const HP_DATA = {
     boss: {
       current: gameStatus?.boss_status?.hp ?? 50,
@@ -189,11 +272,25 @@ const ProjectPage: React.FC = () => {
   }
 
   return (
-    <div className="flex h-[calc(100vh-148px)] w-full">
+    <div className="flex h-[calc(100vh-148px)] w-full relative">
+      {showDeadlineWarning && projectId && (
+        <DeadlineWarningModal
+          open={showDeadlineWarning}
+          projectId={projectId}
+          delayDays={delayedDays}
+          onClose={() => setShowDeadlineWarning(false)}
+          onContinue={handleDeadlineContinue}
+        />
+      )}
       {/* Left sidebar */}
       <aside className="w-125 flex-shrink-0 bg-offWhite border-r border-cream">
         <ScrollArea className="h-full" type="always">
-          <ProjectDetailCard hpData={HP_DATA} projectData={PROJECT_DATA} />
+          <ProjectDetailCard 
+            hpData={HP_DATA} 
+            projectData={PROJECT_DATA}
+            userScore={me?.score ?? 0}
+            gameStatus={gameStatus}
+          />
           <DamageLog logs={logs} />
           <ReviewTask
             projectId={projectId ?? null}
@@ -207,6 +304,37 @@ const ProjectPage: React.FC = () => {
               enqueueActions(actions)
             }}
           />
+          {projectId && (
+            <div className="w-full pr-3 self-stretch bg-offWhite inline-flex flex-col justify-start items-start font-['Baloo_2']">
+              <Header
+                bgColor="bg-red-500"
+                textColor="!text-offWhite"
+                text="Close Project"
+              />
+              <NotificationDialog
+                title="Close Project"
+                description="Are you sure you want to close this project? This action cannot be undone."
+                trigger={
+                  <Button
+                    variant="shadow"
+                    className="w-full !bg-red-500 !text-offWhite my-4 font-['Baloo_2']"
+                  >
+                    Close Project
+                  </Button>
+                }
+                onConfirm={async () => {
+                  try {
+                    await closeProject(projectId)
+                    toast.success("Project closed successfully")
+                    navigate(`/project/${projectId}/project-end`)
+                  } catch (err) {
+                    console.error(err)
+                    toast.error(err instanceof Error ? err.message : "Failed to close project")
+                  }
+                }}
+              />
+            </div>
+          )}
         </ScrollArea>
       </aside>
 
