@@ -162,11 +162,11 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
     if (!over) return;
 
     const taskId = active.id as string;
-    const activeContainer = findContainer(taskId);
-    if (!activeContainer) return;
+    const originContainer = dragStartContainerRef.current;
+    if (!originContainer) return;
 
     // Tasks in Done cannot be moved out (we'll also enforce on dragEnd).
-    if (activeContainer === 'done') return;
+    if (originContainer === 'done') return;
 
     let targetStatus: TaskStatus | null = null;
 
@@ -180,27 +180,33 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
       targetStatus = overContainer;
     }
 
-    if (!targetStatus || targetStatus === activeContainer) return;
+    // Validate target status exists and is different from origin
+    if (!targetStatus || targetStatus === originContainer) return;
+    
+    // Ensure targetStatus is a valid TaskStatus
+    const validStatuses: TaskStatus[] = ['backlog', 'todo', 'inProgress', 'done'];
+    if (!validStatuses.includes(targetStatus)) return;
+
     const toStatus: TaskStatus = targetStatus;
 
-    // Optimistic UI
+    // Optimistic UI - use original container state to avoid issues with multiple updates
     setTasks((prev) => {
-      const activeItems = prev[activeContainer]
-      const activeIndex = activeItems.findIndex((item) => item.id === taskId)
-      if (activeIndex === -1) return prev
+      // Use the original container from when drag started
+      const originalTasks = dragStartTasksSnapshotRef.current?.[originContainer] || prev[originContainer];
+      const taskIndex = originalTasks.findIndex((item) => item.id === taskId);
+      if (taskIndex === -1) return prev;
 
-    const movedTask = activeItems[activeIndex];
+      const movedTask = originalTasks[taskIndex];
 
-      return {
-        ...prev,
-        [activeContainer]: prev[activeContainer].filter(
-          (item) => item.id !== taskId
-        ),
-        [toStatus]: [...prev[toStatus], movedTask],
-      };
+      // Remove from all containers and add to target
+      const newTasks = { ...prev };
+      for (const key in newTasks) {
+        newTasks[key as keyof Tasks] = newTasks[key as keyof Tasks].filter(item => item.id !== taskId);
+      }
+      newTasks[toStatus] = [...newTasks[toStatus], movedTask];
+
+      return newTasks;
     });
-
-    console.log("target:", targetStatus);
   }
 
 
@@ -233,6 +239,18 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
     if (over.id.toString().startsWith('column-')) {
       const containerId = over.id.toString().replace('column-', '') as keyof Tasks;
 
+      // Validate containerId is a valid TaskStatus
+      const validStatuses: TaskStatus[] = ['backlog', 'todo', 'inProgress', 'done'];
+      if (!validStatuses.includes(containerId as TaskStatus)) {
+        if (dragStartTasksSnapshotRef.current) {
+          setTasks(dragStartTasksSnapshotRef.current);
+        }
+        setActiveId(null);
+        dragStartContainerRef.current = null;
+        dragStartTasksSnapshotRef.current = null;
+        return;
+      }
+
       // Tasks cannot be moved OUT of done.
       if (originContainer === 'done' && containerId !== 'done') {
         if (dragStartTasksSnapshotRef.current) {
@@ -244,15 +262,26 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
         return;
       }
 
-      if (activeContainer !== containerId) {
+      // Only update UI if moving to a different container
+      if (originContainer && originContainer !== containerId) {
         setTasks(prev => {
-          const activeItems = prev[activeContainer];
-          const activeIndex = activeItems.findIndex(item => item.id === active.id);
-          return {
-            ...prev,
-            [activeContainer]: prev[activeContainer].filter(item => item.id !== active.id),
-            [containerId]: [...prev[containerId], prev[activeContainer][activeIndex]]
-          };
+          // Find the task in the original container (before optimistic updates)
+          const originalContainer = originContainer as keyof Tasks;
+          const originalTasks = dragStartTasksSnapshotRef.current?.[originalContainer] || prev[originalContainer];
+          const taskIndex = originalTasks.findIndex(item => item.id === taskId);
+          
+          if (taskIndex === -1) return prev;
+
+          const taskToMove = originalTasks[taskIndex];
+          
+          // Remove from all containers and add to target
+          const newTasks = { ...prev };
+          for (const key in newTasks) {
+            newTasks[key as keyof Tasks] = newTasks[key as keyof Tasks].filter(item => item.id !== taskId);
+          }
+          newTasks[containerId] = [...newTasks[containerId], taskToMove];
+          
+          return newTasks;
         });
       }
 
@@ -287,6 +316,18 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
       return;
     }
 
+    // Validate overContainer is a valid TaskStatus
+    const validStatuses: TaskStatus[] = ['backlog', 'todo', 'inProgress', 'done'];
+    if (!validStatuses.includes(overContainer as TaskStatus)) {
+      if (dragStartTasksSnapshotRef.current) {
+        setTasks(dragStartTasksSnapshotRef.current);
+      }
+      setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
+      return;
+    }
+
     // Tasks cannot be moved OUT of done.
     if (originContainer === 'done' && overContainer !== 'done') {
       if (dragStartTasksSnapshotRef.current) {
@@ -298,20 +339,47 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
       return;
     }
     
-    if (activeContainer === overContainer) {
-      const activeIndex = tasks[activeContainer].findIndex(task => task.id === active.id);
-      const overIndex = tasks[overContainer].findIndex(task => task.id === over.id);
+    // Handle reordering within the same container
+    if (originContainer && originContainer === overContainer) {
+      const originalTasks = dragStartTasksSnapshotRef.current?.[originContainer as keyof Tasks] || tasks[originContainer];
+      const activeIndex = originalTasks.findIndex(task => task.id === active.id);
+      const overIndex = originalTasks.findIndex(task => task.id === over.id);
       
-      if (activeIndex !== overIndex) {
+      if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
         setTasks(prev => ({
           ...prev,
-          [overContainer]: arrayMove(prev[overContainer], activeIndex, overIndex)
+          [overContainer]: arrayMove(originalTasks, activeIndex, overIndex)
         }));
       }
+      // No API call needed for reordering within same container
+      setActiveId(null);
+      dragStartContainerRef.current = null;
+      dragStartTasksSnapshotRef.current = null;
+      return;
     }
 
-    // Only persist when the task is dropped into a different column
+    // Handle moving between different containers
     if (originContainer && overContainer && originContainer !== overContainer) {
+      // Update UI using original container state
+      setTasks(prev => {
+        const originalContainer = originContainer as keyof Tasks;
+        const originalTasks = dragStartTasksSnapshotRef.current?.[originalContainer] || prev[originalContainer];
+        const taskIndex = originalTasks.findIndex(item => item.id === taskId);
+        
+        if (taskIndex === -1) return prev;
+
+        const taskToMove = originalTasks[taskIndex];
+        
+        // Remove from all containers and add to target
+        const newTasks = { ...prev };
+        for (const key in newTasks) {
+          newTasks[key as keyof Tasks] = newTasks[key as keyof Tasks].filter(item => item.id !== taskId);
+        }
+        newTasks[overContainer] = [...newTasks[overContainer], taskToMove];
+        
+        return newTasks;
+      });
+
       try {
         await updateTaskStatus(taskId, overContainer as TaskStatus);
         if (overContainer === "done") {

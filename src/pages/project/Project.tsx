@@ -23,9 +23,6 @@ import { getActionKey } from "@/utils/actionDeduplication";
 import { useAnimationSync } from "@/hook/useAnimationSync";
 import { useProjects } from "@/hook/useProjects";
 import DeadlineWarningModal from "@/sections/project/DeadlineWarningModal";
-import NotificationDialog from "@/components/NotificationDialog";
-import { Button } from "@/components/ui/button";
-import Header from "@/sections/project/Header";
 import { useEstimateFinishTime } from "@/hook/useEstimateFinishTime";
 
 const ProjectPage: React.FC = () => {
@@ -243,6 +240,17 @@ const ProjectPage: React.FC = () => {
     }
   }
 
+  const handleCloseProject = async (projectId: string) => {
+    try {
+      await closeProject(projectId)
+      toast.success("Project closed successfully")
+      navigate(`/project/${projectId}/project-end`)
+    } catch (err) {
+      console.error(err)
+      toast.error(err instanceof Error ? err.message : "Failed to close project")
+    }
+  }
+
   // Format deadline for display
   const formattedDeadline = useMemo(() => {
     if (!project?.deadline) return undefined
@@ -292,6 +300,8 @@ const ProjectPage: React.FC = () => {
             projectData={PROJECT_DATA}
             userScore={me?.score ?? 0}
             gameStatus={gameStatus}
+            projectId={projectId ?? undefined}
+            onCloseProject={handleCloseProject}
           />
           <DamageLog logs={logs} />
           <ReviewTask
@@ -306,37 +316,6 @@ const ProjectPage: React.FC = () => {
               enqueueActions(actions)
             }}
           />
-          {projectId && (
-            <div className="w-full pr-3 self-stretch bg-offWhite inline-flex flex-col justify-start items-start font-['Baloo_2']">
-              <Header
-                bgColor="bg-red-500"
-                textColor="!text-offWhite"
-                text="Close Project"
-              />
-              <NotificationDialog
-                title="Close Project"
-                description="Are you sure you want to close this project? This action cannot be undone."
-                trigger={
-                  <Button
-                    variant="shadow"
-                    className="w-full !bg-red-500 !text-offWhite my-4 font-['Baloo_2']"
-                  >
-                    Close Project
-                  </Button>
-                }
-                onConfirm={async () => {
-                  try {
-                    await closeProject(projectId)
-                    toast.success("Project closed successfully")
-                    navigate(`/project/${projectId}/project-end`)
-                  } catch (err) {
-                    console.error(err)
-                    toast.error(err instanceof Error ? err.message : "Failed to close project")
-                  }
-                }}
-              />
-            </div>
-          )}
         </ScrollArea>
       </aside>
 
