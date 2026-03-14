@@ -8,6 +8,7 @@ export type ReviewLogEntry = {
 export type ReviewHistoryEntry = {
   id: string
   title: string
+  reviewer: string
   participants: string[]
   timestamp: string | Date
   comment: string

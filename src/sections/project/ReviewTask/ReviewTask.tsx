@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react"
 import Header from "../Header"
 import { Button } from "@/components/ui/button"
-import { ReviewTaskModal } from "./ReviewTaskModal"
+import ReviewTaskModal from "./ReviewTaskModal"
 import type { ReviewHistoryEntry, ReviewTaskData, ReviewTaskProps } from "./types"
 import { get } from "@/Api"
 
@@ -92,7 +92,8 @@ const ReviewTask: React.FC<ReviewTaskProps> = ({
     const history: ReviewHistoryEntry[] = (reviewHistory ?? []).map((r) => ({
       id: String(r.id),
       title: r.report?.task?.task_name ?? "Task review",
-      participants: [r.reviewer?.username, r.receiver?.username].filter(Boolean) as string[],
+      reviewer: r.reviewer?.username,
+      participants: [r.receiver?.username].filter(Boolean) as string[],
       timestamp: r.report?.created_at ?? new Date().toISOString(),
       comment: r.report?.description ?? "",
     }))

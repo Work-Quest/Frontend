@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { SpriteEntity } from '@/components/battle/SpriteEntity';
 import { POSITIONS, ENTITY_CONFIG } from '@/config/battleConfig';
 import { User, BossState } from '@/types/battleTypes';
@@ -11,7 +11,7 @@ import { useGame } from '@/hook/useGame';
 import { getItemColorCategory } from '@/lib/utils';
 import type { ProjectMemberItemsResponse, StatusEffectEntry } from '@/types/GameApi';
 import toast from 'react-hot-toast';
-import { usePolling, usePollingWhen } from '@/hook/usePolling';
+import { usePollingWhen } from '@/hook/usePolling';
 import { POLLING_CONFIG } from '@/config/pollingConfig';
 
 interface BattleSceneProps {

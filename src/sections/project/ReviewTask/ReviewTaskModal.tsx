@@ -39,7 +39,7 @@ type ReviewReportResponseRow = {
   }
 }
 
-export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
+const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
   open,
   onOpenChange,
   data,
@@ -231,6 +231,7 @@ export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
     </Dialog>
   )
 }
+export default ReviewTaskModal
 
 function LatestLogCard({
   log,
@@ -307,7 +308,8 @@ function HistoryCard({
         <span className="font-bold text-darkBrown text-base">{entry.title}</span>
         <span className="text-darkBrown/70 text-sm shrink-0">{timeAgo}</span>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 justify-between gap-2">
+        <div className="flex items-center justify-end gap-2">
         {entry.participants.map((name, i) => (
           <span
             key={`${entry.id}-${i}`}
@@ -316,6 +318,15 @@ function HistoryCard({
             {name}
           </span>
         ))}
+        </div>
+        <div className="flex items-center gap-2">
+          review by
+          <span
+              className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-['Baloo_2'] !bg-green"
+          >
+              {entry.reviewer}
+            </span>
+        </div>
       </div>
       <div className="flex flex-col gap-2 bg-orange/10 p-2 rounded-lg">
         <p className="text-darkBrown/90 text-sm">
