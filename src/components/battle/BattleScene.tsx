@@ -11,7 +11,7 @@ import { useGame } from '@/hook/useGame';
 import { getItemColorCategory } from '@/lib/utils';
 import type { ProjectMemberItemsResponse, StatusEffectEntry } from '@/types/GameApi';
 import toast from 'react-hot-toast';
-import { usePollingWhen } from '@/hook/usePolling';
+import { usePolling, usePollingWhen } from '@/hook/usePolling';
 import { POLLING_CONFIG } from '@/config/pollingConfig';
 
 interface BattleSceneProps {
@@ -19,6 +19,7 @@ interface BattleSceneProps {
     boss: BossState;
     projectId: string | null;
     myProjectMemberId: string | null;
+    bossPhase?: number;
 }
 
 type GroupedItem = {
@@ -124,18 +125,17 @@ const EffectIconPlaceholder: React.FC<{
                 </div>
             )}
             {/* Tooltip on hover */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-[60] bg-slate-800 border border-gray-600 rounded px-1 py-1  text-white whitespace-pre-line text-center min-w-[100px]">
-                <div className="text-gray-300 text-[5px] mt-1">{effect.effect_description}</div>
-                <div className="text-yellow-400 text-[5px]  mt-1">Value: {effect.effect_value}</div>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-[60] bg-slate-800 border border-gray-600 rounded px-1 py-1 gap-2 text-white whitespace-pre-line text-center min-w-[100px]">
+                <div className="text-gray-300 text-[5px] ">{effect.effect_description}</div>
                 {stackCount > 1 && (
-                    <div className="text-orange-400 text-[5px] mt-1">Stacks: {stackCount}</div>
+                    <div className="text-orange-400 text-[5px] ">Stacks: {stackCount}</div>
                 )}
             </div>
         </div>
     );
 };
 
-export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId, myProjectMemberId }) => {
+export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId, myProjectMemberId, bossPhase }) => {
     const bossName = (ENTITY_CONFIG.bosses as any)[boss.id]?.name || "GREAT BOSS";
     const { getMyItems, useMyItem, getMyStatusEffects } = useGame(projectId ?? undefined);
     const [items, setItems] = useState<ProjectMemberItemsResponse | null>(null);
@@ -208,16 +208,11 @@ export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId
         }
     }, [projectId, myProjectMemberId, getMyStatusEffects]);
 
-    // Use conditional polling: always fetch, but only poll when projectId is available
-    usePollingWhen(
-        refreshEffects,
-        () => !!projectId, // Condition: only poll when projectId exists
-        {
-            pollIntervalMs: POLLING_CONFIG.effects.interval,
-            enabled: true,
-        },
-        [projectId, myProjectMemberId] // Dependencies for initial fetch (myProjectMemberId for filtering)
-    )
+    // Use centralized polling hook for effects
+    usePolling(refreshEffects, {
+        pollIntervalMs: POLLING_CONFIG.effects.interval,
+        enabled: true,
+    }, [projectId, myProjectMemberId])
 
     // Group effects by effect_id and count stacks
     const groupedEffects = useMemo(() => {
@@ -325,6 +320,17 @@ export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId
                 style={{ width: '476px', height: '140px', transform: 'scale(2.5)', imageRendering: 'pixelated' }}
             >
                 <img src="/assets/bg.gif" className="absolute inset-0 w-full h-full object-cover z-0" />
+
+                {/* Boss Phase Indicator - Top Left */}
+                {boss.status !== 'hidden' && bossPhase !== undefined && (
+                    <div className="absolute top-1 left-2 z-50 pointer-events-none">
+                        {/* <div className=" border-2 border-yellow-500 rounded-md px-3 py-1 shadow-lg"> */}
+                            <span className="text-yellow-300 font-bold text-xs font-mono tracking-wider">
+                                Phase {bossPhase}
+                            </span>
+                        {/* </div> */}
+                    </div>
+                )}
 
                 {boss.status !== 'hidden' && (
                     <div className="absolute left-1/2 -translate-x-1/2 w-full z-40 pointer-events-none scale-35 transition-opacity duration-500">

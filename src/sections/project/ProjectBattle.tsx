@@ -360,6 +360,7 @@ const ProjectBattle = ({
         boss={boss} 
         projectId={projectId ?? null}
         myProjectMemberId={myMemberId}
+        bossPhase={gameStatus?.boss_status?.phase}
       />
     </div>
   );

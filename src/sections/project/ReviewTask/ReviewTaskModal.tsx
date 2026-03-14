@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -50,27 +50,45 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
 
   const defaultLatestSelectedId = latestLogs[1]?.id ?? latestLogs[0]?.id ?? ''
 
+  // Extract unique usernames from otherLogsOptions participants
+  const uniqueUsernames = useMemo(() => {
+    const usernameSet = new Set<string>()
+    otherLogsOptions.forEach((log) => {
+      log.participants.forEach((name) => usernameSet.add(name))
+    })
+    return Array.from(usernameSet).sort()
+  }, [otherLogsOptions])
+
   const [selectedSource, setSelectedSource] = useState<'latest' | 'other'>('latest')
   const [selectedLogId, setSelectedLogId] = useState<string>(defaultLatestSelectedId)
-  const [selectedOtherLogId, setSelectedOtherLogId] = useState<string>('')
+  const [selectedUsername, setSelectedUsername] = useState<string>('')
   const [reviewText, setReviewText] = useState('')
   const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   const { playerSupport } = useGame(projectId ?? undefined)
 
-  const selectedOtherLog = otherLogsOptions.find((log) => log.id === selectedOtherLogId)
+  // Filter logs by selected username
+  const filteredLogsByUsername = useMemo(() => {
+    if (!selectedUsername) return []
+    return otherLogsOptions.filter((log) => log.participants.includes(selectedUsername))
+  }, [otherLogsOptions, selectedUsername])
+
 
   const handleSelectLatestLog = (id: string) => {
     setSelectedSource('latest')
     setSelectedLogId(id)
-    setSelectedOtherLogId('')
+    setSelectedUsername('')
   }
 
-  const handleSelectOtherLog = (id: string) => {
+  const handleSelectUsername = (username: string) => {
     setSelectedSource('other')
-    setSelectedLogId(id)
-    setSelectedOtherLogId(id)
+    setSelectedUsername(username)
+    // Set the first log for this username as selected
+    const firstLog = otherLogsOptions.find((log) => log.participants.includes(username))
+    if (firstLog) {
+      setSelectedLogId(firstLog.id)
+    }
   }
 
   const handleSubmitReview = async () => {
@@ -164,28 +182,42 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
                   <h3 className="!text-xl !font-medium text-darkBrown mt-4 mb-2 font-['Baloo_2']">
                     Other Logs
                   </h3>
-                  <Select value={selectedOtherLogId} onValueChange={handleSelectOtherLog}>
+                  <Select value={selectedUsername} onValueChange={handleSelectUsername}>
                     <SelectTrigger className="w-full border-darkBrown/20 text-darkBrown bg-white font-['Baloo_2']">
-                      <SelectValue placeholder="Select your friend's log" />
+                      <SelectValue placeholder="Select by username" />
                     </SelectTrigger>
                     <SelectContent className="font-['Baloo_2']">
-                      {otherLogsOptions.map((log) => (
-                        <SelectItem key={log.id} value={log.id}>
-                          {log.title}
+                      {uniqueUsernames.map((username) => (
+                        <SelectItem key={username} value={username}>
+                          {username}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
 
-                  {selectedSource === 'other' && selectedOtherLog && (
-                    <div className="mt-3">
-                      <LatestLogCard
-                        log={selectedOtherLog}
-                        isHighlighted
-                        reviewValue={reviewText}
-                        onReviewChange={setReviewText}
-                        onSelect={() => handleSelectOtherLog(selectedOtherLog.id)}
-                      />
+                  {selectedSource === 'other' && selectedUsername && (
+                    <div className="mt-3 space-y-3">
+                      {filteredLogsByUsername.length === 0 ? (
+                        <p className="text-darkBrown/70 text-sm text-center py-4 font-['Baloo_2']">
+                          No logs found for {selectedUsername}
+                        </p>
+                      ) : (
+                        filteredLogsByUsername.map((log) => {
+                          const isSelected = selectedLogId === log.id
+                          return (
+                            <LatestLogCard
+                              key={log.id}
+                              log={log}
+                              isHighlighted={isSelected}
+                              reviewValue={isSelected ? reviewText : undefined}
+                              onReviewChange={isSelected ? setReviewText : undefined}
+                              onSelect={() => {
+                                setSelectedLogId(log.id)
+                              }}
+                            />
+                          )
+                        })
+                      )}
                     </div>
                   )}
                 </ScrollArea>
