@@ -26,12 +26,14 @@ import DeadlineWarningModal from "@/sections/project/DeadlineWarningModal";
 import NotificationDialog from "@/components/NotificationDialog";
 import { Button } from "@/components/ui/button";
 import Header from "@/sections/project/Header";
+import { useEstimateFinishTime } from "@/hook/useEstimateFinishTime";
 
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
   const { projectId } = useParams<{ projectId: string }>()
   const { projects, closeProject } = useProjects()
   const navigate = useNavigate()
+  const { estimatedDays } = useEstimateFinishTime(projectId)
   const { fetchedTask } = useTask({ pollIntervalMs: POLLING_CONFIG.tasks.interval });
   const { projectMembers } = useProjectMembers(projectId)
   const { logs, loading: logsLoading } = useLog(projectId, { pollIntervalMs: POLLING_CONFIG.logs.interval });
@@ -251,14 +253,14 @@ const ProjectPage: React.FC = () => {
     })
   }, [project?.deadline])
 
-  // Create PROJECT_DATA with real values (excluding estimatedTime)
+  // Create PROJECT_DATA with real values
   const PROJECT_DATA = useMemo(() => ({
     deadline: formattedDeadline,
     daysLeft: isDelayed ? undefined : daysLeft,
     delayedDays: isDelayed ? delayedDays : undefined,
     isDelayed: isDelayed,
-    estimatedTime: undefined,
-  }), [formattedDeadline, daysLeft, isDelayed, delayedDays])
+    estimatedTime: estimatedDays ?? undefined,
+  }), [formattedDeadline, daysLeft, isDelayed, delayedDays, estimatedDays])
 
   const HP_DATA = {
     boss: {
