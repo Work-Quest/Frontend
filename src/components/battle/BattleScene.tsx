@@ -11,6 +11,8 @@ import { useGame } from '@/hook/useGame';
 import { getItemColorCategory } from '@/lib/utils';
 import type { ProjectMemberItemsResponse, StatusEffectEntry } from '@/types/GameApi';
 import toast from 'react-hot-toast';
+import { usePolling, usePollingWhen } from '@/hook/usePolling';
+import { POLLING_CONFIG } from '@/config/pollingConfig';
 
 interface BattleSceneProps {
     users: User[];
@@ -141,9 +143,10 @@ export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId
     const [usingItemId, setUsingItemId] = useState<string | null>(null);
     const [statusEffects, setStatusEffects] = useState<StatusEffectEntry[]>([]);
 
-    // Fetch items when projectId or myProjectMemberId changes
+    // Fetch items when projectId changes
+    // Note: API uses authenticated user automatically, so myProjectMemberId is optional
     const refreshItems = React.useCallback(async (opts?: { silent?: boolean }) => {
-        if (!projectId || !myProjectMemberId) {
+        if (!projectId) {
             setItems(null);
             return;
         }
@@ -152,7 +155,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId
             if (!opts?.silent) {
                 setLoadingItems(true);
             }
-            const data = await getMyItems(projectId);
+            const data = await getMyItems(projectId, opts?.silent);
             setItems(data);
         } catch (error) {
             console.error('Failed to fetch items:', error);
@@ -164,67 +167,37 @@ export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId
                 setLoadingItems(false);
             }
         }
-    }, [projectId, myProjectMemberId, getMyItems]);
+    }, [projectId, getMyItems]);
 
-    useEffect(() => {
-        refreshItems();
-    }, [refreshItems]);
+    // Use conditional polling: always fetch, but only poll when projectId is available
+    usePollingWhen(
+        refreshItems,
+        () => !!projectId, // Condition: only poll when projectId exists
+        {
+            pollIntervalMs: POLLING_CONFIG.items.interval,
+            enabled: true,
+        },
+        [projectId] // Dependencies for initial fetch
+    )
 
-    // Long-poll loop for items: request -> wait -> request (no overlap).
-    useEffect(() => {
-        if (!projectId || !myProjectMemberId) return
-
-        const pollIntervalMs = 5000
-        const enabled = true
-
-        if (!enabled) return
-        if (!pollIntervalMs || pollIntervalMs <= 0) return
-
-        let cancelled = false
-        let timer: number | null = null
-
-        const sleep = (ms: number) =>
-            new Promise<void>((resolve) => {
-                timer = window.setTimeout(() => resolve(), ms)
-            })
-
-        const loop = async () => {
-            // Start after initial load; keep refreshing silently.
-            while (!cancelled) {
-                try {
-                    await refreshItems({ silent: true })
-                } catch {
-                    // keep polling even if a request fails
-                }
-                await sleep(pollIntervalMs)
-            }
-        }
-
-        void loop()
-
-        return () => {
-            cancelled = true
-            if (timer) window.clearTimeout(timer)
-        }
-    }, [projectId, myProjectMemberId, refreshItems])
-
-    // Fetch status effects when projectId or myProjectMemberId changes
+    // Fetch status effects when projectId changes
+    // Note: API uses authenticated user automatically, but we filter by myProjectMemberId if available
     const refreshEffects = React.useCallback(async (opts?: { silent?: boolean }) => {
-        if (!projectId || !myProjectMemberId) {
+        if (!projectId) {
             setStatusEffects([]);
             return;
         }
 
         try {
-            const data = await getMyStatusEffects(projectId);
+            const data = await getMyStatusEffects(projectId, opts?.silent);
             // Handle both response formats: { member } or { members }
             if ('member' in data && data.member) {
                 setStatusEffects(data.member.effects || []);
             } else if ('members' in data && Array.isArray(data.members)) {
-                // Find the member matching myProjectMemberId
-                const myMember = data.members.find(
-                    m => m.project_member_id === myProjectMemberId
-                );
+                // If myProjectMemberId is available, filter to that member, otherwise use first member
+                const myMember = myProjectMemberId
+                    ? data.members.find(m => m.project_member_id === myProjectMemberId)
+                    : data.members[0];
                 setStatusEffects(myMember?.effects || []);
             } else {
                 setStatusEffects([]);
@@ -235,47 +208,16 @@ export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId
         }
     }, [projectId, myProjectMemberId, getMyStatusEffects]);
 
-    useEffect(() => {
-        refreshEffects();
-    }, [refreshEffects]);
-
-    // Long-poll loop for effects: request -> wait -> request (no overlap).
-    useEffect(() => {
-        if (!projectId || !myProjectMemberId) return
-
-        const pollIntervalMs = 5000
-        const enabled = true
-
-        if (!enabled) return
-        if (!pollIntervalMs || pollIntervalMs <= 0) return
-
-        let cancelled = false
-        let timer: number | null = null
-
-        const sleep = (ms: number) =>
-            new Promise<void>((resolve) => {
-                timer = window.setTimeout(() => resolve(), ms)
-            })
-
-        const loop = async () => {
-            // Start after initial load; keep refreshing silently.
-            while (!cancelled) {
-                try {
-                    await refreshEffects({ silent: true })
-                } catch {
-                    // keep polling even if a request fails
-                }
-                await sleep(pollIntervalMs)
-            }
-        }
-
-        void loop()
-
-        return () => {
-            cancelled = true
-            if (timer) window.clearTimeout(timer)
-        }
-    }, [projectId, myProjectMemberId, refreshEffects])
+    // Use conditional polling: always fetch, but only poll when projectId is available
+    usePollingWhen(
+        refreshEffects,
+        () => !!projectId, // Condition: only poll when projectId exists
+        {
+            pollIntervalMs: POLLING_CONFIG.effects.interval,
+            enabled: true,
+        },
+        [projectId, myProjectMemberId] // Dependencies for initial fetch (myProjectMemberId for filtering)
+    )
 
     // Group effects by effect_id and count stacks
     const groupedEffects = useMemo(() => {

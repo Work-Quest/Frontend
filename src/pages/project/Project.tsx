@@ -21,15 +21,17 @@ import type { GameActionPayload } from "@/types/battleTypes";
 import useLog from "@/hook/useLog";
 import { useAuth } from "@/context/AuthContext";
 import { useOverdueBossAttack } from "@/hook/useOverdueBossAttack";
-import type { ProjectLogEntry } from "@/types/LogApi";
+import { POLLING_CONFIG } from "@/config/pollingConfig";
+import { getActionKey } from "@/utils/actionDeduplication";
+import { useAnimationSync } from "@/hook/useAnimationSync";
 
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
   const { projectId } = useParams<{ projectId: string }>()
-  const { fetchedTask } = useTask({ pollIntervalMs: 5000 });
+  const { fetchedTask } = useTask({ pollIntervalMs: POLLING_CONFIG.tasks.interval });
   const { projectMembers } = useProjectMembers(projectId)
-  const { logs, loading: logsLoading } = useLog(projectId, { pollIntervalMs: 3000 });
-  const { playerAttack, bossAttack, gameStatus } = useGame(projectId, { pollIntervalMs: 5000 });
+  const { logs, loading: logsLoading } = useLog(projectId, { pollIntervalMs: POLLING_CONFIG.logs.interval });
+  const { playerAttack, bossAttack, gameStatus } = useGame(projectId, { pollIntervalMs: POLLING_CONFIG.gameStatus.interval });
   const [payloadBatch, setPayloadBatch] = useState<GameActionPayload[] | null>(
     null
   );
@@ -39,68 +41,36 @@ const ProjectPage: React.FC = () => {
     null
   );
   const [bossUpdateNonce, setBossUpdateNonce] = useState(0);
-  const processedLogIdsRef = React.useRef<Set<string>>(new Set());
+  // Track API actions to prevent duplicates from log polling
+  const apiActionsRef = React.useRef<Map<string, number>>(new Map());
 
-  // Convert log entries to game actions for animation synchronization
-  const convertLogsToActions = React.useCallback((logEntries: ProjectLogEntry[]): GameActionPayload[] => {
-    const actions: GameActionPayload[] = []
+  // Clear API actions tracking when projectId changes
+  useEffect(() => {
+    apiActionsRef.current.clear()
+  }, [projectId])
+
+  const enqueueActions = React.useCallback((actions: GameActionPayload[], taskId?: string) => {
+    if (!actions || actions.length === 0) return
     
-    for (const log of logEntries) {
-      const eventType = String(log.event_type || "").toUpperCase()
-      const payload = log.payload || {}
+    // Track API actions for deduplication (if taskId is provided)
+    if (taskId) {
+      const now = Date.now()
+      const DEDUP_WINDOW_MS = 5000 // 5 seconds
       
-      switch (eventType) {
-        case "USER_ATTACK":
-          // Extract player_id from payload (actor_id is the player who attacked)
-          const playerId = payload.player_id ? String(payload.player_id) : 
-                          log.actor_id ? String(log.actor_id) : null
-          if (playerId) {
-            actions.push({ act: "ATTACK", userId: playerId })
-          }
-          break
-          
-        case "BOSS_ATTACK":
-          // BOSS_ATTACK targets specific players - payload has player_id
-          const attackedPlayerId = payload.player_id ? String(payload.player_id) : 
-                                  payload.target_player_id ? String(payload.target_player_id) : null
-          if (attackedPlayerId) {
-            actions.push({ act: "BOSS_ATTACK_USER", userId: attackedPlayerId })
-          }
-          break
-          
-        case "KILL_PLAYER":
-          // KILL_PLAYER uses receiver_id in payload
-          const killedPlayerId = payload.receiver_id ? String(payload.receiver_id) : 
-                                payload.player_id ? String(payload.player_id) : null
-          if (killedPlayerId) {
-            actions.push({ act: "DIE", userId: killedPlayerId })
-          }
-          break
-          
-        case "KILL_BOSS":
-          actions.push({ act: "BOSS_DIE" })
-          break
-          
-        case "BOSS_REVIVE":
-          actions.push({ act: "BOSS_REVIVE" })
-          break
-          
-        case "USER_REVIVE":
-          // USER_REVIVE uses player_id in payload
-          const revivedPlayerId = payload.player_id ? String(payload.player_id) : 
-                                 log.actor_id ? String(log.actor_id) : null
-          if (revivedPlayerId) {
-            actions.push({ act: "REVIVE", userId: revivedPlayerId })
-          }
-          break
+      // Clean up old entries (older than 5 seconds)
+      for (const [key, timestamp] of apiActionsRef.current.entries()) {
+        if (now - timestamp > DEDUP_WINDOW_MS) {
+          apiActionsRef.current.delete(key)
+        }
+      }
+      
+      // Track each action with act:taskId key
+      for (const action of actions) {
+        const key = getActionKey(action, taskId)
+        apiActionsRef.current.set(key, now)
       }
     }
     
-    return actions
-  }, [])
-
-  const enqueueActions = React.useCallback((actions: GameActionPayload[]) => {
-    if (!actions || actions.length === 0) return
     setPayloadBatch(actions)
     setPayloadBatchNonce((n) => n + 1)
   }, [])
@@ -150,7 +120,7 @@ const ProjectPage: React.FC = () => {
           setBossUpdateNonce((n) => n + 1);
         }
 
-        enqueueActions(actions)
+        enqueueActions(actions, taskId)
         bumpBossRefresh()
       } catch (err) {
         console.error(err);
@@ -182,27 +152,11 @@ const ProjectPage: React.FC = () => {
   }, [overdueAttack.attackedTaskId, overdueAttack.error])
 
   // Animation synchronization: convert logs to actions for cross-window animation sync
-  useEffect(() => {
-    if (!logs || logs.length === 0) return
-    
-    // Filter to only process new logs that haven't been processed yet
-    const newLogs = logs.filter(log => !processedLogIdsRef.current.has(log.id))
-    
-    if (newLogs.length === 0) return
-    
-    // Mark these logs as processed
-    newLogs.forEach(log => {
-      processedLogIdsRef.current.add(log.id)
-    })
-    
-    // Convert logs to actions
-    const actions = convertLogsToActions(newLogs)
-    
-    // Enqueue actions to trigger animations
-    if (actions.length > 0) {
-      enqueueActions(actions)
-    }
-  }, [logs, convertLogsToActions, enqueueActions])
+  useAnimationSync(logs, {
+    onActionsReady: enqueueActions,
+    apiActionsRef,
+    projectId,
+  })
 
   const {
     tasks,

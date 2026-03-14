@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { get } from "@/Api"
 import type { ProjectGameLogsResponse, ProjectLogEntry } from "@/types/LogApi"
+import { usePolling } from "./usePolling"
+import { POLLING_CONFIG } from "@/config/pollingConfig"
 
 type UseLogState = {
   logs: ProjectLogEntry[]
@@ -11,14 +13,9 @@ type UseLogState = {
 }
 
 export type UseLogOptions = {
-  /**
-   * If set, will continuously refetch logs while the component is mounted.
-   * This is "long polling" style (request -> wait -> request) to avoid overlaps.
-   */
+
   pollIntervalMs?: number
-  /**
-   * Enable/disable polling (default: true)
-   */
+ 
   enabled?: boolean
 }
 
@@ -29,7 +26,7 @@ export function useLog(explicitProjectId?: string, options?: UseLogOptions) {
     [explicitProjectId, routeProjectId]
   )
 
-  const pollIntervalMs = options?.pollIntervalMs
+  const pollIntervalMs = options?.pollIntervalMs ?? POLLING_CONFIG.logs.interval
   const enabled = options?.enabled ?? true
 
   const [state, setState] = useState<UseLogState>({
@@ -39,22 +36,60 @@ export function useLog(explicitProjectId?: string, options?: UseLogOptions) {
     error: null,
   })
 
-  const fetchProjectGameLogs = useCallback(async (pid: string) => {
-    return get<ProjectGameLogsResponse>(`/api/project/${pid}/logs/game/`)
+  // Track initial load time to filter historical logs on subsequent polls
+  const initialLoadTimeRef = useRef<number | null>(null)
+
+  const fetchProjectGameLogs = useCallback(async (pid: string, silent?: boolean, timeBegin?: string) => {
+    const url = timeBegin 
+      ? `/api/project/${pid}/logs/game/?time_begin=${encodeURIComponent(timeBegin)}`
+      : `/api/project/${pid}/logs/game/`
+    return get<ProjectGameLogsResponse>(url, silent)
   }, [])
 
   const refetch = useCallback(async (opts?: { silent?: boolean }) => {
     if (!projectId) return null
+    
+    // On initial load (not silent), record timestamp
+    const isInitialLoad = !opts?.silent && initialLoadTimeRef.current === null
+    if (isInitialLoad) {
+      initialLoadTimeRef.current = Date.now()
+    }
+    
+    // For subsequent polls (silent), use time_begin to only fetch new logs
+    const timeBegin = opts?.silent && initialLoadTimeRef.current 
+      ? new Date(initialLoadTimeRef.current).toISOString()
+      : undefined
+    
     if (!opts?.silent) {
       setState((prev) => ({ ...prev, loading: true, error: null }))
     }
     try {
-      const data = await fetchProjectGameLogs(projectId)
-      setState({
-        logs: data.logs ?? [],
-        count: typeof data.count === "number" ? data.count : (data.logs?.length ?? 0),
-        loading: false,
-        error: null,
+      const data = await fetchProjectGameLogs(projectId, opts?.silent, timeBegin)
+      
+      // Merge new logs with existing logs (avoid duplicates by ID)
+      setState((prev) => {
+        if (timeBegin) {
+          // Subsequent poll: merge new logs with existing
+          const existingLogIds = new Set(prev.logs.map(log => log.id))
+          const newLogs = (data.logs ?? []).filter(log => !existingLogIds.has(log.id))
+          const mergedLogs = [...prev.logs, ...newLogs].sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          )
+          return {
+            logs: mergedLogs,
+            count: mergedLogs.length,
+            loading: false,
+            error: null,
+          }
+        } else {
+          // Initial load: replace all logs
+          return {
+            logs: data.logs ?? [],
+            count: typeof data.count === "number" ? data.count : (data.logs?.length ?? 0),
+            loading: false,
+            error: null,
+          }
+        }
       })
       return data
     } catch (err) {
@@ -63,45 +98,17 @@ export function useLog(explicitProjectId?: string, options?: UseLogOptions) {
       throw err
     }
   }, [fetchProjectGameLogs, projectId])
-
+  
+  // Reset initial load time when projectId changes
   useEffect(() => {
-    if (!projectId) return
-    void refetch()
-  }, [projectId, refetch])
+    initialLoadTimeRef.current = null
+  }, [projectId])
 
-  // Long-poll loop: request -> wait -> request (no overlap).
-  useEffect(() => {
-    if (!projectId) return
-    if (!enabled) return
-    if (!pollIntervalMs || pollIntervalMs <= 0) return
-
-    let cancelled = false
-    let timer: number | null = null
-
-    const sleep = (ms: number) =>
-      new Promise<void>((resolve) => {
-        timer = window.setTimeout(() => resolve(), ms)
-      })
-
-    const loop = async () => {
-      // Start after initial load; keep refreshing silently.
-      while (!cancelled) {
-        try {
-          await refetch({ silent: true })
-        } catch {
-          // keep polling even if a request fails
-        }
-        await sleep(pollIntervalMs)
-      }
-    }
-
-    void loop()
-
-    return () => {
-      cancelled = true
-      if (timer) window.clearTimeout(timer)
-    }
-  }, [projectId, enabled, pollIntervalMs, refetch])
+  // Use centralized polling hook
+  usePolling(refetch, {
+    pollIntervalMs: enabled ? pollIntervalMs : undefined,
+    enabled,
+  }, [projectId])
 
   return {
     projectId,
