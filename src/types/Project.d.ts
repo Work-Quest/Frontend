@@ -13,3 +13,10 @@ export type Project = {
   deadline_decision?: "closed" | "continued" | null;
   deadline_decision_date?: string | null;
   };
+
+export type FinishedProjectSummary = {
+  project_id: string;
+  project_name: string;
+  score: number;
+  boss_count: number;
+};

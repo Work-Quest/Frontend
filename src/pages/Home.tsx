@@ -2,6 +2,7 @@
 
 import Leaderboard from "@/components/Leaderboard"
 import type { UserProfile } from "@/types/User"
+import type { Boss } from "@/types/Boss"
 import ProfileCard from "@/sections/home/ProfileCard"
 import ProjectTab, { type FilterState } from "@/sections/home/ProjectTab"
 import { useState, useMemo } from "react"
@@ -9,53 +10,10 @@ import Fuse from "fuse.js"
 import { Input } from "@/components/ui/input"
 import { useProjects } from "@/hook/useProjects"
 import { useLeaderboard } from "@/hook/useLeaderboard"
+import { useAuth } from "@/context/AuthContext"
+import { useUserDefeatedBosses } from "@/hook/useUserDefeatedBosses"
+import { getBossConfigId } from "@/utils/bossMapping"
 import LoadingSpinner from "@/components/LoadingSpinner"
-
-const mockProfile: UserProfile = {
-  name: "John Doe",
-  username: "littleJohn",
-  profileImg: "/mockImg/profile.svg",
-  tag: [
-    {
-      id: "tag1",
-      tagName: "Zombie of the group",
-      description: "Always active at midnighr are you a zombie???",
-    },
-    {
-      id: "tag2",
-      tagName: "Strategist",
-      description: "Always plans the next move with precision.",
-    },
-  ],
-  bossCollection: [
-    {
-      id: "boss1",
-      bossName: "Flame King",
-      img: "/mockImg/boss1.svg",
-      defeated: true,
-    },
-    {
-      id: "boss2",
-      bossName: "Abyss Serpent",
-      img: "/mockImg/boss2.svg",
-      defeated: true,
-    },
-    {
-      id: "boss3",
-      bossName: "Doggy",
-      img: "/mockImg/boss3.svg",
-      defeated: true,
-    },
-  ],
-}
-
-// type BatchDeleteResponse = {
-//   deleted_projects: string[]
-//   failed_projects: {
-//     project_id: string
-//     error: string
-//   }[]
-// }
 
 
 function Home() {
@@ -66,29 +24,56 @@ function Home() {
   })
   const { projects, loading, updateProject, deleteProject } = useProjects()
   const { leaderboard, loading: leaderboardLoading, error: leaderboardError } = useLeaderboard()
+  const { user } = useAuth()
+  const { defeatedBosses, loading: bossesLoading, error: bossesError } = useUserDefeatedBosses()
+
+  // Transform defeated bosses to Boss[] type with idle gif paths
+  const bossCollection: Boss[] = useMemo(() => {
+    return defeatedBosses.map((boss) => {
+      const configId = getBossConfigId(boss.name)
+      return {
+        id: boss.id,
+        bossName: boss.name,
+        img: `/assets/sprites/bosses/${configId}/idle.gif`,
+        defeated: true,
+      }
+    })
+  }, [defeatedBosses])
+
+  // Create UserProfile from real data
+  const userProfile: UserProfile = useMemo(() => {
+    return {
+      name: user?.name,
+      username: user?.username,
+      profileImg: user?.profile_img || undefined,
+      tag: [], // No backend support for tags
+      bossCollection: bossCollection,
+    }
+  }, [user, bossCollection])
+
   const fuse = useMemo(() => {
-  return new Fuse(projects, {
-    keys: ["project_name", "owner_username", "status"],
-  })
-}, [projects])
+    return new Fuse(projects, {
+      keys: ["project_name", "owner_username", "status"],
+    })
+  }, [projects])
 
   const filteredAndSearchedResults = useMemo(() => {
-  let results = projects
+    let results = projects
 
-  if (query.trim() !== "") {
-    results = fuse.search(query).map(r => r.item)
-  }
+    if (query.trim() !== "") {
+      results = fuse.search(query).map(r => r.item)
+    }
 
-  if (filters.status) {
-    results = results.filter(p => p.status === filters.status)
-  }
+    if (filters.status) {
+      results = results.filter(p => p.status === filters.status)
+    }
 
-  if (filters.owner) {
-    results = results.filter(p => p.owner_username === filters.owner)
-  }
+    if (filters.owner) {
+      results = results.filter(p => p.owner_username === filters.owner)
+    }
 
-  return results
-}, [query, filters, projects, fuse])
+    return results
+  }, [query, filters, projects, fuse])
 
   const handleSearch = (value: string) => {
     setQuery(value)
@@ -98,6 +83,8 @@ function Home() {
     setFilters(newFilters)
   }
 
+  const profileLoading = !user || bossesLoading
+
 
   return (
     <div className="h-[calc(100vh-140px)] w-screen overflow-hidden p-4 bg-offWhite">
@@ -105,7 +92,17 @@ function Home() {
         {/* Left Section */}
         <div className="flex flex-col w-full lg:w-2/5 xl:w-1/3 gap-4 lg:pr-4 h-full">
           <div className="h-auto flex-shrink-0">
-            <ProfileCard data={mockProfile} />
+            {profileLoading ? (
+              <div className="bg-orange rounded-3xl p-4 flex items-center justify-center h-[200px]">
+                <LoadingSpinner size="md" />
+              </div>
+            ) : bossesError ? (
+              <div className="bg-orange rounded-3xl p-4 flex items-center justify-center h-[200px] text-red-500">
+                Error loading profile data
+              </div>
+            ) : (
+              <ProfileCard data={userProfile} user_id={user.id} />
+            )}
           </div>
           <div className="flex-1 min-h-0 overflow-hidden">
             <div className="border-2 border-gray-200 bg-offWhite rounded-3xl p-4 h-full">

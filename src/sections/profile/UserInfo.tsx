@@ -1,64 +1,109 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/context/AuthContext"
+import { useEffect, useState } from "react"
+import { get } from "@/Api"
+import type { BusinessUser } from "@/types/User"
 
 interface UserInfoProps {
-  profilePicture?: string
-  name?: string
-  username?: string
-  avatarId?: number
-  backgroundColor?: string
+  userId?: string
 }
 
-export default function UserInfo(UserInfoProps: UserInfoProps) {
+export default function UserInfo({ userId }: UserInfoProps) {
   const navigate = useNavigate()
-  const useAvatarId =
-    UserInfoProps.avatarId != null && UserInfoProps.backgroundColor
+  const { user: currentUser } = useAuth()
+  const [userData, setUserData] = useState<BusinessUser | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const isOwnProfile = !userId || userId === currentUser?.id
+  const displayUser = isOwnProfile ? currentUser : userData
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (isOwnProfile) {
+        setUserData(null)
+        setLoading(false)
+        return
+      }
+
+      if (!userId) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        setLoading(true)
+        const users = await get<BusinessUser[]>("/api/users/business/")
+        const user = users.find((u) => u.id === userId)
+        setUserData(user || null)
+      } catch (err) {
+        console.error("Failed to fetch user data:", err)
+        setUserData(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUserData()
+  }, [userId, isOwnProfile])
+
+  if (loading) {
+    return (
+      <div className="flex items-center w-full gap-4">
+        <div className="!h-[115px] !w-[115px] !min-w-[115px] !rounded-lg bg-gray-200 animate-pulse" />
+        <div className="flex flex-col flex-1 gap-2">
+          <div className="h-6 bg-gray-200 rounded animate-pulse w-32" />
+          <div className="h-4 bg-gray-200 rounded animate-pulse w-24" />
+        </div>
+      </div>
+    )
+  }
+
+  if (!displayUser) {
+    return (
+      <div className="flex items-center w-full gap-4">
+        <Avatar className="!h-[115px] !w-auto !rounded-md">
+          <AvatarFallback>?</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col flex-1">
+          <h2 className="-mb-2 text-xl font-bold">User not found</h2>
+          <p className="!text-brown !font-medium">@unknown</p>
+        </div>
+      </div>
+    )
+  }
+
+  const initials = displayUser.name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "U"
 
   return (
     <>
       <div className="flex items-center w-full gap-4">
-        {useAvatarId ? (
-          <div
-            className="!h-[115px] !w-[115px] !min-w-[115px] !rounded-lg overflow-hidden flex items-center justify-center border-2 border-brown relative"
-            style={{ backgroundColor: UserInfoProps.backgroundColor }}
-          >
-            <img
-              src={`/avatars/${UserInfoProps.avatarId}.png`}
-              alt={`Avatar ${UserInfoProps.avatarId}`}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const el = e.target as HTMLImageElement
-                el.style.display = "none"
-                el.parentElement
-                  ?.querySelector(".avatar-fallback")
-                  ?.classList.remove("hidden")
-              }}
-            />
-            <span className="avatar-fallback hidden absolute inset-0 flex items-center justify-center font-['Baloo_2'] font-bold text-3xl text-darkBrown">
-              {UserInfoProps.avatarId}
-            </span>
-          </div>
-        ) : (
-          <Avatar className="!h-[115px] !w-auto !rounded-md">
-            <AvatarImage src={UserInfoProps.profilePicture} alt="User Avatar" />
-            <AvatarFallback>AK</AvatarFallback>
-          </Avatar>
-        )}
+        <Avatar className="!h-[115px] !w-auto !rounded-md">
+          <AvatarImage src={displayUser.profile_img || undefined} alt="User Avatar" />
+          <AvatarFallback>{initials}</AvatarFallback>
+        </Avatar>
         <div className="flex flex-col flex-1">
           <h2 className="-mb-2 text-xl font-bold">
-            {UserInfoProps.name || "Name"}
+            {displayUser.name || "Name"}
           </h2>
           <p className="!text-brown !font-medium">
-            @{UserInfoProps.username || "username"}
+            @{displayUser.username || "username"}
           </p>
-          <Button
-            variant="default"
-            className="mt-2 !font-bold w-full"
-            onClick={() => navigate("/profile/edit")}
-          >
-            Edit Profile
-          </Button>
+          {isOwnProfile && (
+            <Button
+              variant="default"
+              className="mt-2 !font-bold w-full"
+              onClick={() => navigate("/profile/edit")}
+            >
+              Edit Profile
+            </Button>
+          )}
         </div>
       </div>
     </>

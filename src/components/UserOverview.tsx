@@ -1,14 +1,8 @@
-import { FaUserGroup } from "react-icons/fa6";
 import { PiNewspaperClippingFill } from "react-icons/pi";
 import { RiSwordFill } from "react-icons/ri";
 import { GiAchievement } from "react-icons/gi";
-
-interface UserStats {
-    friendCount: number;
-    projectCount: number;
-    bossDefeated: number;
-    achievements: string;
-}
+import { MdOutlineSportsScore } from "react-icons/md";
+import { useUserProfileStats } from "@/hook/useUserProfileStats";
 
 interface StatItem {
     icon: React.ElementType;
@@ -16,7 +10,7 @@ interface StatItem {
     value: string | number;
 }
 
-interface StatBoxProps extends StatItem {}
+type StatBoxProps = StatItem
 
 const StatBox = ({ icon: Icon, label, value }: StatBoxProps) => (
     <div className="flex flex-col items-center justify-center mx-auto">
@@ -28,25 +22,31 @@ const StatBox = ({ icon: Icon, label, value }: StatBoxProps) => (
     </div>
 );
 
-export default function UserOverview() {
-    const userStats: UserStats = {
-        friendCount: 0,
-        projectCount: 0,
-        bossDefeated: 0,
-        achievements: "0/0",
+interface UserOverviewProps {
+    userId?: string;
+}
+
+export default function UserOverview({ userId }: UserOverviewProps) {
+    const { stats, loading } = useUserProfileStats(userId);
+
+    const userStats = {
+        highestScore: stats?.highest_score || 0,
+        projectCount: stats?.project_count || 0,
+        bossDefeated: stats?.total_bosses_defeated || 0,
+        achievements: "0/0", // Keep as mock data
     };
 
-    const stats: StatItem[] = [
-        { icon: FaUserGroup, label: "Friends", value: userStats.friendCount },
-        { icon: PiNewspaperClippingFill, label: "Projects", value: userStats.projectCount },
-        { icon: RiSwordFill, label: "Boss Defeated", value: userStats.bossDefeated },
+    const statsList: StatItem[] = [
+        { icon: MdOutlineSportsScore, label: "Highest score", value: loading ? "..." : userStats.highestScore.toLocaleString() },
+        { icon: PiNewspaperClippingFill, label: "Projects", value: loading ? "..." : userStats.projectCount },
+        { icon: RiSwordFill, label: "Boss Defeated", value: loading ? "..." : userStats.bossDefeated },
         { icon: GiAchievement, label: "Achievements", value: userStats.achievements },
     ];
 
     return (
         <div className="flex flex-row items-center justify-between h-full gap-4 p-5 rounded-md bg-orange">
             <div className="flex flex-row items-center justify-center w-full gap-4 rounded-md text-offWhite">
-                {stats.map((stat, index) => (
+                {statsList.map((stat, index) => (
                     <StatBox key={index} {...stat} />
                 ))}
             </div>

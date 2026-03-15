@@ -2,15 +2,22 @@
 
 import type { UserProfile } from "@/types/User"
 import { Button } from "@/components/ui/button"
+import {useNavigate} from "react-router-dom";
 
 type ProfileCardProps = {
   data: UserProfile
+  user_id: string
 }
 
-export default function ProfileCard({ data }: ProfileCardProps) {
+export default function ProfileCard({ data, user_id }: ProfileCardProps) {
   const defeatedBosses = data.bossCollection?.filter(boss => boss.defeated).length || 3
   const totalBosses = data.bossCollection?.length || 7
-
+  const navigate = useNavigate()
+  const handleProfileClick = () => {
+    if (user_id) {
+      navigate(`/profile/${user_id}`)
+    }
+  }
   return (
     <div className="w-full mx-auto">
       <div className="bg-orange rounded-3xl p-4 flex flex-col gap-4">
@@ -83,7 +90,10 @@ export default function ProfileCard({ data }: ProfileCardProps) {
         </div>
 
         {/* See Full Profile Button */}
-        <Button className="flex justify-center items-center cursor-pointer">
+        <Button
+            className="flex justify-center items-center cursor-pointer "
+            onClick={handleProfileClick}
+        >
           See Full Profile
         </Button>
       </div>

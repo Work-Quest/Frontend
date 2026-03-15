@@ -1,75 +1,30 @@
 import UserInfo from "../sections/profile/UserInfo"
-import Friends from "../components/Friends"
+import FinishedProjectsHistory from "../components/FinishedProjectsHistory"
 import UserOverview from "@/components/UserOverview"
-import type { UserProfile } from "../types/User"
 import Achievement from "../sections/profile/Achievements"
 import BossDefeated from "@/sections/profile/BossDefeated"
-
-const MOCK_USER_INFO = {
-  name: "Atikarn Kruaykriangkrai",
-  username: "littleJohn",
-  avatarId: 1,
-  backgroundColor: "#ff995a",
-}
-
-const FriendsMockData: { friends: UserProfile[] } = {
-  friends: [
-    {
-      name: "Atikarn Kruaykriangkrai",
-      username: "nanokwok",
-      profileImg: "https://github.com/Nanokwok.png",
-      avatarFallback: "AK",
-    },
-    {
-      name: "Napasorn Tevarut",
-      username: "tonnamza550",
-      profileImg: "https://github.com/tnnpp.png",
-      avatarFallback: "JD",
-    },
-    {
-      name: "Jane Smith",
-      username: "janeSmith",
-      profileImg: "https://github.com/shadcn.png",
-      avatarFallback: "JS",
-    },
-    {
-      name: "Alice Johnson",
-      username: "aliceJ",
-      profileImg: "https://github.com/shadcn.png",
-      avatarFallback: "AJ",
-    },
-    {
-      name: "Bob Brown",
-      username: "bobB",
-      profileImg: "https://github.com/shadcn.png",
-      avatarFallback: "BB",
-    },
-  ] as UserProfile[],
-}
+import { useParams } from "react-router-dom"
 
 export default function Profile() {
-  // TODO: replace with useProfile() or get from API
-  const userInfo = MOCK_USER_INFO
+  const { userId } = useParams<{ userId: string }>()
 
   return (
     <>
       <div className="p-8 h-[calc(100vh-140px)] overflow-hidden flex items-center bg-offWhite gap-4">
         <div className="w-[550px] h-full flex flex-col gap-4">
-          <UserInfo
-            name={userInfo.name}
-            username={userInfo.username}
-            avatarId={userInfo.avatarId}
-            backgroundColor={userInfo.backgroundColor}
-          />
-          <Friends
-            friends={FriendsMockData.friends}
-            friendsCount={FriendsMockData.friends.length}
-          />
+          <UserInfo userId={userId} />
+          <FinishedProjectsHistory userId={userId} />
         </div>
-        <div className="flex flex-col flex-1 h-full gap-4">
-          <UserOverview />
-          <Achievement />
-          <BossDefeated />
+        <div className="grid grid-rows-5 flex-1 h-full gap-4">
+          <div>
+            <UserOverview userId={userId} />
+          </div>
+          <div className="row-span-2">
+            <Achievement />
+          </div>
+          <div className="row-span-2">
+            <BossDefeated userId={userId} />
+          </div>
         </div>
       </div>
     </>

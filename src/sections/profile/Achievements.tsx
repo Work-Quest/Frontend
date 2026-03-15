@@ -46,9 +46,10 @@ export default function Achievements() {
     <>
       <BadgeContainer
         title="Achievements"
-        badges={[
-          ...AchievementsMockData.achievements.map((achievement) => achievement.img),
-        ]}
+        badges={AchievementsMockData.achievements.map((achievement) => ({
+          image: achievement.img,
+          name: achievement.name,
+        }))}
         buttonText="View All Achievements"
       />
     </>
