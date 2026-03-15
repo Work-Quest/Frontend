@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {DamageLogEntry, DamageLogProps} from "./types";
+import { DamageLogEntry, DamageLogPayload, DamageLogProps } from "./types";
 
 const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
   const [showCount, setShowCount] = useState(3);
@@ -28,13 +28,13 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
 
   const damageLogs = useMemo<DamageLogEntry[]>(() => {
     return logs.map((log) => {
-      const p = log.payload as any;
-      const taskName = p?.task?.task_name as string | undefined;
-      const actorName = p?.actor?.username as string | undefined;
+      const p = log.payload as DamageLogPayload;
+      const taskName = p?.task?.task_name;
+      const actorName = p?.actor?.username;
 
       if (log.event_type === "BOSS_ATTACK") {
-        const targetName = p?.target?.username as string | undefined;
-        const damage = typeof p?.damage === "number" ? (p.damage as number) : 0;
+        const targetName = p?.target?.username;
+        const damage = typeof p?.damage === "number" ? p.damage : 0;
 
         return {
           id: log.id,
@@ -49,7 +49,7 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
         id: log.id,
         action: taskName ?? log.event_type,
         timestamp: log.created_at,
-        damageValue: typeof p?.damage === "number" ? (p.damage as number) : 0,
+        damageValue: typeof p?.damage === "number" ? p.damage : 0,
         participants: [actorName].filter(Boolean) as string[],
       };
     });
