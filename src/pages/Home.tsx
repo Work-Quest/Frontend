@@ -1,23 +1,15 @@
 "use client"
 
 import Leaderboard from "@/components/Leaderboard"
-import type { UserScore, UserProfile } from "@/types/User"
+import type { UserProfile } from "@/types/User"
 import ProfileCard from "@/sections/home/ProfileCard"
 import ProjectTab, { type FilterState } from "@/sections/home/ProjectTab"
 import { useState, useMemo } from "react"
 import Fuse from "fuse.js"
 import { Input } from "@/components/ui/input"
 import { useProjects } from "@/hook/useProjects"
-
-const userMockData: UserScore[] = [
-  { order: 1, name: "Michael", username: "michaelza550", score: 12040 },
-  { order: 2, name: "William", username: "williamshake", score: 11522 },
-  { order: 3, name: "Sophia", username: "sophispark", score: 9245 },
-  { order: 4, name: "Oliver", username: "oliverwave", score: 9176 },
-  { order: 5, name: "Isabella", username: "isabellaflare", score: 8530 },
-  { order: 6, name: "Michael1", username: "michaelza5501", score: 8520 },
-  { order: 7, name: "Michael2", username: "michaelza5502", score: 8500 },
-]
+import { useLeaderboard } from "@/hook/useLeaderboard"
+import LoadingSpinner from "@/components/LoadingSpinner"
 
 const mockProfile: UserProfile = {
   name: "John Doe",
@@ -73,6 +65,7 @@ function Home() {
     owner: null,
   })
   const { projects, loading, updateProject, deleteProject } = useProjects()
+  const { leaderboard, loading: leaderboardLoading, error: leaderboardError } = useLeaderboard()
   const fuse = useMemo(() => {
   return new Fuse(projects, {
     keys: ["project_name", "owner_username", "status"],
@@ -116,7 +109,21 @@ function Home() {
           </div>
           <div className="flex-1 min-h-0 overflow-hidden">
             <div className="border-2 border-gray-200 bg-offWhite rounded-3xl p-4 h-full">
-              <Leaderboard user={userMockData} />
+              {leaderboardLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <LoadingSpinner size="md" />
+                </div>
+              ) : leaderboardError ? (
+                <div className="flex items-center justify-center h-full text-red-500">
+                  Error: {leaderboardError}
+                </div>
+              ) : leaderboard && leaderboard.length > 0 ? (
+                <Leaderboard user={leaderboard} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  No leaderboard data available
+                </div>
+              )}
             </div>
           </div>
         </div>
