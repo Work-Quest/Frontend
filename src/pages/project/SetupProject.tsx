@@ -25,7 +25,7 @@ const PRIORITY_HP: Record<string, number> = {
 
 export default function SetupProject() {
   const { fetchedTask } = useTask()
-  const { tasks, handleAddTask, handleDeleteTask } = useKanbanBoard(fetchedTask)
+  const { tasks, handleAddTask, handleDeleteTask, handleUpdateTask } = useKanbanBoard(fetchedTask)
   const { setupBoss, getProjectOwner } = useProjects()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -87,7 +87,7 @@ export default function SetupProject() {
     }
   }
 
-  const handleSetupBoss = async () => { 
+  const handleSetupBoss = async () => {
     try {
       if (!projectId) {
         toast.error("Missing project id.")
@@ -141,7 +141,9 @@ export default function SetupProject() {
                 key={task.id}
                 id={task.id}
                 task={task}
+                projectMember={projectMembers ?? []}
                 onDelete={handleDeleteTask}
+                onUpdateTask={handleUpdateTask}
               />
             ))
           )}
@@ -175,10 +177,10 @@ export default function SetupProject() {
               }}
               // handleCopyLink={handleCopyLink}
               isLoading={isLoading}
-            /> 
+            />
           </div>
-         
-      
+
+
         
       </div>
        <div

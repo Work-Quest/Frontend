@@ -25,7 +25,7 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[50] bg-black/60 backdrop-blur-sm",
         className,
       )}
       {...props}
@@ -33,14 +33,28 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
   )
 }
 
-function DialogContent({ className, children, showCloseButton = true, ...props }: React.ComponentProps<typeof DialogPrimitive.Content> & { showCloseButton?: boolean }) {
+type DialogContentVariant = "normal" | "fancy"
+
+function DialogContent({
+  className,
+  children,
+  showCloseButton = true,
+  variant = "fancy",
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Content> & {
+  showCloseButton?: boolean
+  variant?: DialogContentVariant
+}) {
+  const isNormal = variant === "normal"
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-[50%] left-[50%] z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] sm:max-w-lg",
+          "fixed top-[50%] left-[50%] z-[51] translate-x-[-50%] translate-y-[-50%]",
+          !isNormal && "w-full max-w-[calc(100%-2rem)] sm:max-w-lg",
           "data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
           "data-[state=closed]:zoom-out-90 data-[state=open]:zoom-in-105",
@@ -52,17 +66,9 @@ function DialogContent({ className, children, showCloseButton = true, ...props }
         )}
         {...props}
       >
-        <div className="relative transform-gpu transition-all duration-300 ease-out hover:scale-[1.02] group">
-          <div className="absolute inset-0 bg-cream rounded-lg opacity-70 transition-all duration-300 ease-out group-hover:rotate-4" />
-          <div
-            className={cn(
-              "relative bg-white rounded-lg shadow-2xl transform-gpu transition-all duration-300 ease-out",
-              "border-4 border-gray-200 group-hover:border-gray-300",
-              "p-6 gap-4 grid",
-            )}
-          >
-            <div className="relative z-20">{children}</div>
-
+        {isNormal ? (
+          <div className="relative bg-offWhite rounded-lg shadow-xl border border-white p-0 h-full min-h-0 flex flex-col">
+            {children}
             {showCloseButton && (
               <DialogPrimitive.Close
                 className={cn(
@@ -70,15 +76,41 @@ function DialogContent({ className, children, showCloseButton = true, ...props }
                   "w-10 h-10 rounded-full",
                   "!bg-transparent hover:!border-transparent",
                   "items-center justify-center",
-                  "transition-all duration-200 ease-in-out"
                 )}
               >
-                <XIcon className="w-5 h-5 text-darkBrown drop-shadow-sm transition-transform duration-200 ease-out relative z-40" />
+                <XIcon className="w-5 h-5 text-darkBrown drop-shadow-sm relative z-40" />
                 <span className="sr-only">Close</span>
               </DialogPrimitive.Close>
             )}
           </div>
-        </div>
+        ) : (
+          <div className="relative transform-gpu transition-all duration-300 ease-out hover:scale-[1.02] group">
+            <div className="absolute inset-0 bg-cream rounded-lg opacity-70 transition-all duration-300 ease-out group-hover:rotate-4" />
+            <div
+              className={cn(
+                "relative bg-white rounded-lg shadow-2xl transform-gpu transition-all duration-300 ease-out",
+                "border-4 border-gray-200 group-hover:border-gray-300",
+                "p-6 gap-4 grid",
+              )}
+            >
+              <div className="relative z-20">{children}</div>
+              {showCloseButton && (
+                <DialogPrimitive.Close
+                  className={cn(
+                    "absolute top-3 right-5 z-30",
+                    "w-10 h-10 rounded-full",
+                    "!bg-transparent hover:!border-transparent",
+                    "items-center justify-center",
+                    "transition-all duration-200 ease-in-out"
+                  )}
+                >
+                  <XIcon className="w-5 h-5 text-darkBrown drop-shadow-sm transition-transform duration-200 ease-out relative z-40" />
+                  <span className="sr-only">Close</span>
+                </DialogPrimitive.Close>
+              )}
+            </div>
+          </div>
+        )}
       </DialogPrimitive.Content>
     </DialogPortal>
   )

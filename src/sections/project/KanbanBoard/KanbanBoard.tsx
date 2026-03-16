@@ -8,22 +8,23 @@ import {
   useSensors,
   DragOverlay,
   MeasuringStrategy,
-} from "@dnd-kit/core";
-import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { KanbanColumn } from "./KanbanColumn";
-import { Task, Tasks, TaskStatus } from "./types";
-import { UserStatus } from "@/types/User";
+} from "@dnd-kit/core"
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
+import { KanbanColumn } from "./KanbanColumn"
+import { Task, Tasks, TaskStatus } from "./types"
+import { UserStatus } from "@/types/User"
 
 interface KanbanBoardProps {
-  tasks: Tasks;
-  onAddTask: (column: TaskStatus, task: Task) => void;
-  onDeleteTask: (id: string) => void;
-  onDragStart: (event: any) => void;
-  onDragOver: (event: any) => void;
-  onDragEnd: (event: any) => void;
-  activeId: string | null;
-  findActiveTask: () => Task | null;
-  projectMember: UserStatus[];
+  tasks: Tasks
+  onAddTask: (column: TaskStatus, task: Task) => void
+  onUpdateTask: (task: Task) => void
+  onDeleteTask: (id: string) => void
+  onDragStart: (event: any) => void
+  onDragOver: (event: any) => void
+  onDragEnd: (event: any) => void
+  activeId: string | null
+  findActiveTask: () => Task | null
+  projectMember: UserStatus[]
 }
 
 const getColumnTitle = (id: string): string => {
@@ -32,13 +33,14 @@ const getColumnTitle = (id: string): string => {
     todo: "TODO",
     inProgress: "In Progress",
     done: "Done",
-  };
-  return titles[id] || id;
-};
+  }
+  return titles[id] || id
+}
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   tasks,
   onAddTask,
+  onUpdateTask,
   onDeleteTask,
   onDragStart,
   onDragOver,
@@ -48,9 +50,17 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   projectMember,
 }) => {
   const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
+
+  const activeTask = findActiveTask()
+  const activeAssignees =
+    activeTask?.assigneesName?.length ? activeTask.assigneesName : activeTask?.assignees ?? []
 
   return (
     <div className="p-4">
@@ -76,6 +86,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               title={getColumnTitle(columnId)}
               tasks={tasks[columnId as keyof typeof tasks]}
               onAddTask={onAddTask}
+              onUpdateTask={onUpdateTask}
               onDeleteTask={onDeleteTask}
               projectMember={projectMember}
             />
@@ -89,31 +100,31 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               style={{ boxShadow: "0 8px 12px rgba(0, 0, 0, 0.15)" }}
             >
               <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">
-                {findActiveTask()?.title}
+                {activeTask?.title}
               </h4>
               <div className="h-px bg-brown w-full"></div>
               <div className="flex flex-wrap gap-2">
                 <div
                   className={`tag tag-priority ${
-                    findActiveTask()?.priority === "Low"
+                    activeTask?.priority === "Low"
                       ? "tag-priority-low"
-                      : findActiveTask()?.priority === "Medium"
-                      ? "tag-priority-medium"
-                      : findActiveTask()?.priority === "High"
-                      ? "tag-priority-high"
-                      : "tag-priority-urgent"
+                      : activeTask?.priority === "Medium"
+                        ? "tag-priority-medium"
+                        : activeTask?.priority === "High"
+                          ? "tag-priority-high"
+                          : "tag-priority-urgent"
                   }`}
                 >
-                  {findActiveTask()?.priority}
+                  {activeTask?.priority}
                 </div>
                 <div className="tag tag-iteration">
-                  {findActiveTask()?.iteration}
+                  {activeTask?.iteration}
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                {findActiveTask()?.assignees.map((assignee) => (
+                {activeAssignees.map((assignee) => (
                   <div
-                    key={`${findActiveTask()?.id}-${assignee}`}
+                    key={`${activeTask?.id ?? "task"}-${assignee}`}
                     className="tag tag-name"
                   >
                     {assignee}
@@ -125,5 +136,5 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         </DragOverlay>
       </DndContext>
     </div>
-  );
-};
+  )
+}

@@ -9,6 +9,7 @@ export interface Task {
   deadline: string | null;
   iteration: string | null;
   assignees: string[];
+  assigneesName: string[];
   status: TaskStatus;
 }
 
@@ -22,6 +23,11 @@ export interface TaskResponse {
   deadline: string | null;
   created_at: string;
   completed_at: string | null;
+  // Optional fields depending on backend serializer (for persistence after refresh)
+  assignees?: unknown;
+  assignees_name?: unknown;
+  assignee_names?: unknown;
+  assignee_ids?: unknown;
 }
 
 export interface Tasks {
@@ -51,13 +57,22 @@ export const PRIORITY_TO_NUMBER: Record<TaskPriority, number> = {
 // -----------------------------
 
 export const mapTaskResponseToTask = (task: TaskResponse): Task => ({
-  id: task.task_id ?? undefined,
+  id: task.task_id,
   title: task.task_name,
   priority: PRIORITY_MAP[task.priority],
   description: task.description,
   deadline: task.deadline,
   iteration: null,
-  assignees: [],
+  assignees: Array.isArray((task as any).assignees)
+    ? (task as any).assignees.map((v: any) => String(v))
+    : Array.isArray((task as any).assignee_ids)
+      ? (task as any).assignee_ids.map((v: any) => String(v))
+      : [],
+  assigneesName: Array.isArray((task as any).assignees_name)
+    ? (task as any).assignees_name.map((v: any) => String(v))
+    : Array.isArray((task as any).assignee_names)
+      ? (task as any).assignee_names.map((v: any) => String(v))
+      : [],
   status: task.status,
 })
 

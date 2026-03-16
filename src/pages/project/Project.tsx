@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { PROJECT_DATA } from "@/sections/project/constants";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import ToggleButton from "@/components/ToggleButton";
-import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard";
+import React, { useState, useEffect } from "react"
+import {
+  PROJECT_DATA,
+} from "@/sections/project/constants"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import ToggleButton from "@/components/ToggleButton"
+import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard"
+import ReviewTask from "@/sections/project/ReviewTask/ReviewTask"
 import DamageLog from "@/sections/project/DamageLog/DamageLog";
-import ReviewTask from "@/sections/project/ReviewTask";
 import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard";
 import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
 import { useTask } from "@/hook/useTask";
@@ -100,8 +102,8 @@ const ProjectPage: React.FC = () => {
           setBossUpdateNonce((n) => n + 1);
         }
 
-        enqueueActions(actions);
-        bumpBossRefresh();
+        enqueueActions(actions)
+        bumpBossRefresh()
       } catch (err) {
         console.error(err);
         toast.error("Attack failed");
@@ -139,12 +141,13 @@ const ProjectPage: React.FC = () => {
     handleDragEnd,
     findActiveTask,
     handleAddTask,
+    handleUpdateTask,
     handleDeleteTask,
   } = useKanbanBoard(fetchedTask, { onMovedToDone: handleMovedToDone });
 
   const toggleBossPlaceholder = () => {
-    setShowBossPlaceholder((prev) => !prev);
-  };
+    setShowBossPlaceholder((prev) => !prev)
+  }
 
   const { user } = useAuth();
   const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id);
@@ -192,6 +195,7 @@ const ProjectPage: React.FC = () => {
             <KanbanBoard
               tasks={tasks}
               onAddTask={handleAddTask}
+              onUpdateTask={handleUpdateTask}
               onDeleteTask={handleDeleteTask}
               onDragStart={handleDragStart}
               onDragOver={handleDragOver}

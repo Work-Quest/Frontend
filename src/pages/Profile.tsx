@@ -1,9 +1,16 @@
-import UserInfo from "../sections/profile/UserInfo";
-import Friends from "../components/Friends";
-import UserOverview from "@/components/UserOverview";
-import type { UserProfile } from "../types/User";
-import Achievement from "../sections/profile/Achievements";
-import BossDefeated from "@/sections/profile/BossDefeated";
+import UserInfo from "../sections/profile/UserInfo"
+import Friends from "../components/Friends"
+import UserOverview from "@/components/UserOverview"
+import type { UserProfile } from "../types/User"
+import Achievement from "../sections/profile/Achievements"
+import BossDefeated from "@/sections/profile/BossDefeated"
+
+const MOCK_USER_INFO = {
+  name: "Atikarn Kruaykriangkrai",
+  username: "littleJohn",
+  avatarId: 1,
+  backgroundColor: "#ff995a",
+}
 
 const FriendsMockData: { friends: UserProfile[] } = {
   friends: [
@@ -38,17 +45,21 @@ const FriendsMockData: { friends: UserProfile[] } = {
       avatarFallback: "BB",
     },
   ] as UserProfile[],
-};
+}
 
 export default function Profile() {
+  // TODO: replace with useProfile() or get from API
+  const userInfo = MOCK_USER_INFO
+
   return (
     <>
       <div className="p-8 h-[calc(100vh-140px)] overflow-hidden flex items-center bg-offWhite gap-4">
         <div className="w-[550px] h-full flex flex-col gap-4">
           <UserInfo
-            profilePicture="https://github.com/shadcn.png"
-            name="Atikarn Kruaykriangkrai"
-            username="littleJohn"
+            name={userInfo.name}
+            username={userInfo.username}
+            avatarId={userInfo.avatarId}
+            backgroundColor={userInfo.backgroundColor}
           />
           <Friends
             friends={FriendsMockData.friends}
@@ -62,5 +73,5 @@ export default function Profile() {
         </div>
       </div>
     </>
-  );
+  )
 }

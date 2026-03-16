@@ -2,6 +2,7 @@ import { Outlet, useLocation, useParams, Navigate } from "react-router-dom"
 import { useEffect, useMemo, useState } from "react"
 import { get } from "@/Api"
 import NotFound from "@/pages/NotFound"
+import LoadingScreen from "@/components/LoadingScreen"
 
 type ProjectBossResponse = {
   boss: string | null
@@ -19,6 +20,12 @@ export default function ProjectGuard() {
     if (!projectId) return false
     const normalized = location.pathname.replace(/\/+$/, "")
     return normalized.endsWith(`/project/${projectId}/setup`)
+  }, [location.pathname, projectId])
+
+  const isProjectEndRoute = useMemo(() => {
+    if (!projectId) return false
+    const normalized = location.pathname.replace(/\/+$/, "")
+    return normalized.endsWith(`/project/${projectId}/project-end`)
   }, [location.pathname, projectId])
 
   useEffect(() => {
@@ -70,27 +77,37 @@ export default function ProjectGuard() {
     fetchBoss()
   }, [projectId, location.pathname, guardStatus])
 
-  if (guardStatus === "loading") {
-    return <div>Loading...</div>
-}
+  if (guardStatus === 'loading') {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <LoadingScreen message="Checking your quest access..." />
+      </div>
+    )
+  }
 
   if (guardStatus === "closed") {
-    return <Navigate replace to="/project-end" state={{ projectId }} />
+    // If the project is closed, allow the nested /project-end route to render.
+    // Otherwise redirect the user to it.
+    if (isProjectEndRoute) {
+      return <Outlet />
+    }
+    return (
+      <Navigate
+        replace
+        to={`/project/${projectId}/project-end`}
+        state={{ projectId }}
+      />
+    )
   }
 
   if (guardStatus === "forbidden") {
     return <div><NotFound></NotFound></div>
   }
 
-  // active project: wait for boss setup check
-  if (bossSetup === null) {
-    return <div>Loading...</div>
-  }
-
   // Routing rule:
   // - boss NOT set up => user can only access /setup
   // - boss IS set up => user can only access the main project page (index)
-  if (bossSetup === false && !isSetupRoute) {
+  if (bossSetup === false && !isSetupRoute && !isProjectEndRoute) {
     return <Navigate replace to={`/project/${projectId}/setup`} />
   }
 
