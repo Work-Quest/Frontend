@@ -40,7 +40,7 @@ export default function Header() {
   if (isAuthenticated) {
     Items = [
       { name: "Home", path: "/home" },
-      { name: "Profile", path: "/profile" },
+      { name: "Profile", path: `/profile/${user?.id || ''}` },
       { name: "Friend", path: "/friend" },
       { name: "Help", path: "/help" },
     ]

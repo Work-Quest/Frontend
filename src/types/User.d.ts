@@ -10,6 +10,7 @@ export type UserScore = {
   order: number;
   name: string;
   username: string;
+  user_id?: string;  // Add user_id for profile navigation
   score: number;
 };
 

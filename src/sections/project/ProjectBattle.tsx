@@ -267,6 +267,36 @@ const ProjectBattle = ({
         }
 
         await handleGameActionRef.current(action)
+        
+        // Update boss HP after each animation completes (for ATTACK actions)
+        // This ensures the HP bar in BattleScene reflects the latest HP immediately
+        if (action?.act === "ATTACK" || action?.act === "BOSS_ATTACK_USER") {
+          const update = bossUpdateRef.current
+          if (update && Number.isFinite(update.hp) && Number.isFinite(update.maxHp)) {
+            setBoss((prev) => ({
+              ...prev,
+              hp: update.hp,
+              maxHp: update.maxHp,
+            }))
+            // Don't clear bossUpdateRef here - it might be needed for other attacks in the queue
+            // It will be cleared when used for BOSS_REVIVE or when queue finishes
+          } else if (projectId && getProjectBoss) {
+            // If no bossUpdate available, fetch from backend to ensure HP is up-to-date
+            getProjectBoss(projectId)
+              .then((projectBoss) => {
+                if (projectBoss?.hp !== undefined && projectBoss?.max_hp !== undefined) {
+                  setBoss((prev) => ({
+                    ...prev,
+                    hp: projectBoss.hp,
+                    maxHp: projectBoss.max_hp,
+                  }))
+                }
+              })
+              .catch(() => {
+                // Silently fail - HP will update on next poll
+              })
+          }
+        }
       } finally {
         if (!unmounted) setActionQueue((prev) => prev.slice(1))
         isProcessingQueueRef.current = false
@@ -325,7 +355,13 @@ const ProjectBattle = ({
           </div>
         </div>
       )}
-      <BattleScene users={users} boss={boss} />
+      <BattleScene 
+        users={users} 
+        boss={boss} 
+        projectId={projectId ?? null}
+        myProjectMemberId={myMemberId}
+        bossPhase={gameStatus?.boss_status?.phase}
+      />
     </div>
   );
 };

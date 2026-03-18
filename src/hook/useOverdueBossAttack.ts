@@ -10,7 +10,7 @@ type UseOverdueBossAttackParams = {
   logs: ProjectLogEntry[]
   logsLoading: boolean
   bossAttack: (projectId: string, payload: BossAttackRequest) => Promise<BossAttackResponse>
-  enqueueActions: (actions: GameActionPayload[]) => void
+  enqueueActions: (actions: GameActionPayload[], taskId?: string) => void
   bumpBossRefresh: () => void
   enabled?: boolean
 }
@@ -103,7 +103,7 @@ export function useOverdueBossAttack({
           }
         )
 
-        if (actions.length > 0) enqueueActions(actions)
+        if (actions.length > 0) enqueueActions(actions, overdueTaskId)
         bumpBossRefresh()
 
         setState({ running: false, attackedTaskId: overdueTaskId, error: null })

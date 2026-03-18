@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,9 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 import type { ReviewLogEntry, ReviewHistoryEntry, ReviewTaskData } from './types'
+import toast from 'react-hot-toast'
+import { post } from '@/Api'
+import { useGame } from '@/hook/useGame'
 
 const COMMENT_PREVIEW_LEN = 90
 
@@ -22,53 +25,112 @@ type ReviewTaskModalProps = {
   onOpenChange: (open: boolean) => void
   /** Single source: pass API data here later; when null/undefined use mock. */
   data: ReviewTaskData
+  projectId: string | null
+  onSupportApplied?: (receiverProjectMemberIds: string[]) => void
 }
 
-export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({ open, onOpenChange, data }) => {
+type ReviewReportResponseRow = {
+  id: string
+  report: {
+    report_id: string
+  }
+  receiver: {
+    project_member_id: string
+  }
+}
+
+const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
+  open,
+  onOpenChange,
+  data,
+  projectId,
+  onSupportApplied,
+}) => {
   const { latestLogs, otherLogsOptions, history } = data
 
   const defaultLatestSelectedId = latestLogs[1]?.id ?? latestLogs[0]?.id ?? ''
 
+  // Extract unique usernames from otherLogsOptions participants
+  const uniqueUsernames = useMemo(() => {
+    const usernameSet = new Set<string>()
+    otherLogsOptions.forEach((log) => {
+      log.participants.forEach((name) => usernameSet.add(name))
+    })
+    return Array.from(usernameSet).sort()
+  }, [otherLogsOptions])
+
   const [selectedSource, setSelectedSource] = useState<'latest' | 'other'>('latest')
   const [selectedLogId, setSelectedLogId] = useState<string>(defaultLatestSelectedId)
-  const [selectedOtherLogId, setSelectedOtherLogId] = useState<string>('')
+  const [selectedUsername, setSelectedUsername] = useState<string>('')
   const [reviewText, setReviewText] = useState('')
   const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  const selectedOtherLog = otherLogsOptions.find((log) => log.id === selectedOtherLogId)
+  const { playerSupport } = useGame(projectId ?? undefined)
+
+  // Filter logs by selected username
+  const filteredLogsByUsername = useMemo(() => {
+    if (!selectedUsername) return []
+    return otherLogsOptions.filter((log) => log.participants.includes(selectedUsername))
+  }, [otherLogsOptions, selectedUsername])
+
 
   const handleSelectLatestLog = (id: string) => {
     setSelectedSource('latest')
     setSelectedLogId(id)
-    setSelectedOtherLogId('')
+    setSelectedUsername('')
   }
 
-  const handleSelectOtherLog = (id: string) => {
+  const handleSelectUsername = (username: string) => {
     setSelectedSource('other')
-    setSelectedLogId(id)
-    setSelectedOtherLogId(id)
+    setSelectedUsername(username)
+    // Set the first log for this username as selected
+    const firstLog = otherLogsOptions.find((log) => log.participants.includes(username))
+    if (firstLog) {
+      setSelectedLogId(firstLog.id)
+    }
   }
 
   const handleSubmitReview = async () => {
+    if (!projectId) return
     if (!selectedLogId || !reviewText.trim()) return
+    if (submitting) return
 
     const allLogs = [...latestLogs, ...otherLogsOptions]
     const targetLog = allLogs.find((log) => log.id === selectedLogId)
     if (!targetLog) return
 
-    const payload = {
-      logId: targetLog.id,
-      source: selectedSource,
-      comment: reviewText.trim(),
+    setSubmitting(true)
+    try {
+      // 1) Create review report (enforces no-self-review + one-per-task-per-reviewer in backend)
+      const created = await post<
+        { task_id: string; description: string },
+        ReviewReportResponseRow[]
+      >(`/api/project/${projectId}/review/report/`, {
+        task_id: String(targetLog.id),
+        description: reviewText.trim(),
+      })
+
+      const reportId = created?.[0]?.report?.report_id
+      if (!reportId) throw new Error('Review created but report_id is missing')
+
+      // 2) Trigger support (buff/effect/item) for the review receivers
+      const supportRes = await playerSupport(projectId, { report_id: String(reportId) })
+      const receiverIds =
+        supportRes?.result?.applied?.map((a: any) => String(a.receiver_id)).filter(Boolean) ?? []
+
+      // 3) Close modal and notify parent to animate receivers
+      setReviewText('')
+      onOpenChange(false)
+      onSupportApplied?.(receiverIds)
+      toast.success('Review submitted')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to submit review'
+      toast.error(msg)
+      console.error(e)
+    } finally {
+      setSubmitting(false)
     }
-
-    // TODO: replace with API call, e.g.:
-    // await submitReview(payload)
-    // and then refresh data / close modal based on response.
-    console.log('Review payload (mock):', payload)
-
-    setReviewText('')
-    onOpenChange(false)
   }
 
   return (
@@ -120,28 +182,42 @@ export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({ open, onOpenCh
                   <h3 className="!text-xl !font-medium text-darkBrown mt-4 mb-2 font-['Baloo_2']">
                     Other Logs
                   </h3>
-                  <Select value={selectedOtherLogId} onValueChange={handleSelectOtherLog}>
+                  <Select value={selectedUsername} onValueChange={handleSelectUsername}>
                     <SelectTrigger className="w-full border-darkBrown/20 text-darkBrown bg-white font-['Baloo_2']">
-                      <SelectValue placeholder="Select your friend's log" />
+                      <SelectValue placeholder="Select by username" />
                     </SelectTrigger>
                     <SelectContent className="font-['Baloo_2']">
-                      {otherLogsOptions.map((log) => (
-                        <SelectItem key={log.id} value={log.id}>
-                          {log.title}
+                      {uniqueUsernames.map((username) => (
+                        <SelectItem key={username} value={username}>
+                          {username}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
 
-                  {selectedSource === 'other' && selectedOtherLog && (
-                    <div className="mt-3">
-                      <LatestLogCard
-                        log={selectedOtherLog}
-                        isHighlighted
-                        reviewValue={reviewText}
-                        onReviewChange={setReviewText}
-                        onSelect={() => handleSelectOtherLog(selectedOtherLog.id)}
-                      />
+                  {selectedSource === 'other' && selectedUsername && (
+                    <div className="mt-3 space-y-3">
+                      {filteredLogsByUsername.length === 0 ? (
+                        <p className="text-darkBrown/70 text-sm text-center py-4 font-['Baloo_2']">
+                          No logs found for {selectedUsername}
+                        </p>
+                      ) : (
+                        filteredLogsByUsername.map((log) => {
+                          const isSelected = selectedLogId === log.id
+                          return (
+                            <LatestLogCard
+                              key={log.id}
+                              log={log}
+                              isHighlighted={isSelected}
+                              reviewValue={isSelected ? reviewText : undefined}
+                              onReviewChange={isSelected ? setReviewText : undefined}
+                              onSelect={() => {
+                                setSelectedLogId(log.id)
+                              }}
+                            />
+                          )
+                        })
+                      )}
                     </div>
                   )}
                 </ScrollArea>
@@ -176,10 +252,10 @@ export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({ open, onOpenCh
             <Button
               variant="orange"
               className="px-6 font-['Baloo_2']"
-              disabled={!selectedLogId || !reviewText.trim()}
+              disabled={!projectId || submitting || !selectedLogId || !reviewText.trim()}
               onClick={handleSubmitReview}
             >
-              Submit Review
+              {submitting ? 'Submitting…' : 'Submit Review'}
             </Button>
           </div>
         </div>
@@ -187,6 +263,7 @@ export const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({ open, onOpenCh
     </Dialog>
   )
 }
+export default ReviewTaskModal
 
 function LatestLogCard({
   log,
@@ -263,7 +340,8 @@ function HistoryCard({
         <span className="font-bold text-darkBrown text-base">{entry.title}</span>
         <span className="text-darkBrown/70 text-sm shrink-0">{timeAgo}</span>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 justify-between gap-2">
+        <div className="flex items-center justify-end gap-2">
         {entry.participants.map((name, i) => (
           <span
             key={`${entry.id}-${i}`}
@@ -272,6 +350,15 @@ function HistoryCard({
             {name}
           </span>
         ))}
+        </div>
+        <div className="flex items-center gap-2">
+          review by
+          <span
+              className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-['Baloo_2'] !bg-green"
+          >
+              {entry.reviewer}
+            </span>
+        </div>
       </div>
       <div className="flex flex-col gap-2 bg-orange/10 p-2 rounded-lg">
         <p className="text-darkBrown/90 text-sm">

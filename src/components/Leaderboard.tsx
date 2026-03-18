@@ -1,5 +1,6 @@
 import type { UserScore } from "@/types/User"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useNavigate } from "react-router-dom"
 
 type LeaderboardProps = {
   user: UserScore[]
@@ -11,6 +12,7 @@ type RankStyle = {
 }
 
 function Leaderboard({ user }: LeaderboardProps) {
+  const navigate = useNavigate()
   const rankStyle: RankStyle[] = [
     { number: 1, style: "!text-lightOrange !text-5xl" },
     { number: 2, style: "!text-lightBrown !text-5xl" },
@@ -19,6 +21,12 @@ function Leaderboard({ user }: LeaderboardProps) {
 
   const firstPlace = user.find((u) => u.order === 1)
   const otherPlaces = user.filter((u) => u.order !== 1).sort((a, b) => a.order - b.order)
+
+  const handleProfileClick = (userId?: string) => {
+    if (userId) {
+      navigate(`/profile/${userId}`)
+    }
+  }
 
 const FirstPlaceSection = () => {
     if (!firstPlace) return null
@@ -38,12 +46,12 @@ const FirstPlaceSection = () => {
                         <h3 className="!text-offWhite">
                             {firstPlace.name}
                         </h3>
-                        <a
-                            href={`/${firstPlace.username}`}
-                            className="text-cream text-base font-medium -mt-2"
+                        <button
+                            onClick={() => handleProfileClick(firstPlace.user_id)}
+                            className="text-cream text-base font-medium -mt-2 !bg-transparent hover:underline cursor-pointer"
                         >
                             @{firstPlace.username}
-                        </a>
+                        </button>
                     </div>
                 </div>
                 <img src="/crown.svg" alt="crown" />
@@ -92,12 +100,12 @@ const OtherPlacesSection = () => (
                                             <h3 className="-mb-2">
                                                 {i.name}
                                             </h3>
-                                            <a
-                                                href={`/${i.username}`}
-                                                className="text-lightBrown text-base font-medium font-['Baloo_2']"
+                                            <button
+                                                onClick={() => handleProfileClick(i.user_id)}
+                                                className="text-lightBrown text-base font-medium font-['Baloo_2'] hover:underline cursor-pointer"
                                             >
                                                 @{i.username}
-                                            </a>
+                                            </button>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">

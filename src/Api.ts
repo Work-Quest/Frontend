@@ -23,6 +23,9 @@ const api = axios.create({
   },
 })
 
+// Track active non-silent requests to properly manage loading bar
+let activeNonSilentRequests = 0
+
 function startLoading() {
   const ref = (window as any).loadingBarRef
   if (ref?.current) {
@@ -36,33 +39,65 @@ function stopLoading() {
     ref.current.complete()
   }
 }
+
 // AXIOS INTERCEPTORS (AUTO LOADING BAR)
 api.interceptors.request.use(
   (config) => {
-    startLoading()
+    // Only show loading bar if request is not marked as silent
+    const isSilent = (config as any).silent === true
+    if (!isSilent) {
+      activeNonSilentRequests++
+      if (activeNonSilentRequests === 1) {
+        // Only start if this is the first non-silent request
+        startLoading()
+      }
+    }
     return config
   },
   (error) => {
-    stopLoading()
+    const isSilent = (error.config as any)?.silent === true
+    if (!isSilent) {
+      activeNonSilentRequests = Math.max(0, activeNonSilentRequests - 1)
+      if (activeNonSilentRequests === 0) {
+        stopLoading()
+      }
+    }
     return Promise.reject(error)
   },
 )
 
 api.interceptors.response.use(
   (response) => {
-    stopLoading()
+    // Only stop loading bar if request was not silent
+    const isSilent = (response.config as any).silent === true
+    if (!isSilent) {
+      activeNonSilentRequests = Math.max(0, activeNonSilentRequests - 1)
+      if (activeNonSilentRequests === 0) {
+        stopLoading()
+      }
+    }
     return response
   },
   (error) => {
-    stopLoading()
+    const isSilent = (error.config as any)?.silent === true
+    if (!isSilent) {
+      activeNonSilentRequests = Math.max(0, activeNonSilentRequests - 1)
+      if (activeNonSilentRequests === 0) {
+        stopLoading()
+      }
+    }
     return Promise.reject(error)
   },
 )
 
 // FETCH ITEMS (GET)
-export async function get<T>(url: string): Promise<T> {
+export async function get<T>(url: string, silent?: boolean): Promise<T> {
   try {
-    const res = await api.get<T>(`${url}`)
+    const config: any = {}
+    if (silent) {
+      config.silent = true
+    }
+    const res = await api.get<T>(`${url}`, config)
     if (!res.status.toString().startsWith("2")) {
       throw new Error(`HTTP error! status: ${res.status}`)
     }

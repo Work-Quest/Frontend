@@ -10,4 +10,13 @@ export type Project = {
   deadline: string;            
   total_tasks: number;
   completed_tasks: number;
+  deadline_decision?: "closed" | "continued" | null;
+  deadline_decision_date?: string | null;
   };
+
+export type FinishedProjectSummary = {
+  project_id: string;
+  project_name: string;
+  score: number;
+  boss_count: number;
+};

@@ -1,9 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react"
-import {
-  PROJECT_DATA,
-} from "@/sections/project/constants"
+import React, { useState, useEffect, useMemo } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import ToggleButton from "@/components/ToggleButton"
 import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard"
@@ -13,25 +10,31 @@ import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard";
 import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
 import { useTask } from "@/hook/useTask";
 import { useProjectMembers } from "@/hook/useProjectMembers";
-// import ProjectBattle from "@/sections/project/ProjectBattle";
 import BossPlaceholder from "@/sections/project/BossPlaceholder";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useGame } from "@/hook/useGame";
 import toast from "react-hot-toast";
 import type { GameActionPayload } from "@/types/battleTypes";
 import useLog from "@/hook/useLog";
 import { useAuth } from "@/context/AuthContext";
 import { useOverdueBossAttack } from "@/hook/useOverdueBossAttack";
+import { POLLING_CONFIG } from "@/config/pollingConfig";
+import { getActionKey } from "@/utils/actionDeduplication";
+import { useAnimationSync } from "@/hook/useAnimationSync";
+import { useProjects } from "@/hook/useProjects";
+import DeadlineWarningModal from "@/sections/project/DeadlineWarningModal";
+import { useEstimateFinishTime } from "@/hook/useEstimateFinishTime";
 
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
-  const { projectId } = useParams<{ projectId: string }>();
-  const { fetchedTask } = useTask();
-  const { projectMembers } = useProjectMembers(projectId);
-  const { logs, loading: logsLoading } = useLog(projectId, {
-    pollIntervalMs: 3000,
-  });
-  const { playerAttack, bossAttack, gameStatus } = useGame();
+  const { projectId } = useParams<{ projectId: string }>()
+  const { projects, closeProject } = useProjects()
+  const navigate = useNavigate()
+  const { estimatedDays } = useEstimateFinishTime(projectId)
+  const { fetchedTask } = useTask({ pollIntervalMs: POLLING_CONFIG.tasks.interval });
+  const { projectMembers } = useProjectMembers(projectId)
+  const { logs, loading: logsLoading } = useLog(projectId, { pollIntervalMs: POLLING_CONFIG.logs.interval });
+  const { playerAttack, bossAttack, gameStatus } = useGame(projectId, { pollIntervalMs: POLLING_CONFIG.gameStatus.interval });
   const [payloadBatch, setPayloadBatch] = useState<GameActionPayload[] | null>(
     null,
   );
@@ -42,12 +45,39 @@ const ProjectPage: React.FC = () => {
     maxHp: number;
   } | null>(null);
   const [bossUpdateNonce, setBossUpdateNonce] = useState(0);
+  // Track API actions to prevent duplicates from log polling
+  const apiActionsRef = React.useRef<Map<string, number>>(new Map());
 
-  const enqueueActions = React.useCallback((actions: GameActionPayload[]) => {
-    if (!actions || actions.length === 0) return;
-    setPayloadBatch(actions);
-    setPayloadBatchNonce((n) => n + 1);
-  }, []);
+  // Clear API actions tracking when projectId changes
+  useEffect(() => {
+    apiActionsRef.current.clear()
+  }, [projectId])
+
+  const enqueueActions = React.useCallback((actions: GameActionPayload[], taskId?: string) => {
+    if (!actions || actions.length === 0) return
+
+    // Track API actions for deduplication (if taskId is provided)
+    if (taskId) {
+      const now = Date.now()
+      const DEDUP_WINDOW_MS = 5000 // 5 seconds
+
+      // Clean up old entries (older than 5 seconds)
+      for (const [key, timestamp] of apiActionsRef.current.entries()) {
+        if (now - timestamp > DEDUP_WINDOW_MS) {
+          apiActionsRef.current.delete(key)
+        }
+      }
+
+      // Track each action with act:taskId key
+      for (const action of actions) {
+        const key = getActionKey(action, taskId)
+        apiActionsRef.current.set(key, now)
+      }
+    }
+
+    setPayloadBatch(actions)
+    setPayloadBatchNonce((n) => n + 1)
+  }, [])
 
   const bumpBossRefresh = React.useCallback(() => {
     setBossRefreshNonce((n) => n + 1);
@@ -102,7 +132,7 @@ const ProjectPage: React.FC = () => {
           setBossUpdateNonce((n) => n + 1);
         }
 
-        enqueueActions(actions)
+        enqueueActions(actions, taskId)
         bumpBossRefresh()
       } catch (err) {
         console.error(err);
@@ -133,6 +163,13 @@ const ProjectPage: React.FC = () => {
     }
   }, [overdueAttack.attackedTaskId, overdueAttack.error]);
 
+  // Animation synchronization: convert logs to actions for cross-window animation sync
+  useAnimationSync(logs, {
+    onActionsReady: enqueueActions,
+    apiActionsRef,
+    projectId,
+  })
+
   const {
     tasks,
     activeId,
@@ -149,8 +186,98 @@ const ProjectPage: React.FC = () => {
     setShowBossPlaceholder((prev) => !prev)
   }
 
-  const { user } = useAuth();
-  const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id);
+  const { user } = useAuth()
+  const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id)
+  const myProjectMemberId = me?.project_member_id ? String(me.project_member_id) : null
+
+  // Get current project from projects list
+  const project = useMemo(() => {
+    if (!projectId || !projects) return null
+    return projects.find((p) => p.project_id === projectId) ?? null
+  }, [projectId, projects])
+
+  // Calculate days left from deadline
+  const daysLeft = useMemo(() => {
+    if (!project?.deadline) return undefined
+    const deadlineDate = new Date(project.deadline)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    deadlineDate.setHours(0, 0, 0, 0)
+    const diffTime = deadlineDate.getTime() - today.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }, [project?.deadline])
+
+  // Check if deadline has passed
+  const isDelayed = useMemo(() => {
+    return daysLeft !== undefined && daysLeft < 0
+  }, [daysLeft])
+
+  const delayedDays = useMemo(() => {
+    if (!isDelayed) return 0
+    return Math.abs(daysLeft ?? 0)
+  }, [isDelayed, daysLeft])
+
+  // Check if deadline warning should be shown
+  const [showDeadlineWarning, setShowDeadlineWarning] = useState(false)
+
+  useEffect(() => {
+    if (!projectId || !project?.deadline) return
+
+    // Check if deadline has passed and decision hasn't been made
+    if (isDelayed && !project.deadline_decision) {
+      // Check localStorage to see if user has already seen this warning
+      const warningKey = `deadline_warning_seen_${projectId}`
+      const hasSeenWarning = localStorage.getItem(warningKey)
+
+      if (!hasSeenWarning) {
+        setShowDeadlineWarning(true)
+      }
+    }
+  }, [projectId, project?.deadline, project?.deadline_decision, isDelayed])
+
+  const handleDeadlineContinue = () => {
+    if (projectId) {
+      const warningKey = `deadline_warning_seen_${projectId}`
+      localStorage.setItem(warningKey, 'true')
+      setShowDeadlineWarning(false)
+      // Refresh game status to get updated scores
+      if (gameStatus) {
+        // Trigger a refresh by updating a dependency
+        window.location.reload()
+      }
+    }
+  }
+
+  const handleCloseProject = async (projectId: string) => {
+    try {
+      await closeProject(projectId)
+      toast.success("Project closed successfully")
+      navigate(`/project/${projectId}/project-end`)
+    } catch (err) {
+      console.error(err)
+      toast.error(err instanceof Error ? err.message : "Failed to close project")
+    }
+  }
+
+  // Format deadline for display
+  const formattedDeadline = useMemo(() => {
+    if (!project?.deadline) return undefined
+    return new Date(project.deadline).toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    })
+  }, [project?.deadline])
+
+  // Create PROJECT_DATA with real values
+  const PROJECT_DATA = useMemo(() => ({
+    deadline: formattedDeadline,
+    daysLeft: isDelayed ? undefined : daysLeft,
+    delayedDays: isDelayed ? delayedDays : undefined,
+    isDelayed: isDelayed,
+    estimatedTime: estimatedDays ?? undefined,
+  }), [formattedDeadline, daysLeft, isDelayed, delayedDays, estimatedDays])
   const HP_DATA = {
     boss: {
       current: gameStatus?.boss_status?.hp ?? 50,
@@ -163,13 +290,40 @@ const ProjectPage: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-148px)] w-full">
+    <div className="flex h-[calc(100vh-148px)] w-full relative">
+      {showDeadlineWarning && projectId && (
+        <DeadlineWarningModal
+          open={showDeadlineWarning}
+          projectId={projectId}
+          delayDays={delayedDays}
+          onClose={() => setShowDeadlineWarning(false)}
+          onContinue={handleDeadlineContinue}
+        />
+      )}
       {/* Left sidebar */}
       <aside className="w-125 flex-shrink-0 bg-offWhite border-r border-cream">
         <ScrollArea className="h-full" type="always">
-          <ProjectDetailCard hpData={HP_DATA} projectData={PROJECT_DATA} />
+          <ProjectDetailCard
+            hpData={HP_DATA}
+            projectData={PROJECT_DATA}
+            userScore={me?.score ?? 0}
+            gameStatus={gameStatus}
+            projectId={projectId ?? undefined}
+            onCloseProject={handleCloseProject}
+          />
           <DamageLog logs={logs} />
-          <ReviewTask />
+          <ReviewTask
+            projectId={projectId ?? null}
+            doneTasks={tasks.done}
+            myProjectMemberId={myProjectMemberId}
+            onSupportApplied={(receiverIds) => {
+              const actions: GameActionPayload[] = (receiverIds ?? []).map((id) => ({
+                act: "SUPPORT",
+                userId: String(id),
+              }))
+              enqueueActions(actions)
+            }}
+          />
         </ScrollArea>
       </aside>
 

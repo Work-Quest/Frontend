@@ -67,7 +67,7 @@ const router = createBrowserRouter([
             ]
           },
           { path: "project/create", element: < StartProject/>},
-          { path: "profile", element: <Profile /> },
+          { path: "profile/:userId", element: <Profile /> },
           { path: 'profile/edit', element: <EditProfile /> },
           {
             path: "/battle-test",

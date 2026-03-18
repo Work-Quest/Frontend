@@ -1,15 +1,21 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { get, post } from "@/Api"
 import type { UserStatus } from "@/types/User"
+import { usePolling } from "./usePolling"
+import { POLLING_CONFIG } from "@/config/pollingConfig"
 
 type UseProjectMembersOptions = {
   /**
    * Polling interval in ms. Set to 0 to disable polling.
-   * Default: 5000
+   * If not set, uses centralized config default.
    */
   pollIntervalMs?: number
+  /**
+   * Enable/disable polling (default: true)
+   */
+  enabled?: boolean
   /**
    * Refetch immediately when returning to the tab/window.
    * Default: true
@@ -22,21 +28,33 @@ export function useProjectMembers(projectId?: string, options: UseProjectMembers
   const [membersLoading, setMembersLoading] = useState(false)
   const [membersError, setMembersError] = useState<string | null>(null)
 
-  const pollIntervalMs = options.pollIntervalMs ?? 5000
+  const pollIntervalMs = options.pollIntervalMs ?? POLLING_CONFIG.members.interval
+  const enabled = options?.enabled ?? true
   const refetchOnFocus = options.refetchOnFocus ?? true
 
-  const refetchProjectMembers = useCallback(async () => {
-    if (!projectId) return
+  const refetchProjectMembers = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!projectId) return null
     try {
-      setMembersLoading(true)
-      setMembersError(null)
-      const members = await get<UserStatus[]>(`/api/project/${projectId}/members/`)
+      if (!opts?.silent) {
+        setMembersLoading(true)
+        setMembersError(null)
+      }
+      const members = await get<UserStatus[]>(`/api/project/${projectId}/members/`, opts?.silent)
       setProjectMembers(members)
+      if (!opts?.silent) {
+        setMembersError(null)
+      }
+      return members
     } catch (error) {
       console.error("Error fetching project members:", error)
-      setMembersError("Failed to load project members.")
+      if (!opts?.silent) {
+        setMembersError("Failed to load project members.")
+      }
+      throw error
     } finally {
-      setMembersLoading(false)
+      if (!opts?.silent) {
+        setMembersLoading(false)
+      }
     }
   }, [projectId])
 
@@ -48,58 +66,12 @@ export function useProjectMembers(projectId?: string, options: UseProjectMembers
     )
   }, [projectId])
 
-  // Keep project members fresh ("realtime" via polling + refetch on focus).
-  useEffect(() => {
-    if (!projectId) return
-
-    let cancelled = false
-    let inFlight = false
-    let intervalId: number | undefined
-
-    const refetchMembers = async () => {
-      if (inFlight) return
-      inFlight = true
-      try {
-        const members = await get<UserStatus[]>(`/api/project/${projectId}/members/`)
-        if (!cancelled) setProjectMembers(members)
-      } catch (error) {
-        // Best-effort; keep last known members.
-        console.error("Error fetching project members:", error)
-      } finally {
-        inFlight = false
-      }
-    }
-
-    // Initial + polling.
-    refetchMembers()
-    if (pollIntervalMs > 0) {
-      intervalId = window.setInterval(refetchMembers, pollIntervalMs)
-    }
-
-    // Refetch immediately when the user comes back to the tab.
-    const onVisibility = () => {
-      if (!refetchOnFocus) return
-      if (document.visibilityState === "visible") refetchMembers()
-    }
-    const onFocus = () => {
-      if (!refetchOnFocus) return
-      refetchMembers()
-    }
-
-    if (refetchOnFocus) {
-      document.addEventListener("visibilitychange", onVisibility)
-      window.addEventListener("focus", onFocus)
-    }
-
-    return () => {
-      cancelled = true
-      if (intervalId !== undefined) window.clearInterval(intervalId)
-      if (refetchOnFocus) {
-        document.removeEventListener("visibilitychange", onVisibility)
-        window.removeEventListener("focus", onFocus)
-      }
-    }
-  }, [projectId, pollIntervalMs, refetchOnFocus])
+  // Use centralized polling hook
+  usePolling(refetchProjectMembers, {
+    pollIntervalMs: enabled ? pollIntervalMs : undefined,
+    enabled,
+    pauseOnHidden: refetchOnFocus, // If refetchOnFocus is true, pause on hidden (usePolling handles resume)
+  }, [projectId])
 
   return {
     projectMembers,

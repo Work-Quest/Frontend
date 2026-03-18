@@ -209,19 +209,19 @@ export const useBattleLogic = (initial: number | ProjectMemberLike[] = 5) => {
             }));
             await wait(1000);
             setUsers(prev => prev.map(u => (u.status === 'shifting_backward') ? { ...u, status: 'idle' } : u));
-        } else if (payload.act === 'BUFF') {
+        } else if (payload.act === 'SUPPORT') {
             if (targetUser.status === 'dead') return;
-            setUsers(prev =>
-                prev.map(u =>
-                    u.uid === payload.userId ? { ...u, hasBuffRing: true } : u
-                )
-            );
-            await wait(800);
-            setUsers(prev =>
-                prev.map(u =>
-                    u.uid === payload.userId ? { ...u, hasBuffRing: false } : u
-                )
-            );
+            setSequenceRunning(true);
+            setUsers(prev => prev.map(u => {
+                if (u.uid === payload.userId) return { ...u, hasBuffRing: true  };
+                return u;
+            }));
+            await wait(userConfig.actions.dead.duration);
+            setUsers(prev => prev.map(u => {
+                if (u.uid === payload.userId) return { ...u,  hasBuffRing: false };
+                return u;
+            }));
+            setSequenceRunning(false);
         }
     };
 

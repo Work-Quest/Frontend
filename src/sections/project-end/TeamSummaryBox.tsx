@@ -1,6 +1,7 @@
 type TeamSummaryBoxProps = {
     user: {
         name: string;
+        score: number;
         damageDeal: number;
         damageReceive: number;
         status: string;
@@ -9,7 +10,7 @@ type TeamSummaryBoxProps = {
 };
 
 export default function TeamSummaryBox({
-    user: { name, damageDeal, damageReceive, status, isMVP },
+    user: { name, score, damageDeal, damageReceive, status, isMVP },
 }: TeamSummaryBoxProps) {
     return (
         <div className="w-full">
@@ -28,6 +29,9 @@ export default function TeamSummaryBox({
                     <div className="self-stretch w-full flex justify-between items-center gap-3">
                         <div className="flex flex-col justify-start items-start gap-1">
                             <div className="p-1 flex justify-start items-center gap-2.5">
+                                <p className="justify-start !text-white !font-bold">Score</p>
+                            </div>
+                            <div className="p-1 flex justify-start items-center gap-2.5">
                                 <p className="justify-start !text-white !font-bold">Damage Deal</p>
                             </div>
                             <div className="p-1 flex justify-start items-center gap-2.5">
@@ -38,6 +42,9 @@ export default function TeamSummaryBox({
                             </div>
                         </div>
                         <div className="flex flex-col justify-start items-end gap-1">
+                            <div className="p-1 flex justify-end items-center gap-2.5">
+                                <p className="justify-start !text-white">{score}</p>
+                            </div>
                             <div className="p-1 flex justify-end items-center gap-2.5">
                                 <p className="justify-start !text-white">{damageDeal}</p>
                             </div>
