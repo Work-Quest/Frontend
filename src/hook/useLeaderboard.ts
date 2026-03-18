@@ -41,3 +41,4 @@ export function useLeaderboard(): UseLeaderboardState {
   return { ...state, refetch: fetchLeaderboard };
 }
 
+

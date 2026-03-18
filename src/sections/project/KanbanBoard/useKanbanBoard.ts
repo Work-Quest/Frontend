@@ -189,6 +189,16 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
 
     const toStatus: TaskStatus = targetStatus;
 
+    // Prevent moving to "done" if task has no assignees
+    if (toStatus === "done") {
+      const originalTasks = dragStartTasksSnapshotRef.current?.[originContainer] || tasks[originContainer as keyof Tasks];
+      const taskToMove = originalTasks.find((item) => item.id === taskId);
+      if (taskToMove && (!taskToMove.assignees || taskToMove.assignees.length === 0)) {
+        // Don't update UI - prevent the move visually
+        return;
+      }
+    }
+
     // Optimistic UI - use original container state to avoid issues with multiple updates
     setTasks((prev) => {
       // Use the original container from when drag started
@@ -287,6 +297,25 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
 
       // Only persist when the task is dropped into a different column
       if (originContainer && containerId && originContainer !== containerId) {
+        // Check if moving to "done" and task has no assignees
+        if (containerId === "done") {
+          const originalContainer = originContainer as keyof Tasks;
+          const originalTasks = dragStartTasksSnapshotRef.current?.[originalContainer] || tasks[originalContainer];
+          const taskToMove = originalTasks.find(item => item.id === taskId);
+          
+          if (taskToMove && (!taskToMove.assignees || taskToMove.assignees.length === 0)) {
+            toast.error("Cannot move task to Done: Task must have at least one assignee");
+            // Revert the UI change
+            if (dragStartTasksSnapshotRef.current) {
+              setTasks(dragStartTasksSnapshotRef.current);
+            }
+            setActiveId(null);
+            dragStartContainerRef.current = null;
+            dragStartTasksSnapshotRef.current = null;
+            return;
+          }
+        }
+        
         try {
           await updateTaskStatus(taskId, containerId as TaskStatus);
           if (containerId === "done") {
@@ -379,6 +408,25 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
         
         return newTasks;
       });
+
+      // Check if moving to "done" and task has no assignees
+      if (overContainer === "done") {
+        const originalContainer = originContainer as keyof Tasks;
+        const originalTasks = dragStartTasksSnapshotRef.current?.[originalContainer] || tasks[originalContainer];
+        const taskToMove = originalTasks.find(item => item.id === taskId);
+        
+        if (taskToMove && (!taskToMove.assignees || taskToMove.assignees.length === 0)) {
+          toast.error("Cannot move task to Done: Task must have at least one assignee");
+          // Revert the UI change
+          if (dragStartTasksSnapshotRef.current) {
+            setTasks(dragStartTasksSnapshotRef.current);
+          }
+          setActiveId(null);
+          dragStartContainerRef.current = null;
+          dragStartTasksSnapshotRef.current = null;
+          return;
+        }
+      }
 
       try {
         await updateTaskStatus(taskId, overContainer as TaskStatus);

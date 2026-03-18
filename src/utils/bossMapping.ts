@@ -13,3 +13,4 @@ export const getBossConfigId = (bossName: string): string => {
   return mapping[nameLower] || 'b01'; // Default to b01 if boss name doesn't match
 };
 
+
