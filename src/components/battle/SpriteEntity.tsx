@@ -9,6 +9,7 @@ interface SpriteProps {
   positionStyle: React.CSSProperties;
   isMirrored?: boolean;
   name?: string; 
+  showBuffRing?: boolean;
 }
 
 export const SpriteEntity: React.FC<SpriteProps> = ({ 
@@ -17,14 +18,28 @@ export const SpriteEntity: React.FC<SpriteProps> = ({
   action, 
   positionStyle, 
   isMirrored,
-  name 
+  name,
+  showBuffRing,
 }) => {
   const imgSrc = `/assets/sprites/${type}/${id}/${action}.gif`;
+  const magicRingSrc = `/assets/magic_ring.gif`;
 
-  const entityConfig = (ENTITY_CONFIG[type] as any)?.[id];
+  const entityConfig =
+    ENTITY_CONFIG[type as keyof typeof ENTITY_CONFIG] &&
+    (ENTITY_CONFIG[type as keyof typeof ENTITY_CONFIG] as Record<string, { size?: { width: number; height: number } }>)[id];
 
   const width = entityConfig?.size?.width || 64;
   const height = entityConfig?.size?.height || 57;
+
+  const backgroundImage = showBuffRing
+    ? `url(${imgSrc}), url(${magicRingSrc})`
+    : `url(${imgSrc})`;
+
+  const backgroundPosition = showBuffRing
+    ? 'center bottom, center 60%'
+    : 'center bottom';
+
+  const backgroundSize = showBuffRing ? '100%, 50%' : '100%';
 
   return (
     <div
@@ -33,11 +48,11 @@ export const SpriteEntity: React.FC<SpriteProps> = ({
         position: 'absolute',
         width: `${width}px`,
         height: `${height}px`,
-        backgroundImage: `url(${imgSrc})`,
+        backgroundImage,
         imageRendering: 'pixelated',
         backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center bottom',
-        backgroundSize: '100%',
+        backgroundPosition,
+        backgroundSize,
         transform: isMirrored ? 'scaleX(-1)' : 'scaleX(1)',
         
         ...positionStyle,

@@ -309,7 +309,7 @@ const ProjectBattle = ({
   }, [actionQueue])
 
   return (
-    <div className="relative bg-slate-950 text-white font-sans flex flex-col z-10">
+    <div className="relative bg-slate-950 text-white font-sans flex flex-col z-10 translate-y-[-12px]">
       {(boss.status === "hidden" || boss.status === "dead") && (
         <div className="absolute inset-0 z-[999] bg-black/50 flex items-center justify-center">
           <div className="text-center font-mono tracking-widest">

@@ -6,6 +6,7 @@ export interface User {
     name: string;
     hp: number;
     maxHp: number;
+    hasBuffRing?: boolean;
 }
 
 export interface BossState {
@@ -20,6 +21,7 @@ export type GameActionPayload =
     | { act: 'DIE'; userId: string }
     | { act: 'REVIVE'; userId: string }
     | { act: 'SUPPORT'; userId: string }
+    | { act: 'BUFF'; userId: string }
     | { act: 'BOSS_ULTIMATE' }
     | { act: 'BOSS_ATTACK_USER'; userId: string }
     | { act: 'BOSS_DIE' }

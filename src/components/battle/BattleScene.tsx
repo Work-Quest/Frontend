@@ -455,7 +455,18 @@ export const BattleScene: React.FC<BattleSceneProps> = ({ users, boss, projectId
                     else if (user.status === 'shifting_forward') { action = 'walk_right'; isMirrored = false; }
                     else if (user.status === 'shifting_backward') { action = 'walk_left'; isMirrored = false; }
 
-                    return (<SpriteEntity key={user.uid} type="characters" id={user.charId} action={action} positionStyle={getUserPosition(user.slot, user.status)} isMirrored={isMirrored} name={user.status === 'dead' ? undefined : user.name} />);
+                    return (
+                        <SpriteEntity 
+                            key={user.uid} 
+                            type="characters" 
+                            id={user.charId} 
+                            action={action} 
+                            positionStyle={getUserPosition(user.slot, user.status)} 
+                            isMirrored={isMirrored} 
+                            name={user.status === 'dead' ? undefined : user.name}
+                            showBuffRing={user.hasBuffRing}
+                        />
+                    );
                 })}
             </div>
         </div>

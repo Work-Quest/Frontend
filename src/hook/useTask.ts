@@ -77,6 +77,13 @@ export const useTask = (options?: UseTaskOptions) => {
     return null;
   }, [activeId, fetchedTask]);
 
+  // const getTaskById = useCallback(async (taskId: string, explicitProjectId?: string): Promise<Task> => {
+  //   const pid = explicitProjectId ?? projectId;
+  //   if (!pid) throw new Error("projectId is required to fetch task by id");
+  //   const taskResponse = await get<TaskResponse>(`/api/project/${pid}/tasks/${taskId}/`);
+  //   return mapTaskResponseToTask(taskResponse);
+  // }, [projectId]);
+
   return {
     fetchedTask,
     setFetchedTasks,
