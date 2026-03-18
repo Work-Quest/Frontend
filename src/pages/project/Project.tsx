@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react"
 import {
@@ -13,7 +13,8 @@ import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard";
 import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
 import { useTask } from "@/hook/useTask";
 import { useProjectMembers } from "@/hook/useProjectMembers";
-import ProjectBattle from "@/sections/project/ProjectBattle";
+// import ProjectBattle from "@/sections/project/ProjectBattle";
+import BossPlaceholder from "@/sections/project/BossPlaceholder";
 import { useParams } from "react-router-dom";
 import { useGame } from "@/hook/useGame";
 import toast from "react-hot-toast";
@@ -24,30 +25,33 @@ import { useOverdueBossAttack } from "@/hook/useOverdueBossAttack";
 
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
-  const { projectId } = useParams<{ projectId: string }>()
+  const { projectId } = useParams<{ projectId: string }>();
   const { fetchedTask } = useTask();
-  const { projectMembers } = useProjectMembers(projectId)
-  const { logs, loading: logsLoading } = useLog(projectId, { pollIntervalMs: 3000 });
+  const { projectMembers } = useProjectMembers(projectId);
+  const { logs, loading: logsLoading } = useLog(projectId, {
+    pollIntervalMs: 3000,
+  });
   const { playerAttack, bossAttack, gameStatus } = useGame();
   const [payloadBatch, setPayloadBatch] = useState<GameActionPayload[] | null>(
-    null
+    null,
   );
   const [payloadBatchNonce, setPayloadBatchNonce] = useState(0);
   const [bossRefreshNonce, setBossRefreshNonce] = useState(0);
-  const [bossUpdate, setBossUpdate] = useState<{ hp: number; maxHp: number } | null>(
-    null
-  );
+  const [bossUpdate, setBossUpdate] = useState<{
+    hp: number;
+    maxHp: number;
+  } | null>(null);
   const [bossUpdateNonce, setBossUpdateNonce] = useState(0);
 
   const enqueueActions = React.useCallback((actions: GameActionPayload[]) => {
-    if (!actions || actions.length === 0) return
-    setPayloadBatch(actions)
-    setPayloadBatchNonce((n) => n + 1)
-  }, [])
+    if (!actions || actions.length === 0) return;
+    setPayloadBatch(actions);
+    setPayloadBatchNonce((n) => n + 1);
+  }, []);
 
   const bumpBossRefresh = React.useCallback(() => {
-    setBossRefreshNonce((n) => n + 1)
-  }, [])
+    setBossRefreshNonce((n) => n + 1);
+  }, []);
 
   const handleMovedToDone = React.useCallback(
     async (taskId: string) => {
@@ -57,10 +61,12 @@ const ProjectPage: React.FC = () => {
         const res = await playerAttack(projectId, { task_id: taskId });
         const attacked = res.result.attacks?.length ?? 0;
         const skipped = res.result.skipped?.length ?? 0;
-        if (attacked > 0) toast.success(`Boss attacked by ${attacked} assignee(s)`);
+        if (attacked > 0)
+          toast.success(`Boss attacked by ${attacked} assignee(s)`);
         if (skipped > 0) toast(`Skipped ${skipped} assignee(s)`);
         const bossPhaseAdvanced = !!res.result.boss_phase_advanced;
-        const bossWasDefeated = bossPhaseAdvanced || (res.result.boss_hp ?? 0) <= 0;
+        const bossWasDefeated =
+          bossPhaseAdvanced || (res.result.boss_hp ?? 0) <= 0;
 
         if (bossPhaseAdvanced) {
           const phaseLabel =
@@ -71,7 +77,7 @@ const ProjectPage: React.FC = () => {
         }
 
         const actions: GameActionPayload[] = (res.result.attacks ?? []).map(
-          (a) => ({ act: "ATTACK", userId: String(a.player_id) })
+          (a) => ({ act: "ATTACK", userId: String(a.player_id) }),
         );
 
         // Boss transition animations:
@@ -85,8 +91,14 @@ const ProjectPage: React.FC = () => {
 
         // Pass boss HP/maxHp updates down, but ProjectBattle will apply them only
         // when it is safe (e.g., before BOSS_REVIVE or after queue finishes).
-        if (typeof res.result.boss_hp === "number" && typeof res.result.boss_max_hp === "number") {
-          setBossUpdate({ hp: res.result.boss_hp, maxHp: res.result.boss_max_hp });
+        if (
+          typeof res.result.boss_hp === "number" &&
+          typeof res.result.boss_max_hp === "number"
+        ) {
+          setBossUpdate({
+            hp: res.result.boss_hp,
+            maxHp: res.result.boss_max_hp,
+          });
           setBossUpdateNonce((n) => n + 1);
         }
 
@@ -97,7 +109,7 @@ const ProjectPage: React.FC = () => {
         toast.error("Attack failed");
       }
     },
-    [playerAttack, projectId, enqueueActions, bumpBossRefresh]
+    [playerAttack, projectId, enqueueActions, bumpBossRefresh],
   );
 
   const overdueAttack = useOverdueBossAttack({
@@ -109,17 +121,17 @@ const ProjectPage: React.FC = () => {
     enqueueActions,
     bumpBossRefresh,
     enabled: true,
-  })
+  });
 
   useEffect(() => {
     if (overdueAttack.attackedTaskId) {
-      toast.error("Overdue task! Boss attacked!")
+      toast.error("Overdue task! Boss attacked!");
     }
     if (overdueAttack.error) {
       // Silent-ish: show only in console; you can toast if you want
-      console.error(overdueAttack.error)
+      console.error(overdueAttack.error);
     }
-  }, [overdueAttack.attackedTaskId, overdueAttack.error])
+  }, [overdueAttack.attackedTaskId, overdueAttack.error]);
 
   const {
     tasks,
@@ -137,8 +149,8 @@ const ProjectPage: React.FC = () => {
     setShowBossPlaceholder((prev) => !prev)
   }
 
-  const { user } = useAuth()
-  const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id)
+  const { user } = useAuth();
+  const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id);
   const HP_DATA = {
     boss: {
       current: gameStatus?.boss_status?.hp ?? 50,
@@ -148,7 +160,7 @@ const ProjectPage: React.FC = () => {
       current: me?.hp ?? 100,
       max: me?.max_hp ?? 100,
     },
-  }
+  };
 
   return (
     <div className="flex h-[calc(100vh-148px)] w-full">
@@ -163,13 +175,13 @@ const ProjectPage: React.FC = () => {
 
       {/* Main content */}
       <main className="flex-1 flex flex-col bg-offWhite overflow-hidden">
-        {/* <BossPlaceholder isVisible={showBossPlaceholder} /> */}
-        <ProjectBattle
+        <BossPlaceholder
+          isVisible={showBossPlaceholder}
           projectMembers={projectMembers ?? []}
-          payloadBatch={payloadBatch}
+          payloadBatch={payloadBatch ?? []}
           payloadBatchNonce={payloadBatchNonce}
           bossRefreshNonce={bossRefreshNonce}
-          bossUpdate={bossUpdate}
+          bossUpdate={bossUpdate ?? { hp: 0, maxHp: 0 }}
           bossUpdateNonce={bossUpdateNonce}
         />
         <ToggleButton

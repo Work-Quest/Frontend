@@ -95,8 +95,6 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
           No damage logs yet
         </p>
       )}
-
-
       <Button
         variant="shadow"
         className="!bg-orange mr-4 w-full my-4 font-['Baloo_2']"

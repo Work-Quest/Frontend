@@ -1,7 +1,7 @@
 export const ENTITY_CONFIG = {
   characters: {
     c01: {
-      name: "Warrior",
+      name: "Max",
       size: { width: 64, height: 57 },
       actions: {
         idle: { loop: true },
@@ -13,7 +13,91 @@ export const ENTITY_CONFIG = {
       },
     },
     c02: {
-      name: "Warrior2",
+      name: "Sven",
+      size: { width: 64, height: 57 },
+      actions: {
+        idle: { loop: true },
+        walk_left: { loop: true },
+        walk_right: { loop: true },
+        attack: { duration: 800, loop: false, damageDelay: 500 },
+        damage: { duration: 500, loop: false },
+        dead: { duration: 1000, loop: false },
+      },
+    },
+    c03: { 
+      name: "Alex",
+      size: { width: 64, height: 57 },
+      actions: {
+        idle: { loop: true },
+        walk_left: { loop: true },
+        walk_right: { loop: true },
+        attack: { duration: 800, loop: false, damageDelay: 500 },
+        damage: { duration: 500, loop: false },
+        dead: { duration: 1000, loop: false },
+      },
+    },
+    c04: {
+      name: "Kitty",
+      size: { width: 64, height: 57 },
+      actions: {
+        idle: { loop: true },
+        walk_left: { loop: true },
+        walk_right: { loop: true },
+        attack: { duration: 800, loop: false, damageDelay: 500 },
+        damage: { duration: 500, loop: false },
+        dead: { duration: 1000, loop: false },
+      },
+    },
+    c05: {
+      name: "Java",
+      size: { width: 64, height: 57 },
+      actions: {
+        idle: { loop: true },
+        walk_left: { loop: true },
+        walk_right: { loop: true },
+        attack: { duration: 800, loop: false, damageDelay: 500 },
+        damage: { duration: 500, loop: false },
+        dead: { duration: 1000, loop: false },
+      },
+    },
+    c06: {
+      name: "Kelvin",
+      size: { width: 64, height: 57 },
+      actions: {
+        idle: { loop: true },
+        walk_left: { loop: true },
+        walk_right: { loop: true },
+        attack: { duration: 800, loop: false, damageDelay: 500 },
+        damage: { duration: 500, loop: false },
+        dead: { duration: 1000, loop: false },
+      },
+    },
+    c07: {
+      name: "Liz",
+      size: { width: 64, height: 57 },
+      actions: {
+        idle: { loop: true },
+        walk_left: { loop: true },
+        walk_right: { loop: true },
+        attack: { duration: 800, loop: false, damageDelay: 500 },
+        damage: { duration: 500, loop: false },
+        dead: { duration: 1000, loop: false },
+      },
+    },
+    c08: {
+      name: "Mond",
+      size: { width: 64, height: 57 },
+      actions: {
+        idle: { loop: true },
+        walk_left: { loop: true },
+        walk_right: { loop: true },
+        attack: { duration: 800, loop: false, damageDelay: 500 },
+        damage: { duration: 500, loop: false },
+        dead: { duration: 1000, loop: false },
+      },
+    },
+    c09: {
+      name: "Jenny",
       size: { width: 64, height: 57 },
       actions: {
         idle: { loop: true },
