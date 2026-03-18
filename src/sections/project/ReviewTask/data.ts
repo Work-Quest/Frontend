@@ -44,6 +44,7 @@ export const MOCK_REVIEW_TASK_DATA: ReviewTaskData = {
     {
       id: "hist-1",
       title: "Implement Signup Page",
+      reviewer: "Project Manager",
       participants: ["Nano", "Amy"],
       timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
       comment:
@@ -52,6 +53,7 @@ export const MOCK_REVIEW_TASK_DATA: ReviewTaskData = {
     {
       id: "hist-2",
       title: "Set up node",
+      reviewer: "Tech Lead",
       participants: ["Tonnam", "Amy"],
       timestamp: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(),
       comment:
@@ -60,6 +62,7 @@ export const MOCK_REVIEW_TASK_DATA: ReviewTaskData = {
     {
       id: "hist-3",
       title: "Design Landing Page",
+      reviewer: "UX Lead",
       participants: ["Harmony", "Alex"],
       timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       comment:

@@ -1,4 +1,8 @@
+'use client'
+
+import { useState } from 'react'
 import BadgeContainer from "@/components/BadgeContainer"
+import AchievementModal from "@/components/AchievementModal"
 import {
   ACHIEVEMENT_IDS,
   getAchievementImagePath,
@@ -26,6 +30,7 @@ function AchievementsSkeleton() {
 
 export default function Achievements() {
   const { achievementIds, loading, error } = useAchievements()
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const unlockedSet = new Set<string>(achievementIds)
 
   const badges = ACHIEVEMENT_IDS.map((id) => ({
@@ -50,6 +55,18 @@ export default function Achievements() {
   }
 
   return (
-    <BadgeContainer title="Achievements" badges={badges} buttonText="View All Achievements" />
+    <>
+      <BadgeContainer
+        title="Achievements"
+        badges={badges}
+        buttonText="View All Achievements"
+        onViewAll={() => setIsModalOpen(true)}
+      />
+      <AchievementModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        badges={badges}
+      />
+    </>
   )
 }

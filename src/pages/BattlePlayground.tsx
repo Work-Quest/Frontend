@@ -50,7 +50,7 @@ const BattlePlayground = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans flex flex-col">
       
-      <BattleScene users={users} boss={boss} />
+      <BattleScene users={users} boss={boss} projectId={null} myProjectMemberId={null} />
 
       <div className="flex-1 bg-slate-900 border-t border-slate-800 p-6 shadow-2xl z-50">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8 h-full">

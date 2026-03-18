@@ -68,11 +68,6 @@ export const TaskStatusPieChart: React.FC<TaskStatusPieChartProps> = ({
         ]}
         width={160}
         height={160}
-        slotProps={{
-          legend: {
-            hidden: true,
-          },
-        }}
         colors={data.map((item) => item.color)}
         sx={{
           '& .MuiPieArc-root': {

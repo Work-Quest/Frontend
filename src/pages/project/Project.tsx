@@ -35,13 +35,6 @@ const ProjectPage: React.FC = () => {
   const { projectMembers } = useProjectMembers(projectId)
   const { logs, loading: logsLoading } = useLog(projectId, { pollIntervalMs: POLLING_CONFIG.logs.interval });
   const { playerAttack, bossAttack, gameStatus } = useGame(projectId, { pollIntervalMs: POLLING_CONFIG.gameStatus.interval });
-  const { projectId } = useParams<{ projectId: string }>();
-  const { fetchedTask } = useTask();
-  const { projectMembers } = useProjectMembers(projectId);
-  const { logs, loading: logsLoading } = useLog(projectId, {
-    pollIntervalMs: 3000,
-  });
-  const { playerAttack, bossAttack, gameStatus } = useGame();
   const [payloadBatch, setPayloadBatch] = useState<GameActionPayload[] | null>(
     null,
   );
@@ -85,11 +78,6 @@ const ProjectPage: React.FC = () => {
     setPayloadBatch(actions)
     setPayloadBatchNonce((n) => n + 1)
   }, [])
-  const enqueueActions = React.useCallback((actions: GameActionPayload[]) => {
-    if (!actions || actions.length === 0) return;
-    setPayloadBatch(actions);
-    setPayloadBatchNonce((n) => n + 1);
-  }, []);
 
   const bumpBossRefresh = React.useCallback(() => {
     setBossRefreshNonce((n) => n + 1);
@@ -290,9 +278,6 @@ const ProjectPage: React.FC = () => {
     isDelayed: isDelayed,
     estimatedTime: estimatedDays ?? undefined,
   }), [formattedDeadline, daysLeft, isDelayed, delayedDays, estimatedDays])
-
-  const { user } = useAuth();
-  const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id);
   const HP_DATA = {
     boss: {
       current: gameStatus?.boss_status?.hp ?? 50,

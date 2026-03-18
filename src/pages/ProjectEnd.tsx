@@ -63,13 +63,6 @@ function ProjectEnd() {
                     <p className="font-bold !text-red px-2">Delay Penalty {summary.reduction_percent}% score reduction </p>
                 </div>
             )}
-            {/* Main Content */}
-            <div className="flex flex-col lg:flex-row flex-1">
-                {/* Left Section - Leaderboard */}
-                <div className="w-full lg:w-1/3 xl:w-2/5 p-4 bg-offWhite overflow-auto">
-                    <Leaderboard user={userData} />
-                </div>
-
                 {/* Right Section - Team Summary Boxes */}
                 <div className="w-full lg:w-2/3 xl:w-3/4 p-4 bg-offWhite overflow-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -94,7 +87,6 @@ function ProjectEnd() {
 
             <Achievement tags={achievementNames} loading={feedbackLoading} />
             <Feedback projectId={projectId ?? ""} />
-        </div>
         </div>
             );
 }

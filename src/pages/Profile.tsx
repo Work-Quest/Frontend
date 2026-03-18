@@ -15,16 +15,12 @@ export default function Profile() {
           <UserInfo userId={userId} />
           <FinishedProjectsHistory userId={userId} />
         </div>
-        <div className="grid grid-rows-5 flex-1 h-full gap-4">
+        <div className=" flex flex-col flex-1 gap-4  h-full">
           <div>
             <UserOverview userId={userId} />
           </div>
-          <div className="row-span-2">
             <Achievement />
-          </div>
-          <div className="row-span-2">
             <BossDefeated userId={userId} />
-          </div>
         </div>
       </div>
     </>
