@@ -1,56 +1,55 @@
 import BadgeContainer from "@/components/BadgeContainer"
+import {
+  ACHIEVEMENT_IDS,
+  getAchievementImagePath,
+  getAchievementName,
+  getAchievementDescription,
+} from "@/lib/achievementConstants"
+import { useAchievements } from "@/hook/useAchievements"
 
-const AchievementsMockData = {
-  achievements: [
-    {
-      id: "achievement1",
-      name: "Master Explorer",
-      img: "https://placehold.co/600x600",
-      description: "Explore 100 different locations.",
-    },
-    {
-      id: "achievement2",
-      name: "Treasure Hunter",
-      img: "https://placehold.co/600x600",
-      description: "Collect 50 unique treasures.",
-    },
-    {
-      id: "achievement3",
-      name: "Monster Slayer",
-      img: "https://placehold.co/600x600",
-      description: "Defeat 200 monsters.",
-    },
-    {
-      id: "achievement4",
-      name: "Champion of the Arena",
-      img: "https://placehold.co/600x600",
-      description: "Win 10 arena battles.",
-    },
-    {
-      id: "achievement5",
-      name: "Crafting Master",
-      img: "https://placehold.co/600x600",
-      description: "Craft 100 unique items.",
-    },
-    {
-      id: "achievement6",
-      name: "Legendary Collector",
-      img: "https://placehold.co/600x600",
-      description: "Collect all legendary items.",
-    },
-  ],
+function AchievementsSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 p-4 border-2 rounded-lg border-veryLightBrown animate-pulse">
+      <div className="h-8 w-40 bg-veryLightBrown/60 rounded" />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="aspect-square w-full max-w-[80px] rounded-md bg-veryLightBrown/50"
+          />
+        ))}
+      </div>
+      <div className="h-10 w-full rounded-md bg-veryLightBrown/40" />
+    </div>
+  )
 }
 
 export default function Achievements() {
+  const { achievementIds, loading, error } = useAchievements()
+  const unlockedSet = new Set<string>(achievementIds)
+
+  const badges = ACHIEVEMENT_IDS.map((id) => ({
+    id,
+    image: getAchievementImagePath(id),
+    name: getAchievementName(id),
+    description: getAchievementDescription(id),
+    locked: !unlockedSet.has(id),
+  }))
+
+  if (error) {
+    return (
+      <div className="flex flex-col gap-4 p-4 border-2 rounded-lg border-veryLightBrown">
+        <p className="!text-2xl font-bold font-['Baloo_2'] text-darkBrown">Achievements</p>
+        <p className="!text-sm !text-red-600">{error}</p>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return <AchievementsSkeleton />
+  }
+
   return (
-    <>
-      <BadgeContainer
-        title="Achievements"
-        badges={[
-          ...AchievementsMockData.achievements.map((achievement) => achievement.img),
-        ]}
-        buttonText="View All Achievements"
-      />
-    </>
+    <BadgeContainer title="Achievements" badges={badges} buttonText="View All Achievements" />
   )
 }

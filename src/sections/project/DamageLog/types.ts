@@ -9,6 +9,13 @@ export type DamageLogEntry = {
   comment?: string;
 };
 
+export type DamageLogPayload = {
+  task?: { task_name?: string };
+  actor?: { username?: string };
+  target?: { username?: string };
+  damage?: number;
+};
+
 export type DamageLogProps = {
   logs?: ProjectLogEntry[];
 };

@@ -10,4 +10,5 @@ export interface FeedbackResponse {
   work_speed: string | null
   diligence: number | null
   created_at: string
+  achievement_ids?: string[] | null
 }
