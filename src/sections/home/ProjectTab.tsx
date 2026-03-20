@@ -26,6 +26,8 @@ import { IoAddCircle } from "react-icons/io5"
 
 type ProjectTabProps = {
   data: Project[]
+  allData: Project[]
+  filters: FilterState
   onFilterChange: (filters: FilterState) => void
   onUpdateProject: (
     projectId: string,
@@ -46,16 +48,14 @@ export interface FilterState {
 
 export default function ProjectTab({
   data,
+  allData,
+  filters,
   onFilterChange,
   onUpdateProject,
   onDelete,
   loading,
 }: ProjectTabProps) {
   const [page, setPage] = useState(1)
-  const [filters, setFilters] = useState<FilterState>({
-    status: null,
-    owner: null,
-  })
   const [itemsPerPage, setItemsPerPage] = useState(4)
 
   useEffect(() => {
@@ -90,16 +90,15 @@ export default function ProjectTab({
   }
 
   const handleFilterChange = (newFilters: FilterState) => {
-    setFilters(newFilters)
     onFilterChange(newFilters)
     setPage(1)
   }
 
   const uniqueStatuses = Array.from(
-    new Set(data.map((project) => project.status)),
+    new Set(allData.map((project) => project.status)),
   )
   const uniqueOwners = Array.from(
-    new Set(data.map((project) => project.owner_username)),
+    new Set(allData.map((project) => project.owner_username)),
   )
 
   const updateStatusFilter = (status: string | null) => {
@@ -115,6 +114,10 @@ export default function ProjectTab({
   }
 
   const hasActiveFilters = filters.status || filters.owner
+
+  useEffect(() => {
+    setPage(1)
+  }, [data.length])
 
   return (
     <div className="flex gap-4 h-full">
@@ -189,8 +192,8 @@ export default function ProjectTab({
                   Owner
                 </p>
                 <Select
-                  value={filters.owner || ""}
-                  onValueChange={(value) => updateOwnerFilter(value || null)}
+                  value={filters.owner || "all"}
+                  onValueChange={(value) => updateOwnerFilter(value === "all" ? null : value)}
                 >
                   <SelectTrigger className="w-full !bg-offWhite !border-veryLightBrown !border-2 text-brown focus:!outline-none active:!border-lightBrown !font-['Baloo_2']">
                     <SelectValue placeholder="All Owners" />
@@ -226,10 +229,17 @@ export default function ProjectTab({
                         className="bg-orange/20 text-orange"
                       >
                         Status: {filters.status}
-                        <X
-                          className="w-3 h-3 ml-1 cursor-pointer"
-                          onClick={() => updateStatusFilter(null)}
-                        />
+                        <button
+                          type="button"
+                          className="ml-1 !p-1 !bg-transparent inline-flex items-center justify-center cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            updateStatusFilter(null)
+                          }}
+                          aria-label="Clear status filter"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
                       </Badge>
                     )}
                     {filters.owner && (
@@ -238,10 +248,17 @@ export default function ProjectTab({
                         className="bg-orange/20 text-orange"
                       >
                         Owner: {filters.owner}
-                        <X
-                          className="w-3 h-3 ml-1 cursor-pointer"
-                          onClick={() => updateOwnerFilter(null)}
-                        />
+                        <button
+                          type="button"
+                          className="ml-1 !p-1 !bg-transparent inline-flex items-center justify-center cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            updateOwnerFilter(null)
+                          }}
+                          aria-label="Clear owner filter"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
                       </Badge>
                     )}
                   </div>
@@ -255,7 +272,7 @@ export default function ProjectTab({
                   <span className="font-semibold text-brown">
                     {data.length}
                   </span>{" "}
-                  projects
+                  matching projects
                 </p>
               </div>
             </div>

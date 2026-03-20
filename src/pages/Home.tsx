@@ -147,7 +147,15 @@ function Home() {
 
             {/* Project Tab with Filter */}
             <div className="flex-1 min-h-0">
-              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onUpdateProject={updateProject} onDelete={deleteProject} loading={loading} />
+              <ProjectTab
+                data={filteredAndSearchedResults}
+                allData={projects}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onUpdateProject={updateProject}
+                onDelete={deleteProject}
+                loading={loading}
+              />
             </div>
           </div>
         </div>
