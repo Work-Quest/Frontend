@@ -1,9 +1,9 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom"
-import { useAuth } from "@/context/AuthContext"
-import LoadingScreen from "@/components/LoadingScreen"
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
+import LoadingScreen from '@/components/LoadingScreen'
 
 export default function ProtectedLayout() {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, user } = useAuth()
   const location = useLocation()
 
   if (loading) {
@@ -16,6 +16,10 @@ export default function ProtectedLayout() {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  if (user?.is_first_time && location.pathname !== '/setup') {
+    return <Navigate to="/setup" replace />
   }
 
   return <Outlet />

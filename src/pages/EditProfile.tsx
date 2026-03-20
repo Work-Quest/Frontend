@@ -1,23 +1,22 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { User } from "lucide-react"
-import toast from "react-hot-toast"
-import { patch } from "@/Api"
-import { useAuth } from "@/context/AuthContext"
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { User } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { patch } from '@/Api'
+import { useAuth } from '@/context/AuthContext'
 import {
   AVATAR_IDS,
   PRESET_COLORS,
   getAvatarProfilePath,
   getColorIdByValue,
   getColorValueById,
-} from "@/constants/avatar"
+} from '@/constants/avatar'
 
 type Profile = {
   name: string
-  username: string
   avatarId: number
   backgroundColor: string
 }
@@ -30,8 +29,7 @@ export default function EditProfile() {
   const { user, checkAuth } = useAuth()
   const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState<Profile>({
-    name: "",
-    username: "",
+    name: '',
     avatarId: 1,
     backgroundColor: PRESET_COLORS[0].value,
   })
@@ -39,38 +37,35 @@ export default function EditProfile() {
   useEffect(() => {
     if (!user) return
     setProfile({
-      name: user.name ?? "",
-      username: user.username ?? "",
+      name: user.name ?? '',
       avatarId: user.selected_character_id ?? 1,
       backgroundColor: getColorValueById(user.bg_color_id),
     })
   }, [user])
 
-  const { name, username, avatarId, backgroundColor } = profile
+  const { name, avatarId, backgroundColor } = profile
 
   const setName = (v: string) => setProfile((p) => ({ ...p, name: v }))
-  const setUsername = (v: string) =>
-    setProfile((p) => ({ ...p, username: v.replace(/^@/, "") }))
   const setAvatarId = (v: number) => setProfile((p) => ({ ...p, avatarId: v }))
-  const setBackgroundColor = (v: string) =>
-    setProfile((p) => ({ ...p, backgroundColor: v }))
+  const setBackgroundColor = (v: string) => setProfile((p) => ({ ...p, backgroundColor: v }))
 
   const handleSave = async () => {
     try {
       setSaving(true)
       await patch<
-        { selected_character_id: number; bg_color_id: number },
+        { name: string; selected_character_id: number; bg_color_id: number },
         { message: string }
-      >("/api/me/", {
+      >('/api/me/', {
+        name: name.trim(),
         selected_character_id: avatarId,
         bg_color_id: getColorIdByValue(backgroundColor),
       })
       await checkAuth()
-      toast.success("Profile updated!")
-      navigate("/profile")
+      toast.success('Profile updated!')
+      navigate(user?.id ? `/profile/${user.id}` : '/home')
     } catch (error) {
       console.error(error)
-      toast.error("Failed to update profile.")
+      toast.error('Failed to update profile.')
     } finally {
       setSaving(false)
     }
@@ -93,9 +88,7 @@ export default function EditProfile() {
             <div className="w-10 h-10 rounded-xl bg-orange/15 flex items-center justify-center">
               <User className="w-5 h-5 text-orange" />
             </div>
-            <h2 className="font-['Baloo_2'] font-extrabold text-darkBrown text-xl">
-              Profile Info
-            </h2>
+            <h2 className="font-['Baloo_2'] font-extrabold text-darkBrown text-xl">Profile Info</h2>
           </div>
 
           <div className="flex flex-col gap-6">
@@ -112,7 +105,7 @@ export default function EditProfile() {
                   onError={(e) => {
                     const target = e.currentTarget
                     target.onerror = null
-                    target.src = "/mockImg/profile.svg"
+                    target.src = '/mockImg/profile.svg'
                   }}
                 />
               </div>
@@ -120,19 +113,17 @@ export default function EditProfile() {
             </div>
 
             <div className="w-full space-y-2">
-              <label className="text-sm font-bold text-darkBrown font-['Baloo_2']">
-                Avatar
-              </label>
+              <label className="text-sm font-bold text-darkBrown font-['Baloo_2']">Avatar</label>
               <div className="flex flex-wrap gap-2">
                 {AVATAR_IDS.map((id) => (
                   <button
                     key={id}
                     type="button"
                     onClick={() => setAvatarId(id)}
-                    className={`w-14 h-14 rounded-lg border-2 overflow-hidden transition-all ${
+                    className={`w-14 h-14 rounded-lg border-2 overflow-hidden transition-all !p-0 ${
                       avatarId === id
-                        ? "border-brown scale-105 ring-2 ring-orange/50 bg-cream"
-                        : "border-veryLightBrown hover:border-brown/50 bg-cream/50"
+                        ? 'border-brown scale-105 ring-2 ring-orange/50 bg-cream'
+                        : 'border-veryLightBrown hover:border-brown/50 bg-cream/50'
                     }`}
                     title={`Avatar ${id}`}
                     aria-label={`Select avatar ${id}`}
@@ -144,7 +135,7 @@ export default function EditProfile() {
                       onError={(e) => {
                         const target = e.currentTarget
                         target.onerror = null
-                        target.src = "/mockImg/profile.svg"
+                        target.src = '/mockImg/profile.svg'
                       }}
                     />
                   </button>
@@ -164,8 +155,8 @@ export default function EditProfile() {
                     onClick={() => setBackgroundColor(color.value)}
                     className={`w-10 h-10 rounded-lg border-2 transition-all ${
                       backgroundColor === color.value
-                        ? "border-brown scale-110 ring-2 ring-orange/50"
-                        : "border-transparent hover:border-brown/50"
+                        ? 'border-brown scale-110 ring-2 ring-orange/50'
+                        : 'border-transparent hover:border-brown/50'
                     }`}
                     style={{ backgroundColor: color.value }}
                     title={color.label}
@@ -189,19 +180,19 @@ export default function EditProfile() {
             </div>
 
             <div className="w-full space-y-2">
-              <label className="text-sm font-bold text-darkBrown font-['Baloo_2']">
-                Username
-              </label>
+              <label className="text-sm font-bold text-darkBrown font-['Baloo_2']">Username</label>
               <div className="flex">
                 <span className="flex items-center rounded-l-lg border-y-2 border-l-2 border-brown bg-veryLightBrown/50 px-4 font-['Baloo_2'] text-darkBrown">
                   @
                 </span>
                 <input
                   type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="username"
-                  className={inputStyle + " rounded-l-none border-l-0"}
+                  value={user?.username || ''}
+                  readOnly
+                  className={
+                    inputStyle +
+                    ' rounded-l-none border-l-0 bg-gray-100 text-lightBrown cursor-not-allowed'
+                  }
                 />
               </div>
             </div>
@@ -213,7 +204,7 @@ export default function EditProfile() {
             <Button
               variant="cream"
               size="default"
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate(user?.id ? `/profile/${user.id}` : '/home')}
               className="normal-case"
             >
               Cancel
@@ -225,7 +216,7 @@ export default function EditProfile() {
               disabled={saving}
               className="normal-case"
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </div>
