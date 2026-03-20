@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Check } from 'lucide-react'
-// import { post } from "@/Api"
+import { patch } from "@/Api"
 import toast from 'react-hot-toast'
 import { useAuth } from '@/context/AuthContext'
-import { AVATAR_IDS, PRESET_COLORS } from '@/constants/avatar'
+import { AVATAR_IDS, PRESET_COLORS, getAvatarProfilePath, getColorIdByValue } from '@/constants/avatar'
 
 function Setup() {
   const navigate = useNavigate()
@@ -33,25 +33,14 @@ function Setup() {
     e.preventDefault()
     setLoading(true)
 
-    const payload = {
-      name: formData.displayName,
-      username: formData.username,
-      avatarId: selectedAvatar,
-      backgroundColor: selectedColor,
-    }
-
     try {
-      /* * =================================================================
-       * TODO: REPLACE API HERE
-       * =================================================================
-       */
-
-      // const res = await post("/api/user/setup", payload)
-
-      // --- START MOCK DATA SIMULATION ---
-      console.log('Mock API Payload:', payload)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      // --- END MOCK DATA SIMULATION ---
+      await patch<
+        { selected_character_id: number; bg_color_id: number },
+        { message: string }
+      >("/api/me/", {
+        selected_character_id: selectedAvatar,
+        bg_color_id: getColorIdByValue(selectedColor),
+      })
 
       await checkAuth()
       toast.success('Profile setup complete!')
@@ -78,9 +67,14 @@ function Setup() {
                 style={{ backgroundColor: selectedColor }}
               >
                 <img
-                  src={`/avatars/${selectedAvatar}.png`}
+                  src={getAvatarProfilePath(selectedAvatar)}
                   alt={`Avatar ${selectedAvatar}`}
                   className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    const target = e.currentTarget
+                    target.onerror = null
+                    target.src = "/mockImg/profile.svg"
+                  }}
                 />
               </div>
 
@@ -101,9 +95,14 @@ function Setup() {
                       }`}
                     >
                       <img
-                        src={`/avatars/${num}.png`}
+                        src={getAvatarProfilePath(num)}
                         alt={`Option ${num}`}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.currentTarget
+                          target.onerror = null
+                          target.src = "/mockImg/profile.svg"
+                        }}
                       />
                     </div>
                   ))}

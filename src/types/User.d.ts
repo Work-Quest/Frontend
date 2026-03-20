@@ -12,12 +12,15 @@ export type UserScore = {
   username: string;
   user_id?: string;  // Add user_id for profile navigation
   score: number;
+  selected_character_id?: number;
+  bg_color_id?: number;
 };
 
 export type UserProfile = {
   name?: string;
   username?: string;
-  profileImg?: string;
+  selectedCharacterId?: number;
+  bgColorId?: number;
   backgroundColor?: string;
   avatarFallback?: string;
   tag?: Tag[];
@@ -47,4 +50,6 @@ export type BusinessUser = {
   name: string;
   email: string;
   profile_img: string | null;
+  selected_character_id: number;
+  bg_color_id: number;
 };

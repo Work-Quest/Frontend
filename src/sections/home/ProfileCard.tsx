@@ -3,6 +3,7 @@
 import type { UserProfile } from "@/types/User"
 import { Button } from "@/components/ui/button"
 import {useNavigate} from "react-router-dom";
+import { getAvatarProfilePath, getColorValueById } from "@/constants/avatar";
 
 type ProfileCardProps = {
   data: UserProfile
@@ -25,11 +26,19 @@ export default function ProfileCard({ data, user_id }: ProfileCardProps) {
         <div className="flex items-center gap-4">
           {/* Profile Image */}
           <div className="w-[70px] h-[107px] relative">
-            <div className="w-full h-full bg-[#b1dcff] rounded-[10px] border-[3px] border-[#faf9f6] overflow-hidden">
+            <div
+              className="w-full h-full rounded-[10px] border-[3px] border-[#faf9f6] overflow-hidden"
+              style={{ backgroundColor: getColorValueById(data.bgColorId) }}
+            >
               <img
-                src={data.profileImg || "/placeholder.svg"}
+                src={getAvatarProfilePath(data.selectedCharacterId)}
                 alt="Profile"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.onerror = null;
+                  target.src = "/mockImg/profile.svg";
+                }}
               />
             </div>
           </div>

@@ -1,6 +1,7 @@
 import type { UserScore } from "@/types/User"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useNavigate } from "react-router-dom"
+import { getAvatarProfilePath, getColorValueById } from "@/constants/avatar"
 
 type LeaderboardProps = {
   user: UserScore[]
@@ -36,7 +37,16 @@ const FirstPlaceSection = () => {
             <div className="self-stretch p-5 bg-[#ff995a] rounded-[10px] flex justify-between items-center mb-4">
                 <div className="flex items-center gap-4">
                     <div className="w-[70px] h-[70px] bg-[#ffc3ab] rounded-full outline outline-[#faf9f6] flex items-center justify-center text-3xl font-bold text-orange-800">
-                        {firstPlace.name.charAt(0).toUpperCase()}
+                        <img
+                            src={getAvatarProfilePath(firstPlace.selected_character_id)}
+                            alt={firstPlace.username}
+                            className="w-full h-full object-cover rounded-full"
+                            onError={(e) => {
+                                const target = e.currentTarget;
+                                target.onerror = null;
+                                target.src = "/mockImg/profile.svg";
+                            }}
+                        />
                     </div>
 
                     <div className="w-[168px] flex flex-col items-start">
@@ -69,13 +79,6 @@ const OtherPlacesSection = () => (
                     const style = rankStyle.find((r) => r.number === i.order)?.style || "text-[22px]"
                     const bgLeft = "bg-[#d6cec4]"
                     const outlineColor = "#d6cec4"
-                    const avatarBg = [
-                        "#ffba68",
-                        "#b5ddff",
-                        "#f76652",
-                        "#938b80"
-                    ][index % 4]
-
                     return (
                         <div
                             key={index}
@@ -94,8 +97,19 @@ const OtherPlacesSection = () => (
                                     <div className="flex items-center gap-2 flex-1">
                                         <div
                                             className="w-12 h-12 rounded-lg"
-                                            style={{ backgroundColor: avatarBg }}
-                                        ></div>
+                                            style={{ backgroundColor: getColorValueById(i.bg_color_id) }}
+                                        >
+                                            <img
+                                                src={getAvatarProfilePath(i.selected_character_id)}
+                                                alt={i.username}
+                                                className="w-full h-full object-cover rounded-lg"
+                                                onError={(e) => {
+                                                    const target = e.currentTarget;
+                                                    target.onerror = null;
+                                                    target.src = "/mockImg/profile.svg";
+                                                }}
+                                            />
+                                        </div>
                                         <div className="flex flex-col items-start">
                                             <h3 className="-mb-2">
                                                 {i.name}

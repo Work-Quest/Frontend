@@ -8,6 +8,8 @@ type User = {
   username: string
   email: string
   profile_img: string
+  selected_character_id: number
+  bg_color_id: number
 }
 
 type AuthContextType = {

@@ -45,7 +45,8 @@ function Home() {
     return {
       name: user?.name,
       username: user?.username,
-      profileImg: user?.profile_img || undefined,
+      selectedCharacterId: user?.selected_character_id ?? 1,
+      bgColorId: user?.bg_color_id ?? 1,
       tag: [], // No backend support for tags
       bossCollection: bossCollection,
     }
