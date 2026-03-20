@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
-import toast from "react-hot-toast"
-import { post } from "@/Api"
-import { Button } from "@/components/ui/button"
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import { post } from '@/Api'
+import { getAxiosApiMessage, getAxiosStatus } from '@/lib/apiError'
+import { Button } from '@/components/ui/button'
 
 type AcceptInviteResponse = {
   message?: string
@@ -17,8 +18,8 @@ export default function JoinProject() {
   const [searchParams] = useSearchParams()
 
   const token = useMemo(() => {
-    const fromQuery = (searchParams.get("token") || "").trim()
-    const fromParam = (params.token || "").trim()
+    const fromQuery = (searchParams.get('token') || '').trim()
+    const fromParam = (params.token || '').trim()
     return fromQuery || fromParam
   }, [params.token, searchParams])
 
@@ -27,7 +28,7 @@ export default function JoinProject() {
 
   useEffect(() => {
     if (!token) {
-      setError("Missing invite token.")
+      setError('Missing invite token.')
       return
     }
 
@@ -38,38 +39,35 @@ export default function JoinProject() {
       setError(null)
       try {
         const res = await post<{ token: string }, AcceptInviteResponse>(
-          "/api/project/invite/accept/",
+          '/api/project/invite/accept/',
           { token }
         )
 
         if (cancelled) return
 
-        const projectId = (res?.project_id || "").trim()
+        const projectId = (res?.project_id || '').trim()
         if (!projectId) {
-          const msg = res?.error || "Invite accepted, but missing project id."
+          const msg = res?.error || 'Invite accepted, but missing project id.'
           setError(msg)
           toast.error(msg)
           return
         }
 
-        toast.success(res?.message || "Invite accepted!")
+        toast.success(res?.message || 'Invite accepted!')
         navigate(`/project/${projectId}`, { replace: true })
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (cancelled) return
 
-        const status = err?.response?.status
-        const apiMsg =
-          err?.response?.data?.error ||
-          err?.response?.data?.message ||
-          "Failed to accept invite."
+        const status = getAxiosStatus(err)
+        const apiMsg = getAxiosApiMessage(err) || 'Failed to accept invite.'
 
         // Helpful defaults based on backend behavior.
         if (status === 401) {
-          setError("Please log in to accept this invite.")
+          setError('Please log in to accept this invite.')
         } else if (status === 403) {
-          setError(apiMsg || "This invite token does not belong to your account.")
+          setError(apiMsg || 'This invite token does not belong to your account.')
         } else if (status === 404) {
-          setError(apiMsg || "Invalid invite token.")
+          setError(apiMsg || 'Invalid invite token.')
         } else {
           setError(apiMsg)
         }
@@ -96,24 +94,16 @@ export default function JoinProject() {
             <div className="space-y-4">
               <p className="text-red font-semibold">{error}</p>
               <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="orange"
-                  onClick={() => navigate("/home")}
-                  type="button"
-                >
+                <Button variant="orange" onClick={() => navigate('/home')} type="button">
                   Go to Home
                 </Button>
-                <Button
-                  variant="cream"
-                  onClick={() => navigate("/login")}
-                  type="button"
-                >
+                <Button variant="cream" onClick={() => navigate('/login')} type="button">
                   Log in
                 </Button>
               </div>
               <p className="text-sm">
-                Tip: invites are tied to the invited email—make sure you’re logged
-                in with the same account that received the invite.
+                Tip: invites are tied to the invited email—make sure you’re logged in with the same
+                account that received the invite.
               </p>
             </div>
           )}
@@ -122,5 +112,3 @@ export default function JoinProject() {
     </div>
   )
 }
-
-

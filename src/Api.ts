@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios, { type AxiosRequestConfig } from 'axios'
 
 export interface Item {
   id: number
@@ -7,9 +7,7 @@ export interface Item {
 
 // Empty string = same-origin (for Vite dev proxy); undefined = local backend fallback
 const BASE_URL =
-  import.meta.env.VITE_API_URL === ""
-    ? ""
-    : import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
+  import.meta.env.VITE_API_URL === '' ? '' : import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
 const TIMEOUT_MS = 10000
 
@@ -19,7 +17,7 @@ const api = axios.create({
   timeout: TIMEOUT_MS,
   withCredentials: true, // SEND COOKIES
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 })
 
@@ -27,14 +25,14 @@ const api = axios.create({
 let activeNonSilentRequests = 0
 
 function startLoading() {
-  const ref = (window as any).loadingBarRef
+  const ref = window.loadingBarRef
   if (ref?.current) {
     ref.current.continuousStart()
   }
 }
 
 function stopLoading() {
-  const ref = (window as any).loadingBarRef
+  const ref = window.loadingBarRef
   if (ref?.current) {
     ref.current.complete()
   }
@@ -44,7 +42,7 @@ function stopLoading() {
 api.interceptors.request.use(
   (config) => {
     // Only show loading bar if request is not marked as silent
-    const isSilent = (config as any).silent === true
+    const isSilent = config.silent === true
     if (!isSilent) {
       activeNonSilentRequests++
       if (activeNonSilentRequests === 1) {
@@ -55,7 +53,8 @@ api.interceptors.request.use(
     return config
   },
   (error) => {
-    const isSilent = (error.config as any)?.silent === true
+    const cfg = axios.isAxiosError(error) ? error.config : undefined
+    const isSilent = cfg?.silent === true
     if (!isSilent) {
       activeNonSilentRequests = Math.max(0, activeNonSilentRequests - 1)
       if (activeNonSilentRequests === 0) {
@@ -63,13 +62,13 @@ api.interceptors.request.use(
       }
     }
     return Promise.reject(error)
-  },
+  }
 )
 
 api.interceptors.response.use(
   (response) => {
     // Only stop loading bar if request was not silent
-    const isSilent = (response.config as any).silent === true
+    const isSilent = response.config.silent === true
     if (!isSilent) {
       activeNonSilentRequests = Math.max(0, activeNonSilentRequests - 1)
       if (activeNonSilentRequests === 0) {
@@ -79,7 +78,8 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
-    const isSilent = (error.config as any)?.silent === true
+    const cfg = axios.isAxiosError(error) ? error.config : undefined
+    const isSilent = cfg?.silent === true
     if (!isSilent) {
       activeNonSilentRequests = Math.max(0, activeNonSilentRequests - 1)
       if (activeNonSilentRequests === 0) {
@@ -87,23 +87,23 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error)
-  },
+  }
 )
 
 // FETCH ITEMS (GET)
 export async function get<T>(url: string, silent?: boolean): Promise<T> {
   try {
-    const config: any = {}
+    const config: AxiosRequestConfig = {}
     if (silent) {
       config.silent = true
     }
     const res = await api.get<T>(`${url}`, config)
-    if (!res.status.toString().startsWith("2")) {
+    if (!res.status.toString().startsWith('2')) {
       throw new Error(`HTTP error! status: ${res.status}`)
     }
     return res.data
   } catch (error) {
-    console.error("Fetch failed:", error)
+    console.error('Fetch failed:', error)
     throw error
   }
 }
@@ -112,12 +112,12 @@ export async function get<T>(url: string, silent?: boolean): Promise<T> {
 export async function post<T, U>(url: string, data: T): Promise<U> {
   try {
     const res = await api.post<U>(`${url}`, data)
-    if (!res.status.toString().startsWith("2")) {
+    if (!res.status.toString().startsWith('2')) {
       throw new Error(`HTTP error! status: ${res.status}`)
     }
     return res.data
   } catch (error) {
-    console.error("Post request failed:", error)
+    console.error('Post request failed:', error)
     throw error
   }
 }
@@ -126,12 +126,12 @@ export async function post<T, U>(url: string, data: T): Promise<U> {
 export async function put<T, U>(url: string, data: T): Promise<U> {
   try {
     const res = await api.put<U>(`${url}`, data)
-    if (!res.status.toString().startsWith("2")) {
+    if (!res.status.toString().startsWith('2')) {
       throw new Error(`HTTP error! status: ${res.status}`)
     }
     return res.data
   } catch (error) {
-    console.error("Put request failed:", error)
+    console.error('Put request failed:', error)
     throw error
   }
 }
@@ -140,12 +140,12 @@ export async function put<T, U>(url: string, data: T): Promise<U> {
 export async function patch<T, U>(url: string, data: T): Promise<U> {
   try {
     const res = await api.patch<U>(`${url}`, data)
-    if (!res.status.toString().startsWith("2")) {
+    if (!res.status.toString().startsWith('2')) {
       throw new Error(`HTTP error! status: ${res.status}`)
     }
     return res.data
   } catch (error) {
-    console.error("Patch request failed:", error)
+    console.error('Patch request failed:', error)
     throw error
   }
 }
@@ -155,7 +155,7 @@ export async function del(url: string): Promise<void> {
   try {
     await api.delete(`${url}`)
   } catch (error) {
-    console.error("Delete request failed:", error)
+    console.error('Delete request failed:', error)
     throw error
   }
 }

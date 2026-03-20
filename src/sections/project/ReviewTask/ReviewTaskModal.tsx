@@ -74,7 +74,6 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
     return otherLogsOptions.filter((log) => log.participants.includes(selectedUsername))
   }, [otherLogsOptions, selectedUsername])
 
-
   const handleSelectLatestLog = (id: string) => {
     setSelectedSource('latest')
     setSelectedLogId(id)
@@ -117,7 +116,9 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
       // 2) Trigger support (buff/effect/item) for the review receivers
       const supportRes = await playerSupport(projectId, { report_id: String(reportId) })
       const receiverIds =
-        supportRes?.result?.applied?.map((a: any) => String(a.receiver_id)).filter(Boolean) ?? []
+        supportRes?.result?.applied
+          ?.map((a) => ('receiver_id' in a && a.receiver_id ? String(a.receiver_id) : null))
+          .filter((id): id is string => id !== null) ?? []
 
       // 3) Close modal and notify parent to animate receivers
       setReviewText('')
@@ -342,22 +343,20 @@ function HistoryCard({
       </div>
       <div className="flex flex-wrap gap-2 justify-between gap-2">
         <div className="flex items-center justify-end gap-2">
-        {entry.participants.map((name, i) => (
-          <span
-            key={`${entry.id}-${i}`}
-            className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-['Baloo_2'] !bg-orange"
-          >
-            {name}
-          </span>
-        ))}
+          {entry.participants.map((name, i) => (
+            <span
+              key={`${entry.id}-${i}`}
+              className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-['Baloo_2'] !bg-orange"
+            >
+              {name}
+            </span>
+          ))}
         </div>
         <div className="flex items-center gap-2">
           review by
-          <span
-              className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-['Baloo_2'] !bg-green"
-          >
-              {entry.reviewer}
-            </span>
+          <span className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-['Baloo_2'] !bg-green">
+            {entry.reviewer}
+          </span>
         </div>
       </div>
       <div className="flex flex-col gap-2 bg-orange/10 p-2 rounded-lg">

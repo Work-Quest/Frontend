@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react"
+import { useEffect, useRef, useCallback } from 'react'
 
 export type UsePollingOptions = {
   /**
@@ -16,7 +16,7 @@ export type UsePollingOptions = {
   pauseOnHidden?: boolean
 }
 
-type RefetchFunction = (opts?: { silent?: boolean }) => Promise<any> | any
+type RefetchFunction = (opts?: { silent?: boolean }) => Promise<unknown> | unknown
 
 /**
  * Generic polling hook that handles long-polling pattern with:
@@ -35,11 +35,7 @@ export function usePolling(
   options: UsePollingOptions = {},
   dependencies: unknown[] = []
 ) {
-  const {
-    pollIntervalMs,
-    enabled = true,
-    pauseOnHidden = true,
-  } = options
+  const { pollIntervalMs, enabled = true, pauseOnHidden = true } = options
 
   const inFlightRef = useRef(false)
   const cancelledRef = useRef(false)
@@ -52,21 +48,24 @@ export function usePolling(
     })
   }, [])
 
-  const executeFetch = useCallback(async (silent: boolean) => {
-    // Request deduplication: skip if already in flight
-    if (inFlightRef.current) return
-    if (cancelledRef.current) return
+  const executeFetch = useCallback(
+    async (silent: boolean) => {
+      // Request deduplication: skip if already in flight
+      if (inFlightRef.current) return
+      if (cancelledRef.current) return
 
-    inFlightRef.current = true
-    try {
-      await refetchFn({ silent })
-    } catch (error) {
-      // Continue polling even if request fails
-      console.error("Polling fetch error:", error)
-    } finally {
-      inFlightRef.current = false
-    }
-  }, [refetchFn])
+      inFlightRef.current = true
+      try {
+        await refetchFn({ silent })
+      } catch (error) {
+        // Continue polling even if request fails
+        console.error('Polling fetch error:', error)
+      } finally {
+        inFlightRef.current = false
+      }
+    },
+    [refetchFn]
+  )
 
   // Initial fetch on mount or when dependencies change (not silent - shows loading bar)
   useEffect(() => {
@@ -111,7 +110,7 @@ export function usePolling(
     }
 
     if (pauseOnHidden) {
-      document.addEventListener("visibilitychange", handleVisibilityChange)
+      document.addEventListener('visibilitychange', handleVisibilityChange)
     }
 
     return () => {
@@ -121,7 +120,7 @@ export function usePolling(
         timerRef.current = null
       }
       if (pauseOnHidden) {
-        document.removeEventListener("visibilitychange", handleVisibilityChange)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
       }
     }
   }, [enabled, pollIntervalMs, pauseOnHidden, executeFetch, sleep])
@@ -131,10 +130,13 @@ export function usePolling(
      * Manually trigger a fetch (bypasses deduplication for immediate fetch)
      * @param silent - Whether to fetch silently (default: false)
      */
-    refetch: useCallback(async (silent = false) => {
-      inFlightRef.current = false // Reset to allow immediate fetch
-      return executeFetch(silent)
-    }, [executeFetch]),
+    refetch: useCallback(
+      async (silent = false) => {
+        inFlightRef.current = false // Reset to allow immediate fetch
+        return executeFetch(silent)
+      },
+      [executeFetch]
+    ),
   }
 }
 
@@ -154,11 +156,7 @@ export function usePollingWhen(
   options: UsePollingOptions = {},
   dependencies: unknown[] = []
 ) {
-  const {
-    pollIntervalMs,
-    enabled = true,
-    pauseOnHidden = true,
-  } = options
+  const { pollIntervalMs, enabled = true, pauseOnHidden = true } = options
 
   const inFlightRef = useRef(false)
   const cancelledRef = useRef(false)
@@ -171,21 +169,24 @@ export function usePollingWhen(
     })
   }, [])
 
-  const executeFetch = useCallback(async (silent: boolean) => {
-    // Request deduplication: skip if already in flight
-    if (inFlightRef.current) return
-    if (cancelledRef.current) return
+  const executeFetch = useCallback(
+    async (silent: boolean) => {
+      // Request deduplication: skip if already in flight
+      if (inFlightRef.current) return
+      if (cancelledRef.current) return
 
-    inFlightRef.current = true
-    try {
-      await refetchFn({ silent })
-    } catch (error) {
-      // Continue polling even if request fails
-      console.error("Polling fetch error:", error)
-    } finally {
-      inFlightRef.current = false
-    }
-  }, [refetchFn])
+      inFlightRef.current = true
+      try {
+        await refetchFn({ silent })
+      } catch (error) {
+        // Continue polling even if request fails
+        console.error('Polling fetch error:', error)
+      } finally {
+        inFlightRef.current = false
+      }
+    },
+    [refetchFn]
+  )
 
   // Initial fetch on mount or when dependencies change (not silent - shows loading bar)
   // Always try to fetch, even if condition isn't met yet
@@ -239,7 +240,7 @@ export function usePollingWhen(
     }
 
     if (pauseOnHidden) {
-      document.addEventListener("visibilitychange", handleVisibilityChange)
+      document.addEventListener('visibilitychange', handleVisibilityChange)
     }
 
     return () => {
@@ -249,7 +250,7 @@ export function usePollingWhen(
         timerRef.current = null
       }
       if (pauseOnHidden) {
-        document.removeEventListener("visibilitychange", handleVisibilityChange)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
       }
     }
   }, [enabled, pollIntervalMs, pauseOnHidden, executeFetch, sleep, condition])
@@ -259,10 +260,12 @@ export function usePollingWhen(
      * Manually trigger a fetch (bypasses deduplication for immediate fetch)
      * @param silent - Whether to fetch silently (default: false)
      */
-    refetch: useCallback(async (silent = false) => {
-      inFlightRef.current = false // Reset to allow immediate fetch
-      return executeFetch(silent)
-    }, [executeFetch]),
+    refetch: useCallback(
+      async (silent = false) => {
+        inFlightRef.current = false // Reset to allow immediate fetch
+        return executeFetch(silent)
+      },
+      [executeFetch]
+    ),
   }
 }
-

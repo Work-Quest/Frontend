@@ -7,6 +7,7 @@ import useBussinessUser from "@/hook/useBussinessUser";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { post } from "@/Api";
+import { getAxiosStatus } from "@/lib/apiError";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 
@@ -73,8 +74,8 @@ export function PartyMembers({ members, removeMember, canRemoveMember, isLoading
       }
 
       setSelectedMembers([]);
-    } catch (err: any) {
-      const status = err?.response?.status;
+    } catch (err: unknown) {
+      const status = getAxiosStatus(err);
       if (status === 403) {
         toast.error("Only the project owner can invite members.");
       } else {

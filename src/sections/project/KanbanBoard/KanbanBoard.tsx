@@ -1,4 +1,4 @@
-import type React from "react"
+import type React from 'react'
 import {
   DndContext,
   closestCorners,
@@ -8,20 +8,23 @@ import {
   useSensors,
   DragOverlay,
   MeasuringStrategy,
-} from "@dnd-kit/core"
-import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
-import { KanbanColumn } from "./KanbanColumn"
-import { Task, Tasks, TaskStatus } from "./types"
-import { UserStatus } from "@/types/User"
+  type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { KanbanColumn } from './KanbanColumn'
+import { Task, Tasks, TaskStatus } from './types'
+import { UserStatus } from '@/types/User'
 
 interface KanbanBoardProps {
   tasks: Tasks
   onAddTask: (column: TaskStatus, task: Task) => void
   onUpdateTask: (task: Task) => void
   onDeleteTask: (id: string) => void
-  onDragStart: (event: any) => void
-  onDragOver: (event: any) => void
-  onDragEnd: (event: any) => void
+  onDragStart: (event: DragStartEvent) => void
+  onDragOver: (event: DragOverEvent) => void
+  onDragEnd: (event: DragEndEvent) => void
   activeId: string | null
   findActiveTask: () => Task | null
   projectMember: UserStatus[]
@@ -29,10 +32,10 @@ interface KanbanBoardProps {
 
 const getColumnTitle = (id: string): string => {
   const titles: Record<string, string> = {
-    backlog: "Backlog",
-    todo: "TODO",
-    inProgress: "In Progress",
-    done: "Done",
+    backlog: 'Backlog',
+    todo: 'TODO',
+    inProgress: 'In Progress',
+    done: 'Done',
   }
   return titles[id] || id
 }
@@ -55,12 +58,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   )
 
   const activeTask = findActiveTask()
-  const activeAssignees =
-    activeTask?.assigneesName?.length ? activeTask.assigneesName : activeTask?.assignees ?? []
+  const activeAssignees = activeTask?.assigneesName?.length
+    ? activeTask.assigneesName
+    : (activeTask?.assignees ?? [])
 
   return (
     <div className="p-4">
@@ -97,7 +101,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
           {activeId ? (
             <div
               className="p-3 rounded-lg border border-brown border-dashed scale-105 bg-white/80 shadow-lg flex flex-col gap-2 transition-all"
-              style={{ boxShadow: "0 8px 12px rgba(0, 0, 0, 0.15)" }}
+              style={{ boxShadow: '0 8px 12px rgba(0, 0, 0, 0.15)' }}
             >
               <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">
                 {activeTask?.title}
@@ -106,27 +110,22 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               <div className="flex flex-wrap gap-2">
                 <div
                   className={`tag tag-priority ${
-                    activeTask?.priority === "Low"
-                      ? "tag-priority-low"
-                      : activeTask?.priority === "Medium"
-                        ? "tag-priority-medium"
-                        : activeTask?.priority === "High"
-                          ? "tag-priority-high"
-                          : "tag-priority-urgent"
+                    activeTask?.priority === 'Low'
+                      ? 'tag-priority-low'
+                      : activeTask?.priority === 'Medium'
+                        ? 'tag-priority-medium'
+                        : activeTask?.priority === 'High'
+                          ? 'tag-priority-high'
+                          : 'tag-priority-urgent'
                   }`}
                 >
                   {activeTask?.priority}
                 </div>
-                <div className="tag tag-iteration">
-                  {activeTask?.iteration}
-                </div>
+                <div className="tag tag-iteration">{activeTask?.iteration}</div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {activeAssignees.map((assignee) => (
-                  <div
-                    key={`${activeTask?.id ?? "task"}-${assignee}`}
-                    className="tag tag-name"
-                  >
+                  <div key={`${activeTask?.id ?? 'task'}-${assignee}`} className="tag tag-name">
                     {assignee}
                   </div>
                 ))}

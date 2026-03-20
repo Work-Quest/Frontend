@@ -34,7 +34,7 @@ function Home() {
       return {
         id: boss.id,
         bossName: boss.name,
-        img: `/assets/sprites/bosses/${configId}/idle.gif`,
+        img: `/assets/sprites/bosses/${configId}/profile.png`,
         defeated: true,
       }
     })

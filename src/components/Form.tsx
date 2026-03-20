@@ -1,62 +1,63 @@
-import { useState } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
-import { Button } from "./ui/button"
-import { FcGoogle } from "react-icons/fc"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
-import { Eye, EyeOff } from "lucide-react"
-import { useAuth } from "@/context/AuthContext"
-import { post} from "@/Api"
-import toast from 'react-hot-toast';
-import { useGoogleLogin } from "@react-oauth/google"
+import { useState } from 'react'
+import { useLocation, useNavigate, type Location } from 'react-router-dom'
+import { Button } from './ui/button'
+import { FcGoogle } from 'react-icons/fc'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Eye, EyeOff } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import { post } from '@/Api'
+import toast from 'react-hot-toast'
+import { useGoogleLogin } from '@react-oauth/google'
 
+type AuthLocationState = {
+  from?: { pathname?: string; search?: string; hash?: string }
+}
 
-function Form({ method = "register" }: { method?: "login" | "register" }) {
+function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const location = useLocation() as any
+  const location = useLocation() as Location<AuthLocationState>
   const [showPassword, setShowPassword] = useState(false)
   const { checkAuth } = useAuth()
 
-  const name = method === "login" ? "Login" : "Register"
+  const name = method === 'login' ? 'Login' : 'Register'
 
   const description =
-    method === "login"
+    method === 'login'
       ? "Welcome back, Let's get fun with your work!"
       : "Welcome, Let's make your own account!"
 
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   })
 
-  const [error, setError] = useState("")
+  const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
-    setError("")
+    setError('')
 
-    if (method === "register" && formData.password !== formData.confirmPassword) {
-      setError("Password not match")
+    if (method === 'register' && formData.password !== formData.confirmPassword) {
+      setError('Password not match')
       setLoading(false)
       return
     }
 
     try {
       // call api
-      const endpoint =
-      method === "login" ?  "/api/auth/login/" : "/api/auth/register/"
-      
+      const endpoint = method === 'login' ? '/api/auth/login/' : '/api/auth/register/'
 
       const request =
-        method === "login"
+        method === 'login'
           ? {
               email: formData.email,
               password: formData.password,
@@ -64,31 +65,31 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
           : {
               username: formData.name,
               password: formData.password,
-              email: formData.email 
+              email: formData.email,
             }
 
       const res = await post(endpoint, request)
-      console.log("SUCCESS:", res)
+      console.log('SUCCESS:', res)
 
       // After success
-      if (method === "login") {
+      if (method === 'login') {
         await checkAuth()
         const from = location?.state?.from as
           | { pathname?: string; search?: string; hash?: string }
           | undefined
-        const redirectTo = `${from?.pathname || "/home"}${from?.search || ""}${from?.hash || ""}`
+        const redirectTo = `${from?.pathname || '/home'}${from?.search || ''}${from?.hash || ''}`
         navigate(redirectTo, { replace: true })
-        toast.success("Login successful!")
+        toast.success('Login successful!')
       } else {
-        navigate("/login")
-        toast.success("Registration successful! Please login.")
+        navigate('/login')
+        toast.success('Registration successful! Please login.')
       }
       console.log(formData)
     } catch (err) {
-      if (method === "login") {
-        toast.error("Login failed. Please check your credentials.")
+      if (method === 'login') {
+        toast.error('Login failed. Please check your credentials.')
       } else {
-        toast.error("Registration failed. Please try again.")
+        toast.error('Registration failed. Please try again.')
       }
       console.error(err)
     } finally {
@@ -97,24 +98,24 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
   }
 
   const loginWithGoogle = useGoogleLogin({
-  onSuccess: async (tokenResponse) => {
-    console.log("Google Login Success:", tokenResponse)
-    // Send Google access token to your backend
-    await post("/api/auth/google/", {
-      access_token: tokenResponse.access_token,
-    })
+    onSuccess: async (tokenResponse) => {
+      console.log('Google Login Success:', tokenResponse)
+      // Send Google access token to your backend
+      await post('/api/auth/google/', {
+        access_token: tokenResponse.access_token,
+      })
 
-    await checkAuth()
-    const from = location?.state?.from as
-      | { pathname?: string; search?: string; hash?: string }
-      | undefined
-    const redirectTo = `${from?.pathname || "/home"}${from?.search || ""}${from?.hash || ""}`
-    navigate(redirectTo, { replace: true })
-  },
-  onError: () => {
-    console.log("Google Login Failed")
-  },
-})
+      await checkAuth()
+      const from = location?.state?.from as
+        | { pathname?: string; search?: string; hash?: string }
+        | undefined
+      const redirectTo = `${from?.pathname || '/home'}${from?.search || ''}${from?.hash || ''}`
+      navigate(redirectTo, { replace: true })
+    },
+    onError: () => {
+      console.log('Google Login Failed')
+    },
+  })
 
   return (
     <div>
@@ -123,18 +124,21 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
           <div className="w-full md:w-1/2 h-full left-0 top-0 absolute inline-flex justify-center items-center">
             <div className="flex-1 self-stretch px-[10%] inline-flex flex-col justify-center items-center gap-6">
               <div className="self-stretch flex flex-col justify-start items-center">
-                <img src="logo/favicon.svg" alt="logo" className="h-15" draggable="false"/>
+                <img src="logo/favicon.svg" alt="logo" className="h-15" draggable="false" />
                 <div className="self-stretch flex flex-col justify-start items-center">
                   <h2 className="self-stretch text-center justify-start !text-red">{name}</h2>
-                  <p className="self-stretch text-center justify-start !font-medium !text-lightBrown -mt-2">{description}</p>
+                  <p className="self-stretch text-center justify-start !font-medium !text-lightBrown -mt-2">
+                    {description}
+                  </p>
                 </div>
               </div>
               <div className="self-stretch flex flex-col justify-start items-center gap-8">
-                <Button 
+                <Button
                   type="button"
-                  variant="cream" 
+                  variant="cream"
                   className="self-stretch p-4 rounded-md inline-flex justify-center items-center gap-1.5"
-                  onClick={() => loginWithGoogle()}>
+                  onClick={() => loginWithGoogle()}
+                >
                   <FcGoogle />
                   {name} with Google
                 </Button>
@@ -149,7 +153,7 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                 </div>
                 <div className="self-stretch flex flex-col justify-start items-start gap-4">
                   <div className="self-stretch flex flex-col justify-start items-start gap-4 -mt-5">
-                    {method === "register" && (
+                    {method === 'register' && (
                       <div className="self-stretch flex flex-col justify-start items-start gap-1.5">
                         <Label className="self-stretch justify-start !text-sm">Name</Label>
                         <div className="relative w-full">
@@ -175,7 +179,7 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                         />
                       </div>
                     </div>
-                    {method === "register" ? (
+                    {method === 'register' ? (
                       <div className="self-stretch flex flex-row gap-2.5">
                         <div className="flex-1 flex flex-col justify-start items-start gap-1.5">
                           <Label className="self-stretch justify-start !text-sm">Password</Label>
@@ -184,7 +188,7 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                               name="password"
                               value={formData.password}
                               onChange={handleChange}
-                              type={showPassword ? "text" : "password"}
+                              type={showPassword ? 'text' : 'password'}
                               className="w-full p-2.5 pr-10 pl-3 !border-1 !border-brown font-['Baloo_2']"
                               placeholder="e.g. password1234"
                             />
@@ -198,13 +202,15 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                         </div>
 
                         <div className="flex-1 flex flex-col justify-start items-start gap-1.5">
-                          <Label className="self-stretch justify-start !text-sm">Confirm Password</Label>
+                          <Label className="self-stretch justify-start !text-sm">
+                            Confirm Password
+                          </Label>
                           <div className="relative w-full">
                             <Input
                               name="confirmPassword"
                               value={formData.confirmPassword}
                               onChange={handleChange}
-                              type={showPassword ? "text" : "password"}
+                              type={showPassword ? 'text' : 'password'}
                               className="w-full p-2.5 pr-10 pl-3 !border-1 !border-brown font-['Baloo_2']"
                               placeholder="e.g. password1234"
                             />
@@ -225,7 +231,7 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            type={showPassword ? "text" : "password"}
+                            type={showPassword ? 'text' : 'password'}
                             className="w-full p-2.5 pr-10 pl-3 !border-1 !border-brown font-['Baloo_2']"
                             placeholder="e.g. password1234"
                           />
@@ -238,9 +244,7 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                         </div>
                       </div>
                     )}
-                    {error && (
-                      <p className="text-red text-sm font-semibold">{error}</p>
-                    )}
+                    {error && <p className="text-red text-sm font-semibold">{error}</p>}
                   </div>
                 </div>
                 <Button
@@ -250,15 +254,15 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                   className="self-stretch p-4 bg-orange rounded-[10px] border-b-[3px] border-[#f76652] inline-flex justify-center items-center gap-2.5"
                 >
                   <div className="justify-start text-offWhite font-['Baloo_2']">
-                    {method === "login" ? "Login" : "Register"}
+                    {method === 'login' ? 'Login' : 'Register'}
                   </div>
                 </Button>
                 <div className="self-stretch text-center justify-start">
-                  {method === "login" ? (
+                  {method === 'login' ? (
                     <p className="text-darkBrown">
-                      Don't have an account?{" "}
+                      Don't have an account?{' '}
                       <span
-                        onClick={() => navigate("/register")}
+                        onClick={() => navigate('/register')}
                         className="cursor-pointer text-orange font-medium hover:underline hover:text-red"
                       >
                         Register now
@@ -266,9 +270,9 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
                     </p>
                   ) : (
                     <p className="text-darkBrown">
-                      Already have an account?{" "}
+                      Already have an account?{' '}
                       <span
-                        onClick={() => navigate("/login")}
+                        onClick={() => navigate('/login')}
                         className="cursor-pointer text-orange font-medium hover:underline hover:text-red"
                       >
                         Log in now
@@ -280,12 +284,7 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
             </div>
           </div>
           <div className="hidden md:flex md:w-1/2 h-full right-0 top-0 absolute bg-darkBrown items-center justify-center">
-            <img
-              src="/logo/logo.svg"
-              alt="logo"
-              className="w-full px-[30%]"
-              draggable="false"
-            />
+            <img src="/logo/logo.svg" alt="logo" className="w-full px-[30%]" draggable="false" />
           </div>
         </div>
       </form>

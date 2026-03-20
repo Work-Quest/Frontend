@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom"
 import { useRef } from "react"
-import LoadingBar from "react-top-loading-bar"
+import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar"
 import { Toaster } from "react-hot-toast"
 
 type MainLayoutProps = {
@@ -8,9 +8,8 @@ type MainLayoutProps = {
 }
 
 const MainLayout = ({ className = "" }: MainLayoutProps) => {
-  const loadingBarRef = useRef<any>(null)
-  // Expose globally so fetch/axios can control it
-  ;(window as any).loadingBarRef = loadingBarRef
+  const loadingBarRef = useRef<LoadingBarRef | null>(null)
+  window.loadingBarRef = loadingBarRef
   return (
     <div className={`flex flex-col min-h-screen ${className}`}>
       <Toaster position="bottom-left" reverseOrder={false} />

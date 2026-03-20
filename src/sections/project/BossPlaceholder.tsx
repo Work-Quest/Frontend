@@ -1,16 +1,16 @@
-import React from "react";
-import ProjectBattle from "./ProjectBattle";
-import { GameActionPayload } from "@/types/battleTypes";
-
+import React from 'react'
+import ProjectBattle from './ProjectBattle'
+import { GameActionPayload } from '@/types/battleTypes'
+import type { UserStatus } from '@/types/User'
 
 interface BossPlaceholderProps {
-  isVisible: boolean;
-  projectMembers: any;
-  payloadBatch: GameActionPayload[];
-  payloadBatchNonce: number;
-  bossRefreshNonce: number;
-  bossUpdate: { hp: number; maxHp: number };
-  bossUpdateNonce: number;
+  isVisible: boolean
+  projectMembers: UserStatus[]
+  payloadBatch: GameActionPayload[]
+  payloadBatchNonce: number
+  bossRefreshNonce: number
+  bossUpdate: { hp: number; maxHp: number }
+  bossUpdateNonce: number
 }
 
 const BossPlaceholder: React.FC<BossPlaceholderProps> = ({
@@ -24,7 +24,7 @@ const BossPlaceholder: React.FC<BossPlaceholderProps> = ({
 }) => (
   <div
     className={`overflow-hidden transition-all duration-500 ease-in-out ${
-      isVisible ? "h-82" : "h-10"
+      isVisible ? 'h-82' : 'h-10'
     }`}
   >
     <ProjectBattle
@@ -36,6 +36,6 @@ const BossPlaceholder: React.FC<BossPlaceholderProps> = ({
       bossUpdateNonce={bossUpdateNonce}
     />
   </div>
-);
+)
 
-export default BossPlaceholder;
+export default BossPlaceholder

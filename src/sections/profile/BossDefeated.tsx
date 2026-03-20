@@ -1,20 +1,20 @@
-import BadgeContainer from "@/components/BadgeContainer"
-import { useUserDefeatedBosses } from "@/hook/useUserDefeatedBosses"
-import { getBossConfigId } from "@/utils/bossMapping"
-import LoadingSpinner from "@/components/LoadingSpinner"
+import BadgeContainer from '@/components/BadgeContainer'
+import { useUserDefeatedBosses } from '@/hook/useUserDefeatedBosses'
+import { getBossConfigId } from '@/utils/bossMapping'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 interface BossDefeatedProps {
-  userId?: string;
+  userId?: string
 }
 
 export default function BossDefeated({ userId }: BossDefeatedProps) {
   const { defeatedBosses, loading, error } = useUserDefeatedBosses(userId)
 
-  // Map boss names to config IDs and generate idle gif paths with names
+  // Map boss names to config IDs and use static profile art (not idle animation)
   const bossBadges = defeatedBosses.map((boss) => {
     const configId = getBossConfigId(boss.name)
     return {
-      image: `/assets/sprites/bosses/${configId}/idle.gif`,
+      image: `/assets/sprites/bosses/${configId}/profile.png`,
       name: boss.name,
     }
   })

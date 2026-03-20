@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const logout = async () => {
-    await post<{}, any>('/api/auth/logout/', {})
+    await post<Record<string, never>, { message?: string }>('/api/auth/logout/', {})
     toast.success('Logged out successfully.')
     setIsAuthenticated(false)
     setUser(null)

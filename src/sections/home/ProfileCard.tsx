@@ -4,6 +4,7 @@ import type { UserProfile } from '@/types/User'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import { getAvatarProfilePath, getColorValueById } from '@/constants/avatar'
+import { TOTAL_BOSS_COUNT } from '@/config/battleConfig'
 
 type ProfileCardProps = {
   data: UserProfile
@@ -11,8 +12,10 @@ type ProfileCardProps = {
 }
 
 export default function ProfileCard({ data, user_id }: ProfileCardProps) {
-  const defeatedBosses = data.bossCollection?.filter((boss) => boss.defeated).length || 3
-  const totalBosses = data.bossCollection?.length || 7
+  const defeatedList = (data.bossCollection ?? []).filter((b) => b.defeated)
+  const defeatedCount = defeatedList.length
+  const visibleBosses = defeatedList.slice(0, 3)
+  const extraBossCount = Math.max(0, defeatedCount - 3)
   const navigate = useNavigate()
   const handleProfileClick = () => {
     if (user_id) {
@@ -27,7 +30,7 @@ export default function ProfileCard({ data, user_id }: ProfileCardProps) {
           {/* Profile Image */}
           <div className="w-[100px] h-[100px] relative">
             <div
-              className="w-full h-full rounded-[10px] border-[3px] border-[#faf9f6] overflow-hidden"
+              className="w-full h-full rounded-[10px] overflow-hidden"
               style={{ backgroundColor: getColorValueById(data.bgColorId) }}
             >
               <img
@@ -53,40 +56,43 @@ export default function ProfileCard({ data, user_id }: ProfileCardProps) {
 
             {/* Boss Collection Indicators */}
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Boss Circles */}
               <div className="flex items-center">
-                {/* Show up to 3 boss indicators */}
-                {Array.from({ length: Math.min(3, totalBosses) }, (_, index) => (
+                {visibleBosses.map((boss, index) => (
                   <div
-                    key={index}
-                    className={`w-[39px] h-[39px] rounded-full border-[3px] border-[#faf9f6] ${
-                      index < defeatedBosses
-                        ? index === 0
-                          ? 'bg-[#f6a9de]'
-                          : index === 1
-                            ? 'bg-[#938b80]'
-                            : 'bg-[#ff995a]'
-                        : 'bg-gray-400'
-                    } ${index > 0 ? '-ml-2' : ''}`}
-                    style={{ zIndex: 3 - index }}
+                    key={boss.id}
+                    className={`w-[39px] h-[39px] rounded-full overflow-hidden shrink-0 ${
+                      index > 0 ? '-ml-2' : ''
+                    }`}
+                    style={{ zIndex: visibleBosses.length - index }}
+                    title={boss.bossName}
                   >
-                    {data.bossCollection && data.bossCollection[index] && (
-                      <img
-                        src={data.bossCollection[index].img || '/placeholder.svg'}
-                        alt={`Boss ${index + 1}`}
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    )}
+                    <img
+                      src={boss.img || '/placeholder.svg'}
+                      alt={boss.bossName}
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => {
+                        const el = e.currentTarget
+                        el.onerror = null
+                        el.src = '/mockImg/boss1.svg'
+                      }}
+                    />
                   </div>
                 ))}
+                {extraBossCount > 0 && (
+                  <span
+                    className="-ml-1 pl-2 text-sm font-extrabold text-cream shrink-0"
+                    title={`${extraBossCount} more`}
+                  >
+                    +{extraBossCount}
+                  </span>
+                )}
               </div>
 
-              {/* Boss Count */}
               <div className="w-auto flex flex-col">
                 <p className="!text-offWhite text-base !font-medium">
-                  {defeatedBosses}/{totalBosses}
+                  {defeatedCount}/{TOTAL_BOSS_COUNT}
                 </p>
-                <p className="!text-cream !font-medium">Boss Defeated</p>
+                <p className="!text-cream !font-medium -mt-2">Boss Defeated</p>
               </div>
             </div>
           </div>

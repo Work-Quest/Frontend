@@ -33,6 +33,8 @@ export type UserStatus = {
   username: string
   hp: number
   status: MemberStatus
+  selected_character_id?: number
+  bg_color_id?: number
 }
 
 export interface PartyMember {

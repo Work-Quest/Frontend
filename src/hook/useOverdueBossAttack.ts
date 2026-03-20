@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import type { ProjectLogEntry } from "@/types/LogApi"
-import type { Tasks } from "@/sections/project/KanbanBoard/types"
-import type { BossAttackRequest, BossAttackResponse } from "@/types/GameApi"
-import type { GameActionPayload } from "@/types/battleTypes"
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { ProjectLogEntry } from '@/types/LogApi'
+import type { Tasks } from '@/sections/project/KanbanBoard/types'
+import type { BossAttackRequest, BossAttackResponse } from '@/types/GameApi'
+import type { GameActionPayload } from '@/types/battleTypes'
 
 type UseOverdueBossAttackParams = {
   projectId: string | null | undefined
@@ -51,8 +51,9 @@ export function useOverdueBossAttack({
   const attackedTaskIds = useMemo(() => {
     const set = new Set<string>()
     for (const l of logs ?? []) {
-      if (String(l.event_type).toUpperCase() !== "BOSS_ATTACK") continue
-      const taskId = String((l.payload as any)?.task_id ?? "")
+      if (String(l.event_type).toUpperCase() !== 'BOSS_ATTACK') continue
+      const raw = l.payload.task_id
+      const taskId = raw !== undefined && raw !== null ? String(raw) : ''
       if (taskId) set.add(taskId)
     }
     return set
@@ -88,20 +89,17 @@ export function useOverdueBossAttack({
 
     let cancelled = false
     setState((s) => ({ ...s, running: true, error: null }))
-
     ;(async () => {
       try {
         const res = await bossAttack(projectId, { task_id: overdueTaskId })
         if (cancelled) return
 
-        const actions: GameActionPayload[] = (res.result?.attacked_players ?? []).flatMap(
-          (p) => {
-            const uid = String(p.player_id)
-            const batch: GameActionPayload[] = [{ act: "BOSS_ATTACK_USER", userId: uid }]
-            if ((p.hp ?? 0) <= 0) batch.push({ act: "DIE", userId: uid })
-            return batch
-          }
-        )
+        const actions: GameActionPayload[] = (res.result?.attacked_players ?? []).flatMap((p) => {
+          const uid = String(p.player_id)
+          const batch: GameActionPayload[] = [{ act: 'BOSS_ATTACK_USER', userId: uid }]
+          if ((p.hp ?? 0) <= 0) batch.push({ act: 'DIE', userId: uid })
+          return batch
+        })
 
         if (actions.length > 0) enqueueActions(actions, overdueTaskId)
         bumpBossRefresh()
@@ -112,7 +110,7 @@ export function useOverdueBossAttack({
         setState({
           running: false,
           attackedTaskId: null,
-          error: e instanceof Error ? e.message : "Overdue boss attack failed",
+          error: e instanceof Error ? e.message : 'Overdue boss attack failed',
         })
       }
     })()
@@ -135,17 +133,3 @@ export function useOverdueBossAttack({
 }
 
 export default useOverdueBossAttack
-
-
-
-
-
-
-
-
-
-
-
-
-
-
