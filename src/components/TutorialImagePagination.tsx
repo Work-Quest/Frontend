@@ -16,30 +16,79 @@
    className?: string
  }
 
+function ChevronLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M15 18L9 12L15 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M9 18L15 12L9 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
  export default function TutorialImagePagination({
    items,
    reverse = false,
    className = "",
  }: TutorialImagePaginationProps) {
    const [activeIndex, setActiveIndex] = useState(0)
-
+    
    const safeItems = items.length > 0 ? items : []
    const activeItem = safeItems[activeIndex] ?? safeItems[0]
+
+  const isPrevDisabled = activeIndex <= 0
+  const isNextDisabled = activeIndex >= safeItems.length - 1
+
+  const goPrev = () => {
+    setActiveIndex((prev) => Math.max(prev - 1, 0))
+  }
+
+  const goNext = () => {
+    setActiveIndex((prev) => Math.min(prev + 1, safeItems.length - 1))
+  }
 
    if (!activeItem) return null
 
    return (
      <div
        className={cn(
-         "flex flex-col lg:justify-center lg:items-center justify-center items-center gap-8 lg:gap-12 max-w-6xl mx-auto",
-         reverse ? "lg:flex-row-reverse" : "lg:flex-row",
-         className,
+         "flex flex-col lg:items-center items-center gap-8 lg:gap-12 max-w-5xl mx-auto", className,
        )}
      >
        <div
          className={cn(
-           "flex flex-col justify-center items-center max-w-md lg:max-w-lg",
-           reverse ? "lg:items-end text-center lg:text-right" : "lg:items-start text-center lg:text-left",
+          "flex flex-col w-full",
+          reverse ? "items-end text-right" : "items-start text-left",
          )}
        >
          <h2 className="!text-red text-xl sm:text-2xl lg:text-3xl font-bold mb-4">{activeItem.title}</h2>
@@ -50,38 +99,65 @@
          <img
            src={activeItem.imageSrc}
            alt={activeItem.imageAlt}
-           className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-64 lg:h-64 xl:w-80 xl:h-80 object-contain"
+          className="w-full h-full"
          />
 
-         {/* Thumbnails pagination - click to change tutorial text/image */}
+        {/* Arrow pagination - switch tutorial text/image */}
          {safeItems.length > 1 && (
-           <div className={cn("mt-3 flex gap-3 justify-center", reverse ? "lg:justify-start" : "lg:justify-end")}>
-             {safeItems.map((item, idx) => {
-               const isActive = idx === activeIndex
-               return (
-                 <button
-                   key={`${item.title}-${idx}`}
-                   type="button"
-                   onClick={() => setActiveIndex(idx)}
-                   aria-label={`Tutorial step ${idx + 1}`}
-                   className={cn(
-                     "rounded-lg border-2 overflow-hidden transition-all",
-                     isActive ? "border-orange" : "border-transparent hover:border-veryLightBrown",
-                   )}
-                 >
-                   <img
-                     src={item.imageSrc}
-                     alt={item.imageAlt}
-                     className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain bg-offWhite/40"
-                   />
-                 </button>
-               )
-             })}
+          <div
+            className={cn(
+              "mt-3 flex items-center gap-3 justify-center",
+              reverse ? "lg:justify-start" : "lg:justify-end",
+            )}
+          >
+            <button
+              type="button"
+              onClick={goPrev}
+              disabled={isPrevDisabled}
+              aria-label="Previous tutorial step"
+              className={cn(
+                "rounded-full border transition-all p-2",
+                isPrevDisabled
+                  ? "border-veryLightBrown/50 text-veryLightBrown cursor-not-allowed"
+                  : "border-veryLightBrown hover:border-orange text-brown",
+              )}
+            >
+              <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={isNextDisabled}
+              aria-label="Next tutorial step"
+              className={cn(
+                "rounded-full border transition-all p-2",
+                isNextDisabled
+                  ? "border-veryLightBrown/50 text-veryLightBrown cursor-not-allowed"
+                  : "border-veryLightBrown hover:border-orange text-brown",
+              )}
+            >
+              <ChevronRightIcon className="w-5 h-5" />
+            </button>
+            
+            <div className="flex items-center gap-2" aria-label="Tutorial step indicator">
+              {safeItems.map((_, index) => {
+                const isActive = index === activeIndex
+                return (
+                  <div
+                    key={index}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-colors",
+                      isActive ? "bg-orange" : "bg-veryLightBrown",
+                    )}
+                    aria-hidden="true"
+                  />
+                )
+              })}
+            </div>
            </div>
          )}
        </div>
      </div>
    )
  }
-
-
