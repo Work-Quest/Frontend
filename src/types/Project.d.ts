@@ -10,6 +10,10 @@ export type Project = {
   deadline: string;            
   total_tasks: number;
   completed_tasks: number;
+  /** Current project boss display name (from API). */
+  boss_name?: string | null;
+  /** Sprite folder id, e.g. `b01` — matches `public/assets/sprites/bosses/{id}/`. */
+  boss_image?: string | null;
   deadline_decision?: "closed" | "continued" | null;
   deadline_decision_date?: string | null;
   };

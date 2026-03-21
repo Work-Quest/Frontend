@@ -1,6 +1,7 @@
 // src/sections/start-project/PartyMembers.tsx
 import { X } from 'lucide-react'
-import { getAvatarColor, getAvatarPath } from '@/lib/avatarConstants'
+import { getAvatarPath } from '@/lib/avatarConstants'
+import { getColorValueById } from '@/constants/avatar'
 import { PartyMember } from '@/types/User'
 import MultiCombobox from '@/components/ui/multicombobox'
 import useBussinessUser from '@/hook/useBussinessUser'
@@ -138,7 +139,7 @@ export function PartyMembers({
             <div
               className="w-10 h-10 rounded-full border-2 border-white shadow-sm flex items-center justify-center overflow-hidden shrink-0"
               style={{
-                backgroundColor: getAvatarColor(member.avatarBgColorId),
+                backgroundColor: getColorValueById(member.avatarBgColorId),
               }}
             >
               <img

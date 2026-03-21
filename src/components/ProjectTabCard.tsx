@@ -1,4 +1,6 @@
+import { useEffect, useMemo, useState } from 'react'
 import type { Project } from '@/types/Project'
+import { getBossProfileImageSrc } from '@/lib/bossProfileAsset'
 import {
   Dialog,
   DialogContent,
@@ -35,6 +37,16 @@ export default function ProjectTabCard({
 }: ProfileTabCardProps) {
   const completionPercentage = Math.round((project.completed_tasks / project.total_tasks) * 100)
   const navigate = useNavigate()
+  const [bossPortraitFailed, setBossPortraitFailed] = useState(false)
+
+  useEffect(() => {
+    setBossPortraitFailed(false)
+  }, [project.project_id, project.boss_name, project.boss_image])
+
+  const bossPortraitSrc = useMemo(() => {
+    if (bossPortraitFailed) return '/assets/sprites/bosses/b01/profile.png'
+    return getBossProfileImageSrc(project)
+  }, [bossPortraitFailed, project])
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -162,9 +174,10 @@ export default function ProjectTabCard({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
-                src="/placeholder.svg?height=40&width=40"
-                alt="boss"
-                className="w-10 h-10 rounded-lg"
+                src={bossPortraitSrc}
+                alt={project.boss_name ? `${project.boss_name} boss` : 'Boss'}
+                className="h-10 w-10 rounded-lg border border-veryLightBrown/60 bg-offWhite object-cover [image-rendering:pixelated]"
+                onError={() => setBossPortraitFailed(true)}
               />
               <div>
                 <p className="!font-semibold !text-brown">Boss Challenge</p>

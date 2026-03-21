@@ -221,7 +221,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
               </Button>
               <Button
                 type="submit"
-                className="!bg-blue !font-baloo2 !border-blue hover:!bg-blue-400"
+                variant="orange"
               >
                 Add Task
               </Button>
