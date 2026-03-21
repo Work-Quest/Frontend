@@ -316,6 +316,7 @@ const ProjectBattle = ({
           <div className="pointer-events-auto">
             <BattleResponsiveHud
               projectId={battleHudProjectId}
+              myProjectMemberId={myMemberId}
               bossPhase={battleHudPhase}
               showBossPhase={showBattleHudPhase}
             />

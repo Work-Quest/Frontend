@@ -135,7 +135,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           >
             {task.priority}
           </div>
-          <div className="tag tag-iteration">{task.iteration}</div>
         </div>
         <div className="flex flex-wrap gap-2">
           {(task.assigneesName?.length ? task.assigneesName : task.assignees).map(

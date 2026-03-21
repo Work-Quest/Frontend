@@ -17,7 +17,7 @@ type AuthLocationState = {
 function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const location = useLocation() as Location<AuthLocationState>
+  const location = useLocation()
   const [showPassword, setShowPassword] = useState(false)
   const { checkAuth } = useAuth()
 
@@ -80,9 +80,7 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
           persistAuthTokens(res.access, res.refresh)
         }
         await checkAuth()
-        const from = location?.state?.from as
-          | { pathname?: string; search?: string; hash?: string }
-          | undefined
+        const from = (location.state as AuthLocationState | null)?.from
         const redirectTo = `${from?.pathname || '/home'}${from?.search || ''}${from?.hash || ''}`
         navigate(redirectTo, { replace: true })
         toast.success('Login successful!\nWelcome back—loading your dashboard.')
@@ -118,9 +116,7 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
     }
 
       await checkAuth()
-      const from = location?.state?.from as
-        | { pathname?: string; search?: string; hash?: string }
-        | undefined
+      const from = (location.state as AuthLocationState | null)?.from
       const redirectTo = `${from?.pathname || '/home'}${from?.search || ''}${from?.hash || ''}`
       navigate(redirectTo, { replace: true })
       toast.success('Signed in with Google\nWelcome back—loading your dashboard.')

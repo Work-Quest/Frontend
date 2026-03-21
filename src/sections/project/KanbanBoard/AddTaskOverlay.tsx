@@ -80,7 +80,6 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
       id,
       title,
       priority,
-      iteration: null,
       assignees: selectedMembers,
       assigneesName: selectedMembers
         .map((memberId) => memberNameById.get(memberId) ?? memberId)

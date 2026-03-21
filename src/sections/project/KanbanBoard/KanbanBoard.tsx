@@ -121,7 +121,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                 >
                   {activeTask?.priority}
                 </div>
-                <div className="tag tag-iteration">{activeTask?.iteration}</div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {activeAssignees.map((assignee) => (

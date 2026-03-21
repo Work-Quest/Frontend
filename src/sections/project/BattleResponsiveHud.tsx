@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Backpack, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,6 +22,12 @@ import {
 import { cn } from '@/lib/utils'
 import { getInventoryItemIconSrc, INVENTORY_BAG_ICON_SRC } from '@/lib/inventoryItemAssets'
 import { useBattleInventory, type GroupedBattleItem } from '@/hook/useBattleInventory'
+import { useGame } from '@/hook/useGame'
+import { usePolling } from '@/hook/usePolling'
+import { POLLING_CONFIG } from '@/config/pollingConfig'
+import { extractEffectsFromGamePayload } from '@/lib/extractEffectsFromGamePayload'
+import type { StatusEffectEntry } from '@/types/GameApi'
+import { BattleStatusEffectIcon } from '@/components/battle/BattleStatusEffectIcon'
 
 function InventoryBagIcon({ className }: { className?: string }) {
   const [failed, setFailed] = useState(false)
@@ -88,6 +94,8 @@ function getInventoryTitleClass(category: GroupedBattleItem['colorCategory']) {
 
 type BattleResponsiveHudProps = {
   projectId: string | null | undefined
+  /** Used to pick the right row when API returns `{ members }`. */
+  myProjectMemberId?: string | null
   bossPhase?: number
   showBossPhase?: boolean
   className?: string
@@ -98,12 +106,64 @@ type BattleResponsiveHudProps = {
  */
 const BattleResponsiveHud: React.FC<BattleResponsiveHudProps> = ({
   projectId,
+  myProjectMemberId = null,
   bossPhase,
   showBossPhase = true,
 }) => {
   const { groupedItems, loadingItems, usingItemId, handleUseItem } = useBattleInventory(
     projectId ?? null
   )
+  const { getMyStatusEffects } = useGame(projectId ?? undefined)
+  const [statusEffects, setStatusEffects] = useState<StatusEffectEntry[]>([])
+
+  const refreshEffects = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!projectId) {
+        setStatusEffects([])
+        return
+      }
+      try {
+        const data = await getMyStatusEffects(projectId, opts?.silent)
+        setStatusEffects(extractEffectsFromGamePayload(data, myProjectMemberId))
+      } catch (error) {
+        console.error('Failed to fetch status effects:', error)
+      }
+    },
+    [projectId, myProjectMemberId, getMyStatusEffects]
+  )
+
+  usePolling(
+    refreshEffects,
+    {
+      pollIntervalMs: POLLING_CONFIG.effects.interval,
+      enabled: !!projectId,
+    },
+    [projectId, myProjectMemberId]
+  )
+
+  const groupedEffects = useMemo(() => {
+    const grouped = new Map<
+      string,
+      { effect: StatusEffectEntry; count: number; userEffectIds: string[] }
+    >()
+    statusEffects.forEach((effect, index) => {
+      const groupKey =
+        (effect.effect_id && String(effect.effect_id).trim()) ||
+        `${effect.effect_type}-${effect.effect_value}-${effect.user_effect_id ?? `idx-${index}`}`
+      const existing = grouped.get(groupKey)
+      if (existing) {
+        existing.count += 1
+        existing.userEffectIds.push(effect.user_effect_id)
+      } else {
+        grouped.set(groupKey, {
+          effect,
+          count: 1,
+          userEffectIds: [effect.user_effect_id],
+        })
+      }
+    })
+    return Array.from(grouped.entries()).map(([groupKey, value]) => ({ groupKey, ...value }))
+  }, [statusEffects])
 
   const showPhase = showBossPhase && bossPhase !== undefined && bossPhase !== null
 
@@ -124,7 +184,21 @@ const BattleResponsiveHud: React.FC<BattleResponsiveHudProps> = ({
           <span className="text-xs text-slate-500 sm:text-sm">Battle</span>
         )}
       </div>
-      <div className="shrink-0">
+      <div className="flex shrink-0 items-center gap-2">
+        {groupedEffects.length > 0 ? (
+          <div
+            className="inline-grid max-w-[min(90vw,520px)] gap-1 [grid-template-columns:repeat(4,auto)]"
+            aria-label="Active status effects"
+          >
+            {groupedEffects.map((grouped) => (
+              <BattleStatusEffectIcon
+                key={grouped.groupKey}
+                effect={grouped.effect}
+                stackCount={grouped.count}
+              />
+            ))}
+          </div>
+        ) : null}
         <Sheet>
           <SheetTrigger asChild>
             <button

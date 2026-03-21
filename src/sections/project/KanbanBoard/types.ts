@@ -7,7 +7,6 @@ export interface Task {
   priority: TaskPriority
   description: string | null
   deadline: string | null
-  iteration: string | null
   assignees: string[]
   assigneesName: string[]
   status: TaskStatus
@@ -66,7 +65,6 @@ export const mapTaskResponseToTask = (task: TaskResponse): Task => ({
   priority: PRIORITY_MAP[task.priority],
   description: task.description,
   deadline: task.deadline,
-  iteration: null,
   assignees: unknownArrayToStrings(task.assignees ?? task.assignee_ids),
   assigneesName: unknownArrayToStrings(task.assignees_name ?? task.assignee_names),
   status: task.status,
