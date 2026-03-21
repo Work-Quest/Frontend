@@ -6,7 +6,7 @@ import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Eye, EyeOff } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
-import { post} from "@/Api"
+import { persistAuthTokens, post } from "@/Api"
 import toast from 'react-hot-toast';
 import { useGoogleLogin } from "@react-oauth/google"
 
@@ -67,11 +67,17 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
               email: formData.email 
             }
 
-      const res = await post(endpoint, request)
+      const res = await post<
+        typeof request,
+        { username?: string; access?: string; refresh?: string }
+      >(endpoint, request)
       console.log("SUCCESS:", res)
 
       // After success
       if (method === "login") {
+        if (res.access && res.refresh) {
+          persistAuthTokens(res.access, res.refresh)
+        }
         await checkAuth()
         const from = location?.state?.from as
           | { pathname?: string; search?: string; hash?: string }
@@ -100,9 +106,15 @@ function Form({ method = "register" }: { method?: "login" | "register" }) {
   onSuccess: async (tokenResponse) => {
     console.log("Google Login Success:", tokenResponse)
     // Send Google access token to your backend
-    await post("/api/auth/google/", {
+    const googleRes = await post<
+      { access_token: string },
+      { username?: string; access?: string; refresh?: string }
+    >("/api/auth/google/", {
       access_token: tokenResponse.access_token,
     })
+    if (googleRes.access && googleRes.refresh) {
+      persistAuthTokens(googleRes.access, googleRes.refresh)
+    }
 
     await checkAuth()
     const from = location?.state?.from as
