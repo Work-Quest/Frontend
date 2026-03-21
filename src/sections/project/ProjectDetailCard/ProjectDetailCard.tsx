@@ -77,7 +77,7 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="min-w-[140px] bg-offWhite border-lightBrown font-['Baloo_2']"
+              className="min-w-[140px] bg-offWhite border-lightBrown font-baloo2"
             >
               <DropdownMenuItem
                 className="cursor-pointer focus:bg-cream"

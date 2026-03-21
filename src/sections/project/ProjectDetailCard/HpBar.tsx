@@ -18,18 +18,18 @@ const HpBar = ({ label, current, max, color }: Props) => {
   return (
     <div className="flex w-full min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
       <div className="flex min-w-0 shrink-0 items-baseline justify-between gap-2 sm:block sm:w-[5.5rem] sm:shrink-0">
-        <div className="truncate text-xs font-bold text-darkBrown font-['Baloo_2'] sm:text-sm">
+        <div className="truncate text-xs font-bold text-darkBrown font-baloo2 sm:text-sm">
           {label}
         </div>
         <div className="shrink-0 text-right tabular-nums -mt-2 sm:text-left">
           <span
-            className={`text-xs font-bold font-['Baloo_2'] sm:text-sm ${
+            className={`text-xs font-bold font-baloo2 sm:text-sm ${
               color === 'green' ? 'text-green' : 'text-orange'
             }`}
           >
             {Math.round(safeCurrent)}
           </span>
-          <span className="text-xs font-medium text-darkBrown font-['Baloo_2'] sm:text-sm">
+          <span className="text-xs font-medium text-darkBrown font-baloo2 sm:text-sm">
             /{Math.round(displayMax)}
           </span>
         </div>

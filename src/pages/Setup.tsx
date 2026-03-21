@@ -191,7 +191,7 @@ function Setup() {
                     value={formData.displayName}
                     onChange={handleChange}
                     placeholder="Enter your display name"
-                    className="w-full p-3 border-brown font-['Baloo_2']"
+                    className="w-full p-3 border-brown font-baloo2"
                     required
                   />
                 </div>
@@ -201,7 +201,7 @@ function Setup() {
               <div className="flex flex-col gap-1.5">
                 <Label className="text-sm font-bold text-darkBrown">Adventurer Tag</Label>
                 <div className="flex w-full">
-                  <span className="flex items-center rounded-l-lg border-2 border-y border-l border-brown bg-lightBrown/30 px-4 font-['Baloo_2'] text-darkBrown">
+                  <span className="flex items-center rounded-l-lg border-2 border-y border-l border-brown bg-lightBrown/30 px-4 font-baloo2 text-darkBrown">
                     @
                   </span>
                   <div className="flex-1">
@@ -218,7 +218,7 @@ function Setup() {
                         })
                       }
                       placeholder="Enter your unique username"
-                      className="w-full p-3 border-brown border-l-0 rounded-l-none font-['Baloo_2']"
+                      className="w-full p-3 border-brown border-l-0 rounded-l-none font-baloo2"
                       required
                     />
                   </div>

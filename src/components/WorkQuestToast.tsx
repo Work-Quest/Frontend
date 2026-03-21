@@ -98,7 +98,7 @@ export function WorkQuestToast({
   return (
     <div
       className={cn(
-        "relative flex w-[min(100vw-2rem,22rem)] flex-col overflow-hidden rounded-xl border border-darkBrown/10 bg-offWhite font-['Baloo_2'] shadow-[0_4px_24px_rgba(61,55,48,0.12)] transition-all duration-300 ease-[cubic-bezier(0.21,1.02,0.73,1)]",
+        "relative flex w-[min(100vw-2rem,22rem)] flex-col overflow-hidden rounded-xl border border-darkBrown/10 bg-offWhite font-baloo2 shadow-[0_4px_24px_rgba(61,55,48,0.12)] transition-all duration-300 ease-[cubic-bezier(0.21,1.02,0.73,1)]",
         t.visible
           ? 'translate-y-0 scale-100 opacity-100'
           : 'pointer-events-none -translate-y-2 scale-95 opacity-0'
@@ -107,7 +107,7 @@ export function WorkQuestToast({
     >
       <button
         type="button"
-        className="pointer-events-auto absolute right-2 top-2 z-20 flex h-9 w-9 items-center justify-center rounded-lg font-['Baloo_2'] text-xl leading-none text-brown/50 transition-colors hover:bg-cream hover:text-darkBrown active:scale-95"
+        className="pointer-events-auto absolute right-2 top-2 z-20 flex h-9 w-9 items-center justify-center rounded-lg font-baloo2 text-xl leading-none text-brown/50 transition-colors hover:bg-cream hover:text-darkBrown active:scale-95"
         aria-label="Close"
         onClick={() => hotToast.dismiss(t.id)}
       >

@@ -38,7 +38,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
     >
       <div className="flex items-center gap-2 mb-3 min-w-0">
         <h3
-          className="min-w-0 flex-1 !text-sm !leading-tight !line-clamp-1 !overflow-hidden text-darkBrown !font-medium font-['Baloo_2']"
+          className="min-w-0 flex-1 !text-sm !leading-tight !line-clamp-1 !overflow-hidden text-darkBrown !font-medium font-baloo2"
           title={title}
         >
           {title}

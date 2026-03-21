@@ -163,7 +163,7 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full pl-10 p-2.5 !border-1 !border-brown font-['Baloo_2']"
+                            className="w-full pl-10 p-2.5 !border-1 !border-brown font-baloo2"
                             placeholder="e.g. John"
                           />
                         </div>
@@ -176,7 +176,7 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
-                          className="w-full pl-10 p-2.5 !border-1 !border-brown font-['Baloo_2']"
+                          className="w-full pl-10 p-2.5 !border-1 !border-brown font-baloo2"
                           placeholder="e.g. example@gmail.com"
                         />
                       </div>
@@ -191,7 +191,7 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
                               value={formData.password}
                               onChange={handleChange}
                               type={showPassword ? 'text' : 'password'}
-                              className="w-full p-2.5 pr-10 pl-3 !border-1 !border-brown font-['Baloo_2']"
+                              className="w-full p-2.5 pr-10 pl-3 !border-1 !border-brown font-baloo2"
                               placeholder="e.g. password1234"
                             />
                             <div
@@ -213,7 +213,7 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
                               value={formData.confirmPassword}
                               onChange={handleChange}
                               type={showPassword ? 'text' : 'password'}
-                              className="w-full p-2.5 pr-10 pl-3 !border-1 !border-brown font-['Baloo_2']"
+                              className="w-full p-2.5 pr-10 pl-3 !border-1 !border-brown font-baloo2"
                               placeholder="e.g. password1234"
                             />
                             <div
@@ -234,7 +234,7 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
                             value={formData.password}
                             onChange={handleChange}
                             type={showPassword ? 'text' : 'password'}
-                            className="w-full p-2.5 pr-10 pl-3 !border-1 !border-brown font-['Baloo_2']"
+                            className="w-full p-2.5 pr-10 pl-3 !border-1 !border-brown font-baloo2"
                             placeholder="e.g. password1234"
                           />
                           <div
@@ -255,7 +255,7 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
                   disabled={loading}
                   className="self-stretch p-4 bg-orange rounded-[10px] border-b-[3px] border-[#f76652] inline-flex justify-center items-center gap-2.5"
                 >
-                  <div className="justify-start text-offWhite font-['Baloo_2']">
+                  <div className="justify-start text-offWhite font-baloo2">
                     {method === 'login' ? 'Login' : 'Register'}
                   </div>
                 </Button>

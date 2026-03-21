@@ -137,23 +137,23 @@ const BattleResponsiveHud: React.FC<BattleResponsiveHudProps> = ({
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="flex h-full max-h-[100dvh] w-[min(100vw-1rem,300px)] flex-col gap-0 overflow-hidden !border-l-4 !border-brown !bg-cream !p-0 !font-['Baloo_2'] !text-darkBrown shadow-[0_4px_24px_rgba(61,55,48,0.18)] [&>button]:!rounded-lg [&>button]:!text-brown/50 [&>button]:hover:!bg-offWhite [&>button]:hover:!text-darkBrown"
+            className="flex h-full max-h-[100dvh] w-[min(100vw-1rem,300px)] flex-col gap-0 overflow-hidden !border-l-4 !border-brown !bg-cream !p-0 !font-baloo2 !text-darkBrown shadow-[0_4px_24px_rgba(61,55,48,0.18)] [&>button]:!rounded-lg [&>button]:!text-brown/50 [&>button]:hover:!bg-offWhite [&>button]:hover:!text-darkBrown"
           >
             <SheetHeader className="shrink-0 !bg-offWhite/80">
-              <SheetTitle className="!border-b-2 !border-veryLightBrown !pb-2 !font-['Baloo_2'] !text-xl !font-extrabold !tracking-tight !text-darkBrown !normal-case">
+              <SheetTitle className="!border-b-2 !border-veryLightBrown !pb-2 !font-baloo2 !text-xl !font-extrabold !tracking-tight !text-darkBrown !normal-case">
                 Inventory
               </SheetTitle>
-              <SheetDescription className="!mt-1 !font-['Baloo_2'] !text-xs !font-medium !normal-case !text-brown/80">
+              <SheetDescription className="!mt-1 !font-baloo2 !text-xs !font-medium !normal-case !text-brown/80">
                 Select an item to use in battle
               </SheetDescription>
             </SheetHeader>
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 [-webkit-overflow-scrolling:touch]">
               {loadingItems ? (
-                <div className="py-4 text-center text-sm !text-brown/70 !font-['Baloo_2']">
+                <div className="py-4 text-center text-sm !text-brown/70 !font-baloo2">
                   Loading items...
                 </div>
               ) : groupedItems.length === 0 ? (
-                <div className="py-4 text-center text-sm !text-brown/70 !font-['Baloo_2']">
+                <div className="py-4 text-center text-sm !text-brown/70 !font-baloo2">
                   No items in inventory
                 </div>
               ) : (
@@ -174,18 +174,18 @@ const BattleResponsiveHud: React.FC<BattleResponsiveHudProps> = ({
                           size="sm"
                           font="normal"
                           className={cn(
-                            "!font-['Baloo_2'] !text-darkBrown !rounded-lg",
+                            "!font-baloo2 !text-darkBrown !rounded-lg",
                             index < groupedItems.length - 1 ? 'mb-2' : 'mb-2 pb-2'
                           )}
                         >
                           <InventoryItemThumbnail itemName={groupedItem.name} />
                           <ItemContent>
                             <ItemTitle
-                              className={`!font-['Baloo_2'] !text-sm !font-extrabold !leading-tight ${titleClass}`}
+                              className={`!font-baloo2 !text-sm !font-extrabold !leading-tight ${titleClass}`}
                             >
                               {displayName}
                             </ItemTitle>
-                            <ItemDescription className="!font-['Baloo_2'] !text-xs !font-medium !text-brown/85 !leading-snug">
+                            <ItemDescription className="!font-baloo2 !text-xs !font-medium !text-brown/85 !leading-snug">
                               {groupedItem.description || 'No description'}
                             </ItemDescription>
                           </ItemContent>

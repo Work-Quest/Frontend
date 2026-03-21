@@ -50,7 +50,7 @@ export default function ProjectTabCard({
                   style={{ width: `${completionPercentage}%` }}
                 ></div>
               </div>
-              <span className="text-xs text-brown/70 font-['Baloo_2']">
+              <span className="text-xs text-brown/70 font-baloo2">
                 {completionPercentage}%
               </span>
             </div>
@@ -173,7 +173,7 @@ export default function ProjectTabCard({
             </div>
             <Button
               variant="warning"
-              className="!bg-orange hover:!bg-orange/90 hover:!outline-none !font-['Baloo_2']"
+              className="!bg-orange hover:!bg-orange/90 hover:!outline-none !font-baloo2"
               onClick={() => {
                 if (project.status === 'Done') {
                   toast.error(

@@ -22,7 +22,7 @@ type Profile = {
 }
 
 const inputStyle =
-  "w-full rounded-lg !border-brown !border-2 px-4 py-3 font-['Baloo_2'] text-darkBrown placeholder:text-brown/50 focus:outline-none focus:ring-2 focus:ring-orange/50 focus:!border-orange !bg-cream transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+  "w-full rounded-lg !border-brown !border-2 px-4 py-3 font-baloo2 text-darkBrown placeholder:text-brown/50 focus:outline-none focus:ring-2 focus:ring-orange/50 focus:!border-orange !bg-cream transition-all disabled:opacity-70 disabled:cursor-not-allowed"
 
 export default function EditProfile() {
   const navigate = useNavigate()
@@ -75,10 +75,10 @@ export default function EditProfile() {
     <div className="min-h-screen bg-gradient-to-b from-cream/50 via-offWhite to-cream/30 flex flex-col items-center px-4 pt-10 pb-28">
       <div className="w-full max-w-2xl flex flex-col gap-8">
         <header className="text-center space-y-1">
-          <h1 className="!text-red !font-extrabold text-3xl sm:text-4xl font-['Baloo_2'] tracking-tight">
+          <h1 className="!text-red !font-extrabold text-3xl sm:text-4xl font-baloo2 tracking-tight">
             Edit Profile
           </h1>
-          <p className="text-brown/80 text-sm font-['Baloo_2']">
+          <p className="text-brown/80 text-sm font-baloo2">
             Customize your adventurer identity
           </p>
         </header>
@@ -88,7 +88,7 @@ export default function EditProfile() {
             <div className="w-10 h-10 rounded-xl bg-orange/15 flex items-center justify-center">
               <User className="w-5 h-5 text-orange" />
             </div>
-            <h2 className="font-['Baloo_2'] font-extrabold text-darkBrown text-xl">Profile Info</h2>
+            <h2 className="font-baloo2 font-extrabold text-darkBrown text-xl">Profile Info</h2>
           </div>
 
           <div className="flex flex-col gap-6">
@@ -109,11 +109,11 @@ export default function EditProfile() {
                   }}
                 />
               </div>
-              <p className="text-xs text-brown/60 font-['Baloo_2']">Preview</p>
+              <p className="text-xs text-brown/60 font-baloo2">Preview</p>
             </div>
 
             <div className="w-full space-y-2">
-              <label className="text-sm font-bold text-darkBrown font-['Baloo_2']">Avatar</label>
+              <label className="text-sm font-bold text-darkBrown font-baloo2">Avatar</label>
               <div className="flex flex-wrap gap-2">
                 {AVATAR_IDS.map((id) => (
                   <button
@@ -144,7 +144,7 @@ export default function EditProfile() {
             </div>
 
             <div className="w-full space-y-2">
-              <label className="text-sm font-bold text-darkBrown font-['Baloo_2']">
+              <label className="text-sm font-bold text-darkBrown font-baloo2">
                 Background Color
               </label>
               <div className="flex flex-wrap gap-2">
@@ -167,7 +167,7 @@ export default function EditProfile() {
             </div>
 
             <div className="w-full space-y-2">
-              <label className="text-sm font-bold text-darkBrown font-['Baloo_2']">
+              <label className="text-sm font-bold text-darkBrown font-baloo2">
                 Display Name
               </label>
               <input
@@ -180,9 +180,9 @@ export default function EditProfile() {
             </div>
 
             <div className="w-full space-y-2">
-              <label className="text-sm font-bold text-darkBrown font-['Baloo_2']">Username</label>
+              <label className="text-sm font-bold text-darkBrown font-baloo2">Username</label>
               <div className="flex">
-                <span className="flex items-center rounded-l-lg border-y-2 border-l-2 border-brown bg-veryLightBrown/50 px-4 font-['Baloo_2'] text-darkBrown">
+                <span className="flex items-center rounded-l-lg border-y-2 border-l-2 border-brown bg-veryLightBrown/50 px-4 font-baloo2 text-darkBrown">
                   @
                 </span>
                 <input

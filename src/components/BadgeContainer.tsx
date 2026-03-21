@@ -31,7 +31,7 @@ export default function BadgeContainer({
 
   return (
     <div className="flex flex-col gap-3 p-4 border-2 rounded-lg border-veryLightBrown">
-      <p className="!text-2xl font-bold font-['Baloo_2'] text-darkBrown">{title}</p>
+      <p className="!text-2xl font-bold font-baloo2 text-darkBrown">{title}</p>
       <div>
         {previewBadges.length > 0 ? (
           <TooltipProvider>
@@ -52,7 +52,7 @@ export default function BadgeContainer({
                       />
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent className="!font-['Baloo_2'] !bg-darkBrown !text-white !border-none !z-50 !px-3 !py-1.5 !rounded-md">
+                  <TooltipContent className="!font-baloo2 !bg-darkBrown !text-white !border-none !z-50 !px-3 !py-1.5 !rounded-md">
                     <p className="!text-white !text-sm">{badge.description || badge.name}</p>
                   </TooltipContent>
                 </Tooltip>
@@ -60,13 +60,13 @@ export default function BadgeContainer({
             </div>
           </TooltipProvider>
         ) : (
-          <p className="!text-gray-500 font-['Baloo_2'] text-sm">No badges available</p>
+          <p className="!text-gray-500 font-baloo2 text-sm">No badges available</p>
         )}
       </div>
       {onViewAll && (
         <Button
           variant="default"
-          className="!font-bold w-full font-['Baloo_2'] !text-sm !py-2"
+          className="!font-bold w-full font-baloo2 !text-sm !py-2"
           onClick={onViewAll}
         >
           {buttonText}

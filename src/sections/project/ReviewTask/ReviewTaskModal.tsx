@@ -139,19 +139,19 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
       <DialogContent
         variant="normal"
         showCloseButton
-        className="!w-[66.666vw] !min-w-[320px] !max-w-[95vw] h-[80vh] min-h-[420px] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col font-['Baloo_2']"
+        className="!w-[66.666vw] !min-w-[320px] !max-w-[95vw] h-[80vh] min-h-[420px] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col font-baloo2"
       >
         <div className="flex flex-col flex-1 min-h-0 rounded-lg overflow-hidden bg-offWhite/90">
           <DialogTitle className="sr-only">Review Task</DialogTitle>
           <div className="flex items-center justify-between px-6 py-4 border-b border-darkBrown/10 shrink-0">
-            <h2 className="text-2xl font-bold text-darkBrown font-['Baloo_2']">Review Task</h2>
+            <h2 className="text-2xl font-bold text-darkBrown font-baloo2">Review Task</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0 flex-1 min-h-0">
             {/* Left: 3 Latest Logs + or + Other Logs */}
             <div className="flex flex-col min-h-0 overflow-hidden">
               <div className="shrink-0 px-6 pt-6 pb-3">
-                <h3 className="!text-xl !font-medium text-darkBrown font-['Baloo_2']">
+                <h3 className="!text-xl !font-medium text-darkBrown font-baloo2">
                   3 Latest Logs
                 </h3>
               </div>
@@ -176,18 +176,18 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
 
                   <div className="flex items-center gap-2 shrink-0 my-2">
                     <div className="flex-1 h-px bg-darkBrown/20" />
-                    <span className="text-darkBrown/70 text-sm font-['Baloo_2']">or</span>
+                    <span className="text-darkBrown/70 text-sm font-baloo2">or</span>
                     <div className="flex-1 h-px bg-darkBrown/20" />
                   </div>
 
-                  <h3 className="!text-xl !font-medium text-darkBrown mt-4 mb-2 font-['Baloo_2']">
+                  <h3 className="!text-xl !font-medium text-darkBrown mt-4 mb-2 font-baloo2">
                     Other Logs
                   </h3>
                   <Select value={selectedUsername} onValueChange={handleSelectUsername}>
-                    <SelectTrigger className="w-full border-darkBrown/20 text-darkBrown bg-white font-['Baloo_2']">
+                    <SelectTrigger className="w-full border-darkBrown/20 text-darkBrown bg-white font-baloo2">
                       <SelectValue placeholder="Select by username" />
                     </SelectTrigger>
-                    <SelectContent className="font-['Baloo_2']">
+                    <SelectContent className="font-baloo2">
                       {uniqueUsernames.map((username) => (
                         <SelectItem key={username} value={username}>
                           {username}
@@ -199,7 +199,7 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
                   {selectedSource === 'other' && selectedUsername && (
                     <div className="mt-3 space-y-3">
                       {filteredLogsByUsername.length === 0 ? (
-                        <p className="text-darkBrown/70 text-sm text-center py-4 font-['Baloo_2']">
+                        <p className="text-darkBrown/70 text-sm text-center py-4 font-baloo2">
                           No logs found for {selectedUsername}
                         </p>
                       ) : (
@@ -227,7 +227,7 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
 
             {/* Right: History */}
             <div className="flex flex-col min-h-0 overflow-hidden bg-cream/40">
-              <h3 className="!text-xl !font-medium text-darkBrown shrink-0 px-6 py-4 font-['Baloo_2']">
+              <h3 className="!text-xl !font-medium text-darkBrown shrink-0 px-6 py-4 font-baloo2">
                 History
               </h3>
               <div className="flex-1 min-h-0 overflow-hidden px-4 pb-4">
@@ -252,7 +252,7 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
           <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-darkBrown/10 shrink-0">
             <Button
               variant="orange"
-              className="px-6 font-['Baloo_2']"
+              className="px-6 font-baloo2"
               disabled={!projectId || submitting || !selectedLogId || !reviewText.trim()}
               onClick={handleSubmitReview}
             >
@@ -285,7 +285,7 @@ function LatestLogCard({
 
   return (
     <div
-      className={`rounded-lg border p-4 flex flex-col gap-2 font-['Baloo_2'] cursor-pointer ${
+      className={`rounded-lg border p-4 flex flex-col gap-2 font-baloo2 cursor-pointer ${
         isHighlighted ? 'bg-orange/10 border-orange/30' : 'bg-white/80 border-darkBrown/5'
       }`}
       onClick={onSelect}
@@ -298,7 +298,7 @@ function LatestLogCard({
         {log.participants.map((name, i) => (
           <span
             key={`${log.id}-${i}`}
-            className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-['Baloo_2'] !bg-orange"
+            className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-baloo2 !bg-orange"
           >
             {name}
           </span>
@@ -309,7 +309,7 @@ function LatestLogCard({
           placeholder="Review your friend..."
           value={reviewValue ?? ''}
           onChange={(e) => onReviewChange?.(e.target.value)}
-          className="mt-2 border-orange/50 bg-white font-['Baloo_2'] text-darkBrown placeholder:text-darkBrown/50"
+          className="mt-2 border-orange/50 bg-white font-baloo2 text-darkBrown placeholder:text-darkBrown/50"
           rows={2}
         />
       )}
@@ -336,7 +336,7 @@ function HistoryCard({
       : entry.comment
 
   return (
-    <div className="rounded-lg bg-offWhite border border-lightBrown/10 p-4 flex flex-col gap-2 font-['Baloo_2']">
+    <div className="rounded-lg bg-offWhite border border-lightBrown/10 p-4 flex flex-col gap-2 font-baloo2">
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-bold text-darkBrown text-base">{entry.title}</span>
         <span className="text-darkBrown/70 text-sm shrink-0">{timeAgo}</span>
@@ -346,7 +346,7 @@ function HistoryCard({
           {entry.participants.map((name, i) => (
             <span
               key={`${entry.id}-${i}`}
-              className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-['Baloo_2'] !bg-orange"
+              className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-baloo2 !bg-orange"
             >
               {name}
             </span>
@@ -354,7 +354,7 @@ function HistoryCard({
         </div>
         <div className="flex items-center gap-2">
           review by
-          <span className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-['Baloo_2'] !bg-green">
+          <span className="tag tag-name !text-sm px-2 py-0.5 !rounded-sm font-baloo2 !bg-green">
             {entry.reviewer}
           </span>
         </div>
@@ -366,7 +366,7 @@ function HistoryCard({
             <button
               type="button"
               onClick={onToggleExpand}
-              className="!ml-1 !text-darkBrown !underline hover:!text-blue-800 font-['Baloo_2'] !bg-transparent !border-none !p-0 !m-0"
+              className="!ml-1 !text-darkBrown !underline hover:!text-blue-800 font-baloo2 !bg-transparent !border-none !p-0 !m-0"
             >
               {isExpanded ? 'see less' : 'see more'}
             </button>

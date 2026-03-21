@@ -125,7 +125,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
             <div className="space-y-2">
               <Label
                 htmlFor="title"
-                className="font-['Baloo_2'] text-darkBrown"
+                className="font-baloo2 text-darkBrown"
               >
                 Title
               </Label>
@@ -135,14 +135,14 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Task title"
                 required
-                className="font-['Baloo_2'] text-darkBrown"
+                className="font-baloo2 text-darkBrown"
               />
             </div>
 
             <div className="space-y-2">
               <Label
                 htmlFor="priority"
-                className="font-['Baloo_2'] text-darkBrown"
+                className="font-baloo2 text-darkBrown"
               >
                 Priority
               </Label>
@@ -153,7 +153,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
                 <SelectTrigger
                   className={`
                   w-full
-                  !font-['Baloo_2']
+                  !font-baloo2
                   !bg-offWhite
                   text-darkBrown
                   !border
@@ -168,7 +168,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
                 >
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
-                <SelectContent className="font-['Baloo_2'] bg-offWhite text-darkBrown border-lightBrown">
+                <SelectContent className="font-baloo2 bg-offWhite text-darkBrown border-lightBrown">
                   <SelectItem value="Low" className="hover:!bg-cream">
                     Low
                   </SelectItem>
@@ -187,7 +187,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
             <div className="space-y-2">
               <Label
                 htmlFor="Deadline"
-                className="font-['Baloo_2'] text-darkBrown"
+                className="font-baloo2 text-darkBrown"
               >
                 Deadline
               </Label>
@@ -196,7 +196,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="font-['Baloo_2'] text-darkBrown"
+                className="font-baloo2 text-darkBrown"
                 required
               />
             </div>
@@ -214,14 +214,14 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({
               <Button
                 type="button"
                 variant="outline"
-                className="!bg-offWhite !border-darkBrown !font-['Baloo_2'] hover:!bg-cream"
+                className="!bg-offWhite !border-darkBrown !font-baloo2 hover:!bg-cream"
                 onClick={() => setOpen(false)}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="!bg-blue !font-['Baloo_2'] !border-blue hover:!bg-blue-400"
+                className="!bg-blue !font-baloo2 !border-blue hover:!bg-blue-400"
               >
                 Add Task
               </Button>

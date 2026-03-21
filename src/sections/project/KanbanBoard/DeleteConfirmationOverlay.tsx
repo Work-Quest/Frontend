@@ -27,10 +27,10 @@ export const DeleteConfirmationOverlay: React.FC<DeleteConfirmationOverlayProps>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-end">
-          <Button variant="outline" onClick={onCancel} className="!bg-offWhite !border-lightBrown !text-darkBrown hover:!bg-cream !font-['Baloo_2']">
+          <Button variant="outline" onClick={onCancel} className="!bg-offWhite !border-lightBrown !text-darkBrown hover:!bg-cream !font-baloo2">
             Cancel
           </Button>
-          <Button variant="destructive" onClick={onConfirm} className="!bg-red hover:!bg-red-500 !font-['Baloo_2']">
+          <Button variant="destructive" onClick={onConfirm} className="!bg-red hover:!bg-red-500 !font-baloo2">
             Delete
           </Button>
         </DialogFooter>

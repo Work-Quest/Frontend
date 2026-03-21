@@ -107,7 +107,7 @@ function Leaderboard({ user }: LeaderboardProps) {
                         <h3 className="-mb-2 line-clamp-1">{i.name}</h3>
                         <button
                           onClick={() => handleProfileClick(i.user_id)}
-                          className="text-lightBrown !p-0 text-base font-medium font-['Baloo_2'] hover:underline cursor-pointer"
+                          className="text-lightBrown !p-0 text-base font-medium font-baloo2 hover:underline cursor-pointer"
                         >
                           @{i.username}
                         </button>

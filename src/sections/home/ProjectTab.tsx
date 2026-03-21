@@ -195,7 +195,7 @@ export default function ProjectTab({
                   value={filters.owner || "all"}
                   onValueChange={(value) => updateOwnerFilter(value === "all" ? null : value)}
                 >
-                  <SelectTrigger className="w-full !bg-offWhite !border-veryLightBrown !border-2 text-brown focus:!outline-none active:!border-lightBrown !font-['Baloo_2']">
+                  <SelectTrigger className="w-full !bg-offWhite !border-veryLightBrown !border-2 text-brown focus:!outline-none active:!border-lightBrown !font-baloo2">
                     <SelectValue placeholder="All Owners" />
                   </SelectTrigger>
                   <SelectContent>
@@ -303,7 +303,7 @@ export default function ProjectTab({
           {loading ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-4">
               <LoadingSpinner size="lg" />
-              <p className="font-['Baloo_2'] text-brown/70 text-sm">
+              <p className="font-baloo2 text-brown/70 text-sm">
                 Loading quests...
               </p>
             </div>

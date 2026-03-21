@@ -9,7 +9,7 @@ function Label({ className, ...props }: React.ComponentProps<typeof LabelPrimiti
       data-slot="label"
       className={cn(
         "flex items-center gap-2 text-sm sm:text-base leading-none font-base select-none",
-        "font-['Baloo_2'] text-brown transition-colors duration-200",
+        "font-baloo2 text-brown transition-colors duration-200",
         "group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50",
         "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
         "peer-focus:text-blue-600 peer-focus:drop-shadow-sm",

@@ -26,12 +26,12 @@ export default function TeamSummaryBox({
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 min-w-0">
             <Crown className="w-6 h-6 text-offWhite shrink-0" strokeWidth={2} />
-            <h3 className="!text-lg !sm:text-xl !font-bold font-['Baloo_2'] truncate !text-offWhite">
+            <h3 className="!text-lg !sm:text-xl !font-bold font-baloo2 truncate !text-offWhite">
               You{isMVP ? ' · MVP' : ''}
             </h3>
           </div>
         </div>
-        <div className="space-y-0 font-['Baloo_2'] text-sm mt-1">
+        <div className="space-y-0 font-baloo2 text-sm mt-1">
           <div className={rowClass}>
             <span className="text-offWhite/85">Score</span>
             <span className="font-bold tabular-nums">{score.toLocaleString()}</span>
@@ -61,7 +61,7 @@ export default function TeamSummaryBox({
           {isMVP ? <span className="text-red ml-1 text-base font-bold">MVP</span> : null}
         </h3>
       </div>
-      <div className="space-y-0 font-['Baloo_2'] text-sm text-darkBrown">
+      <div className="space-y-0 font-baloo2 text-sm text-darkBrown">
         <div className={rowClass}>
           <span className="text-lightBrown">Score</span>
           <span className="font-semibold tabular-nums">{score.toLocaleString()}</span>

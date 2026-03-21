@@ -139,7 +139,7 @@ function Home() {
               <Input
                 type="search"
                 placeholder="Search projects..."
-                className="w-full bg-offWhite rounded-lg font-['Baloo_2'] h-10"
+                className="w-full bg-offWhite rounded-lg font-baloo2 h-10"
                 value={query}
                 onChange={(e) => handleSearch(e.target.value)}
               />

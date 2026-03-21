@@ -74,7 +74,7 @@ export default function Header() {
               <a
                 key={i.path}
                 href={i.path}
-                className={`text-offWhite px-[1.5rem] cursor-pointer font-['Baloo_2'] hover:text-gray-300 transition-colors ${location.pathname == i.path ? 'border-b-2 border-offWhite' : ''}`}
+                className={`text-offWhite px-[1.5rem] cursor-pointer font-baloo2 hover:text-gray-300 transition-colors ${location.pathname == i.path ? 'border-b-2 border-offWhite' : ''}`}
               >
                 {i.name}
               </a>
@@ -85,7 +85,7 @@ export default function Header() {
               <span className="text-offWhite px-[1.5rem]">{user?.name}</span>
 
               <button
-                className="flex !bg-veryLightBrown text-darkBrown gap-1 items-center h-[2.1675rem] hover:text-brown !font-['Baloo_2'] transition-colors hover:!border-brown"
+                className="flex !bg-veryLightBrown text-darkBrown gap-1 items-center h-[2.1675rem] hover:text-brown !font-baloo2 transition-colors hover:!border-brown"
                 onClick={() => logout()}
               >
                 <svg
@@ -104,12 +104,12 @@ export default function Header() {
             <div className="flex items-center mr-[2.5rem]">
               <span
                 onClick={() => handleClick('/register')}
-                className='text-offWhite px-[1.5rem] cursor-pointer font-["Baloo_2"] hover:text-gray-300 transition-colors'
+                className='text-offWhite px-[1.5rem] cursor-pointer font-baloo2 hover:text-gray-300 transition-colors'
               >
                 Register
               </span>
               <button
-                className="flex !bg-veryLightBrown text-darkBrown gap-1 items-center h-[2.1675rem] hover:text-brown !font-['Baloo_2'] transition-colors hover:!border-brown"
+                className="flex !bg-veryLightBrown text-darkBrown gap-1 items-center h-[2.1675rem] hover:text-brown !font-baloo2 transition-colors hover:!border-brown"
                 onClick={() => handleClick('/login')}
               >
                 <svg
@@ -140,7 +140,7 @@ export default function Header() {
             <DropdownMenuContent className="w-56 bg-offWhite">
               {Items.map((i) => (
                 <DropdownMenuItem
-                  className='hover:bg-veryLightBrown font-["Baloo_2"]'
+                  className='hover:bg-veryLightBrown font-baloo2'
                   key={i.path}
                   onClick={() => handleClick(i.path)}
                 >
@@ -153,7 +153,7 @@ export default function Header() {
               ) : (
                 authItems.map((i) => (
                   <DropdownMenuItem
-                    className='hover:bg-veryLightBrown font-["Baloo_2"]'
+                    className='hover:bg-veryLightBrown font-baloo2'
                     key={i.path}
                     onClick={() => handleClick(i.path)}
                   >

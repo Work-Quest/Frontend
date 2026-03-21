@@ -46,7 +46,7 @@ function StartProject() {
   }
 
   return (
-    <div className="min-h-[80vh] bg-offWhite p-4 md:p-8 font-['Baloo_2'] text-darkBrown flex flex-col items-center">
+    <div className="min-h-[80vh] bg-offWhite p-4 md:p-8 font-baloo2 text-darkBrown flex flex-col items-center">
       {/* Header */}
       <div className="w-full flex flex-col mb-4 md:mb-6">
         <h2 className="text-3xl md:text-4xl font-bold !text-red tracking-tight">

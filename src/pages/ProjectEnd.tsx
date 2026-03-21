@@ -75,7 +75,7 @@ function ProjectEnd() {
   if (loading) {
     return (
       <div className="flex flex-col min-h-[60vh] items-center justify-center bg-[#f5f5f5] px-4">
-        <p className="text-darkBrown font-['Baloo_2']">Loading project summary…</p>
+        <p className="text-darkBrown font-baloo2">Loading project summary…</p>
       </div>
     )
   }
@@ -83,7 +83,7 @@ function ProjectEnd() {
   if (error) {
     return (
       <div className="flex flex-col min-h-[60vh] items-center justify-center bg-[#f5f5f5] px-4">
-        <p className="text-red-600 font-['Baloo_2']">Error: {error}</p>
+        <p className="text-red-600 font-baloo2">Error: {error}</p>
       </div>
     )
   }
@@ -96,7 +96,7 @@ function ProjectEnd() {
             role="status"
             className="rounded-xl border-2 border-red bg-cream px-4 py-3 flex items-center gap-2"
           >
-            <span className="font-bold text-red font-['Baloo_2']">
+            <span className="font-bold text-red font-baloo2">
               Delay penalty: {summary.reduction_percent}% score reduction applied
             </span>
           </div>

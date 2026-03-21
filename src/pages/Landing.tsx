@@ -197,11 +197,11 @@ function Landing() {
               Crush Your Tasks!
             </h2>
             <div className="text-sm sm:text-base">
-              <span className="text-brown font-medium font-['Baloo_2'] mr-2">
+              <span className="text-brown font-medium font-baloo2 mr-2">
                 Take on powerful bosses by completing your tasks. Every task you finish brings you
                 closer to victory and unlocks new challenges.
               </span>
-              <span className="text-orange font-bold font-['Baloo_2']">
+              <span className="text-orange font-bold font-baloo2">
                 Ready to be the ultimate champion?
               </span>
             </div>

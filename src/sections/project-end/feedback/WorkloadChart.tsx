@@ -26,15 +26,15 @@ const WorkloadChart = ({ work_load_per_day }: WorkloadChartProps) => {
 
   return (
     <div className="mt-8 pt-6 border-t border-brown/10 w-full min-w-0">
-      <p className="text-base font-bold text-darkBrown font-['Baloo_2'] mb-4">{heading}</p>
+      <p className="text-base font-bold text-darkBrown font-baloo2 mb-4">{heading}</p>
       {n === 0 ? (
-        <p className="text-sm text-lightBrown font-['Baloo_2']">
+        <p className="text-sm text-lightBrown font-baloo2">
           No daily workload data available yet.
         </p>
       ) : (
         <div className="w-full min-w-0 px-3 py-5 sm:px-5 sm:py-6 box-border">
           <div className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] gap-2 sm:gap-3 items-center">
-            <div className="text-[10px] sm:text-xs text-[#948B81] font-['Baloo_2'] leading-tight shrink-0 w-9 sm:w-11">
+            <div className="text-[10px] sm:text-xs text-[#948B81] font-baloo2 leading-tight shrink-0 w-9 sm:w-11">
               <div>Month</div>
               <div>Ago</div>
             </div>
@@ -71,7 +71,7 @@ const WorkloadChart = ({ work_load_per_day }: WorkloadChartProps) => {
               })}
             </div>
 
-            <div className="text-[10px] sm:text-xs text-[#948B81] font-['Baloo_2'] leading-tight shrink-0 text-right w-9 sm:w-11">
+            <div className="text-[10px] sm:text-xs text-[#948B81] font-baloo2 leading-tight shrink-0 text-right w-9 sm:w-11">
               <div>End</div>
               <div>Day</div>
             </div>

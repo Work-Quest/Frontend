@@ -103,7 +103,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               className="p-3 rounded-lg border border-brown border-dashed scale-105 bg-white/80 shadow-lg flex flex-col gap-2 transition-all"
               style={{ boxShadow: '0 8px 12px rgba(0, 0, 0, 0.15)' }}
             >
-              <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">
+              <h4 className="text-darkBrown text-base font-medium font-baloo2">
                 {activeTask?.title}
               </h4>
               <div className="h-px bg-brown w-full"></div>

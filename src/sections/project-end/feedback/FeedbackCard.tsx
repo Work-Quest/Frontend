@@ -43,7 +43,7 @@ const FeedbackCard = ({ feedbackData, loading, error, memberName }: FeedbackCard
         <h2 className="!text-2xl !font-bold !text-darkBrown border-b border-brown/10 pb-2">
           Individual
         </h2>
-        <p className="!text-lightBrown !font-['Baloo_2'] !mt-1 !text-base">
+        <p className="!text-lightBrown !font-baloo2 !mt-1 !text-base">
           {memberName ? (
             <span className="text-darkBrown font-semibold">{memberName}</span>
           ) : (
@@ -57,7 +57,7 @@ const FeedbackCard = ({ feedbackData, loading, error, memberName }: FeedbackCard
           <div className="flex justify-end mb-4 items-center">
             <div className="flex items-center gap-2 px-4 py-2 bg-cream/50 rounded-xl border border-veryLightBrown">
               <LoadingSpinner size="sm" />
-              <span className="font-['Baloo_2'] text-brown/80 text-sm">Loading…</span>
+              <span className="font-baloo2 text-brown/80 text-sm">Loading…</span>
             </div>
           </div>
         ) : null}
@@ -70,22 +70,22 @@ const FeedbackCard = ({ feedbackData, loading, error, memberName }: FeedbackCard
                   <div className="rounded-xl border border-brown/10 bg-offWhite p-4 flex flex-col gap-2">
                     <div className="flex items-center gap-2 text-lightBrown">
                       <Users className="w-5 h-5 text-orange shrink-0" />
-                      <span className="text-xs font-semibold font-['Baloo_2'] uppercase tracking-wide">
+                      <span className="text-xs font-semibold font-baloo2 uppercase tracking-wide">
                         Teamwork
                       </span>
                     </div>
-                    <p className="text-2xl font-bold text-darkBrown font-['Baloo_2'] tabular-nums">
+                    <p className="text-2xl font-bold text-darkBrown font-baloo2 tabular-nums">
                       {teamwork}
                     </p>
                   </div>
                   <div className="rounded-xl border border-brown/10 bg-offWhite p-4 flex flex-col gap-2">
                     <div className="flex items-center gap-2 text-lightBrown">
                       <Gauge className="w-5 h-5 text-orange shrink-0" />
-                      <span className="text-xs font-semibold font-['Baloo_2'] uppercase tracking-wide">
+                      <span className="text-xs font-semibold font-baloo2 uppercase tracking-wide">
                         Speed
                       </span>
                     </div>
-                    <p className="text-2xl font-bold text-darkBrown font-['Baloo_2'] tabular-nums">
+                    <p className="text-2xl font-bold text-darkBrown font-baloo2 tabular-nums">
                       {speed}
                       {speed !== '—' ? (
                         <span className="text-sm font-normal text-lightBrown ml-1">min</span>
@@ -95,17 +95,17 @@ const FeedbackCard = ({ feedbackData, loading, error, memberName }: FeedbackCard
                   <div className="rounded-xl border border-brown/10 bg-offWhite p-4 flex flex-col gap-2">
                     <div className="flex items-center gap-2 text-lightBrown">
                       <Medal className="w-5 h-5 text-orange shrink-0" />
-                      <span className="text-xs font-semibold font-['Baloo_2'] uppercase tracking-wide">
+                      <span className="text-xs font-semibold font-baloo2 uppercase tracking-wide">
                         Quality score
                       </span>
                     </div>
-                    <p className="text-2xl font-bold text-darkBrown font-['Baloo_2'] tabular-nums">
+                    <p className="text-2xl font-bold text-darkBrown font-baloo2 tabular-nums">
                       {quality}
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-4 font-['Baloo_2'] text-darkBrown leading-relaxed">
+                <div className="space-y-4 font-baloo2 text-darkBrown leading-relaxed">
                   {feedbackData.feedback_text ? (
                     <p className="text-sm md:text-base text-brown/90">
                       {feedbackData.feedback_text}
@@ -122,7 +122,7 @@ const FeedbackCard = ({ feedbackData, loading, error, memberName }: FeedbackCard
             </div>
 
             {feedbackData.diligence != null ? (
-              <p className="mt-4 text-sm text-lightBrown font-['Baloo_2']">
+              <p className="mt-4 text-sm text-lightBrown font-baloo2">
                 <span className="font-semibold text-darkBrown">Diligence: </span>
                 {feedbackData.diligence}%
               </p>
@@ -131,7 +131,7 @@ const FeedbackCard = ({ feedbackData, loading, error, memberName }: FeedbackCard
         )}
 
         {error && (
-          <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm font-['Baloo_2']">
+          <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm font-baloo2">
             {error}
           </div>
         )}

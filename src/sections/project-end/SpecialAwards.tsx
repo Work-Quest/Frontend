@@ -48,7 +48,7 @@ export default function SpecialAwards({
     >
       <div className={`px-4 py-2.5 flex items-center gap-2 ${accentClass}`}>
         <Icon className="w-5 h-5 text-offWhite shrink-0" strokeWidth={2} />
-        <span className="font-['Baloo_2'] font-bold text-offWhite text-sm sm:text-base">
+        <span className="font-baloo2 font-bold text-offWhite text-sm sm:text-base">
           {title}
         </span>
       </div>
@@ -77,11 +77,11 @@ export default function SpecialAwards({
                   <span className="text-orange font-medium"> (You)</span>
                 ) : null}
               </p>
-              <p className="text-sm text-lightBrown font-['Baloo_2']">{subtitle}</p>
+              <p className="text-sm text-lightBrown font-baloo2">{subtitle}</p>
             </div>
           </>
         ) : (
-          <p className="text-lightBrown text-sm font-['Baloo_2']">—</p>
+          <p className="text-lightBrown text-sm font-baloo2">—</p>
         )}
       </div>
     </div>
@@ -112,7 +112,7 @@ export default function SpecialAwards({
 
   return (
     <section className="space-y-3">
-      <h2 className="text-xl font-bold text-darkBrown font-['Baloo_2']">Special awards</h2>
+      <h2 className="text-xl font-bold text-darkBrown font-baloo2">Special awards</h2>
       <div className="flex flex-col sm:flex-row gap-4">{cards}</div>
     </section>
   )
