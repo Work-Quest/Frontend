@@ -6,7 +6,7 @@ export interface FeedbackResponse {
   overall_quality_score: number | null
   team_work: number | null
   strength: string | null
-  work_load_per_day: string | null
+  work_load_per_day: string | number[] | null
   work_speed: string | null
   diligence: number | null
   created_at: string

@@ -1,15 +1,10 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
+import { DotLottieReact, type DotLottie } from '@lottiefiles/dotlottie-react'
 import { FaCaretDown } from 'react-icons/fa'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-type DotLottiePlayer = {
-  addEventListener: (type: string, handler: () => void) => void
-  removeEventListener: (type: string, handler: () => void) => void
-}
 
 function Landing() {
   const navigate = useNavigate()
@@ -55,7 +50,7 @@ function Landing() {
   }, [isFlowSectionInView, currentFlow])
 
   const dotLottieRefCallback = useCallback(
-    (dotLottie: DotLottiePlayer | null) => {
+    (dotLottie: DotLottie | null) => {
       if (dotLottie && currentFlow === 'flow1') {
         const handleComplete = () => {
           setCurrentFlow('flow2')

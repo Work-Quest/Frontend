@@ -67,7 +67,7 @@ function DialogContent({
         {...props}
       >
         {isNormal ? (
-          <div className="relative bg-offWhite rounded-lg shadow-xl border border-white p-0 h-full min-h-0 flex flex-col">
+          <div className="relative bg-offWhite rounded-lg shadow-xl border border-white !p-0 h-full min-h-0 flex flex-col">
             {children}
             {showCloseButton && (
               <DialogPrimitive.Close
@@ -104,7 +104,7 @@ function DialogContent({
                     "transition-all duration-200 ease-in-out"
                   )}
                 >
-                  <XIcon className="w-5 h-5 text-darkBrown drop-shadow-sm transition-transform duration-200 ease-out relative z-40" />
+                  <XIcon className="w-5 h-5 !p-0 text-darkBrown drop-shadow-sm transition-transform duration-200 ease-out relative z-40" />
                   <span className="sr-only">Close</span>
                 </DialogPrimitive.Close>
               )}

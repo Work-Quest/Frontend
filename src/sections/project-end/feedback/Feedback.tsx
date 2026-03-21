@@ -1,27 +1,30 @@
-import FeedbackCard from "./FeedbackCard";
-import useFeedback from "./useFeedback";
-import { useEffect, useRef } from "react";
+import FeedbackCard from './FeedbackCard'
+import useFeedback from './useFeedback'
+import { useEffect, useRef } from 'react'
+import { useAuth } from '@/context/AuthContext'
 
 const Feedback = ({ projectId }: { projectId: string }) => {
-  const { feedback, loading, error, fetchFeedback } = useFeedback(projectId);
+  const { feedback, loading, error, fetchFeedback } = useFeedback(projectId)
   const fetchedForProjectIdRef = useRef<string | null>(null)
+  const { user } = useAuth()
 
   useEffect(() => {
-    if (!projectId) return;
-    // Fetch only once per projectId (avoid re-fetch loops on re-renders)
+    if (!projectId) return
     if (fetchedForProjectIdRef.current === projectId) return
     fetchedForProjectIdRef.current = projectId
-    void fetchFeedback();
-  }, [projectId, fetchFeedback]);
+    void fetchFeedback()
+  }, [projectId, fetchFeedback])
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-gray-50">
+    <section className="pb-8">
       <FeedbackCard
         feedbackData={feedback}
         loading={loading}
         error={error ?? undefined}
+        memberName={user?.name}
       />
-    </div>
-  );
-};
-export default Feedback;
+    </section>
+  )
+}
+
+export default Feedback
