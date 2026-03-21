@@ -29,7 +29,7 @@ export default function FriendBox(FriendBoxProps: FriendBoxProps) {
             </p>
             <a
               href={`/${FriendBoxProps.username}`}
-              className="text-lightBrown text-base font-medium font-['Baloo_2']"
+              className="text-lightBrown text-base font-medium font-baloo2"
             >
               @{FriendBoxProps.username}
             </a>

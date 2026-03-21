@@ -106,7 +106,7 @@ const ReviewTask: React.FC<ReviewTaskProps> = ({
   }, [eligibleDoneTasks, reviewHistory])
 
   return (
-    <div className="w-full pr-3 self-stretch bg-offWhite inline-flex flex-col justify-start items-start font-['Baloo_2']">
+    <div className="w-full pr-3 self-stretch bg-offWhite inline-flex flex-col justify-start items-start font-baloo2">
       <Header
         bgColor="bg-brown"
         textColor="!text-offWhite"
@@ -114,7 +114,7 @@ const ReviewTask: React.FC<ReviewTaskProps> = ({
       />
       <Button
         variant="shadow"
-        className="w-full !bg-brown !text-offWhite my-4 font-['Baloo_2']"
+        className="w-full !bg-brown !text-offWhite my-4 font-baloo2"
         onClick={() => setModalOpen(true)}
       >
         Review

@@ -11,7 +11,7 @@ const DamageLogModalCard: React.FC<DamageLogModalCardProps> = ({ log }) => {
   const isPositive = log.damageValue >= 0;
 
   return (
-    <div className="rounded-lg bg-white/60 border border-darkBrown/5 p-4 flex items-start justify-between gap-2 font-['Baloo_2']">
+    <div className="rounded-lg bg-white/60 border border-darkBrown/5 p-4 flex items-start justify-between gap-2 font-baloo2">
       <div className="flex flex-col gap-2 min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
           <span className="font-bold text-darkBrown text-base">
@@ -23,7 +23,7 @@ const DamageLogModalCard: React.FC<DamageLogModalCardProps> = ({ log }) => {
           {log.participants.map((participant, index) => (
             <span
               key={`${log.id}-${index}`}
-              className="tag tag-name text-xs px-2 py-0.5 rounded-full font-['Baloo_2']"
+              className="tag tag-name text-xs px-2 py-0.5 rounded-full font-baloo2"
             >
               {participant}
             </span>

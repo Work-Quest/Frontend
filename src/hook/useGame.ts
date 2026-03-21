@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from "react"
-import { useParams } from "react-router-dom"
-import { get, post } from "@/Api"
+import { useCallback, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { get, post } from '@/Api'
 import type {
   BossAttackRequest,
   BossAttackResponse,
@@ -20,9 +20,9 @@ import type {
   UseProjectMemberItemRequest,
   UseProjectMemberItemResponse,
   UserStatusesResponse,
-} from "@/types/GameApi"
-import { usePolling } from "./usePolling"
-import { POLLING_CONFIG } from "@/config/pollingConfig"
+} from '@/types/GameApi'
+import { usePolling } from './usePolling'
+import { POLLING_CONFIG } from '@/config/pollingConfig'
 
 type UseGameState = {
   loading: boolean
@@ -51,13 +51,12 @@ export function useGame(explicitProjectId?: string, options?: UseGameOptions) {
   const pollIntervalMs = options?.pollIntervalMs ?? POLLING_CONFIG.gameStatus.interval
   const enabled = options?.enabled ?? true
 
-  const call = useCallback(async <T,>(fn: () => Promise<T>): Promise<T> => {
+  const call = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {
     setState({ loading: true, error: null })
     try {
       return await fn()
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Game request failed"
+      const message = err instanceof Error ? err.message : 'Game request failed'
       setState({ loading: false, error: message })
       throw err
     } finally {
@@ -69,19 +68,19 @@ export function useGame(explicitProjectId?: string, options?: UseGameOptions) {
   // Boss
   // -----------------
 
-  const getProjectBoss = useCallback(async (projectId: string) => {
-    return call(() =>
-      get<BossData>(`/api/game/project/${projectId}/boss/`)
-    )
-  }, [call])
+  const getProjectBoss = useCallback(
+    async (projectId: string) => {
+      return call(() => get<BossData>(`/api/game/project/${projectId}/boss/`))
+    },
+    [call]
+  )
 
-  const getBossStatus = useCallback(async (projectId: string) => {
-    return call(() =>
-      get<BossStatusResponse>(
-        `/api/game/project/${projectId}/boss/status/`
-      )
-    )
-  }, [call])
+  const getBossStatus = useCallback(
+    async (projectId: string) => {
+      return call(() => get<BossStatusResponse>(`/api/game/project/${projectId}/boss/status/`))
+    },
+    [call]
+  )
 
   const bossAttack = useCallback(
     async (projectId: string, payload: BossAttackRequest) => {
@@ -95,14 +94,17 @@ export function useGame(explicitProjectId?: string, options?: UseGameOptions) {
     [call]
   )
 
-  const setupSpecialBoss = useCallback(async (projectId: string) => {
-    return call(() =>
-      post<{}, { message: string; boss: BossData }>(
-        `/api/game/project/${projectId}/boss/setup/special/`,
-        {}
+  const setupSpecialBoss = useCallback(
+    async (projectId: string) => {
+      return call(() =>
+        post<Record<string, never>, { message: string; boss: BossData }>(
+          `/api/game/project/${projectId}/boss/setup/special/`,
+          {}
+        )
       )
-    )
-  }, [call])
+    },
+    [call]
+  )
 
   // -----------------
   // Project member actions
@@ -160,67 +162,77 @@ export function useGame(explicitProjectId?: string, options?: UseGameOptions) {
   // Status
   // -----------------
 
-  const getUserStatuses = useCallback(async (projectId: string) => {
-    return call(() =>
-      get<UserStatusesResponse>(
-        `/api/game/project/${projectId}/project_member/get_all_status/`
+  const getUserStatuses = useCallback(
+    async (projectId: string) => {
+      return call(() =>
+        get<UserStatusesResponse>(`/api/game/project/${projectId}/project_member/get_all_status/`)
       )
-    )
-  }, [call])
+    },
+    [call]
+  )
 
-  const getGameStatus = useCallback(async (projectId: string, silent?: boolean) => {
-    // For silent requests, bypass call() to avoid loading state
-    if (silent) {
-      return get<GameStatusResponse>(`/api/game/project/${projectId}/status/`, true)
-    }
-    return call(() =>
-      get<GameStatusResponse>(`/api/game/project/${projectId}/status/`)
-    )
-  }, [call])
-
-  const refreshGameStatus = useCallback(async (opts?: { silent?: boolean }) => {
-    if (!projectId) return null
-    if (!opts?.silent) {
-      // Could add loading state here if needed
-    }
-    try {
-      const data = await getGameStatus(projectId, opts?.silent)
-      setGameStatus(data)
-      return data
-    } catch (error) {
-      if (!opts?.silent) {
-        console.error("Error fetching game status:", error)
+  const getGameStatus = useCallback(
+    async (projectId: string, silent?: boolean) => {
+      // For silent requests, bypass call() to avoid loading state
+      if (silent) {
+        return get<GameStatusResponse>(`/api/game/project/${projectId}/status/`, true)
       }
-      throw error
-    }
-  }, [projectId, getGameStatus])
+      return call(() => get<GameStatusResponse>(`/api/game/project/${projectId}/status/`))
+    },
+    [call]
+  )
+
+  const refreshGameStatus = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!projectId) return null
+      if (!opts?.silent) {
+        // Could add loading state here if needed
+      }
+      try {
+        const data = await getGameStatus(projectId, opts?.silent)
+        setGameStatus(data)
+        return data
+      } catch (error) {
+        if (!opts?.silent) {
+          console.error('Error fetching game status:', error)
+        }
+        throw error
+      }
+    },
+    [projectId, getGameStatus]
+  )
 
   // Use centralized polling hook for game status
-  usePolling(refreshGameStatus, {
-    pollIntervalMs: enabled ? pollIntervalMs : undefined,
-    enabled,
-  }, [projectId])
+  usePolling(
+    refreshGameStatus,
+    {
+      pollIntervalMs: enabled ? pollIntervalMs : undefined,
+      enabled,
+    },
+    [projectId]
+  )
 
   // -----------------
   // Items / effects
   // -----------------
 
-  const getMyItems = useCallback(async (projectId: string, silent?: boolean) => {
-    // For silent requests, bypass call() to avoid loading state
-    if (silent) {
-      return get<ProjectMemberItemsResponse>(
-        `/api/game/project/${projectId}/project_member/item/`,
-        true
+  const getMyItems = useCallback(
+    async (projectId: string, silent?: boolean) => {
+      // For silent requests, bypass call() to avoid loading state
+      if (silent) {
+        return get<ProjectMemberItemsResponse>(
+          `/api/game/project/${projectId}/project_member/item/`,
+          true
+        )
+      }
+      return call(() =>
+        get<ProjectMemberItemsResponse>(`/api/game/project/${projectId}/project_member/item/`)
       )
-    }
-    return call(() =>
-      get<ProjectMemberItemsResponse>(
-        `/api/game/project/${projectId}/project_member/item/`
-      )
-    )
-  }, [call])
+    },
+    [call]
+  )
 
-  const useMyItem = useCallback(
+  const consumeMemberItem = useCallback(
     async (projectId: string, payload: UseProjectMemberItemRequest) => {
       return call(() =>
         post<UseProjectMemberItemRequest, UseProjectMemberItemResponse>(
@@ -232,20 +244,23 @@ export function useGame(explicitProjectId?: string, options?: UseGameOptions) {
     [call]
   )
 
-  const getMyStatusEffects = useCallback(async (projectId: string, silent?: boolean) => {
-    // For silent requests, bypass call() to avoid loading state
-    if (silent) {
-      return get<ProjectMemberStatusEffectsResponse>(
-        `/api/game/project/${projectId}/project_member/status/effect/`,
-        true
+  const getMyStatusEffects = useCallback(
+    async (projectId: string, silent?: boolean) => {
+      // For silent requests, bypass call() to avoid loading state
+      if (silent) {
+        return get<ProjectMemberStatusEffectsResponse>(
+          `/api/game/project/${projectId}/project_member/status/effect/`,
+          true
+        )
+      }
+      return call(() =>
+        get<ProjectMemberStatusEffectsResponse>(
+          `/api/game/project/${projectId}/project_member/status/effect/`
+        )
       )
-    }
-    return call(() =>
-      get<ProjectMemberStatusEffectsResponse>(
-        `/api/game/project/${projectId}/project_member/status/effect/`
-      )
-    )
-  }, [call])
+    },
+    [call]
+  )
 
   return {
     loading: state.loading,
@@ -271,11 +286,9 @@ export function useGame(explicitProjectId?: string, options?: UseGameOptions) {
 
     // items / effects
     getMyItems,
-    useMyItem,
+    consumeMemberItem,
     getMyStatusEffects,
   }
 }
 
 export default useGame
-
-

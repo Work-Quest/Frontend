@@ -78,7 +78,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         }`}
       >
         <div className="flex justify-between items-start">
-          <h4 className="text-darkBrown text-base font-medium font-['Baloo_2']">
+          <h4 className="text-darkBrown text-base font-medium font-baloo2">
             {task.title}
           </h4>
           <DropdownMenu>
@@ -93,7 +93,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="min-w-[140px] bg-offWhite border-lightBrown font-['Baloo_2']"
+              className="min-w-[140px] bg-offWhite border-lightBrown font-baloo2"
             >
               <DropdownMenuItem
                 className="cursor-pointer focus:bg-cream"
@@ -135,7 +135,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           >
             {task.priority}
           </div>
-          <div className="tag tag-iteration">{task.iteration}</div>
         </div>
         <div className="flex flex-wrap gap-2">
           {(task.assigneesName?.length ? task.assigneesName : task.assignees).map(

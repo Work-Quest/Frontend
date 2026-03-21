@@ -34,7 +34,7 @@ function Home() {
       return {
         id: boss.id,
         bossName: boss.name,
-        img: `/assets/sprites/bosses/${configId}/idle.gif`,
+        img: `/assets/sprites/bosses/${configId}/profile.png`,
         defeated: true,
       }
     })
@@ -45,7 +45,8 @@ function Home() {
     return {
       name: user?.name,
       username: user?.username,
-      profileImg: user?.profile_img || undefined,
+      selectedCharacterId: user?.selected_character_id ?? 1,
+      bgColorId: user?.bg_color_id ?? 1,
       tag: [], // No backend support for tags
       bossCollection: bossCollection,
     }
@@ -138,7 +139,7 @@ function Home() {
               <Input
                 type="search"
                 placeholder="Search projects..."
-                className="w-full bg-offWhite rounded-lg font-['Baloo_2'] h-10"
+                className="w-full bg-offWhite rounded-lg font-baloo2 h-10"
                 value={query}
                 onChange={(e) => handleSearch(e.target.value)}
               />
@@ -146,7 +147,15 @@ function Home() {
 
             {/* Project Tab with Filter */}
             <div className="flex-1 min-h-0">
-              <ProjectTab data={filteredAndSearchedResults} onFilterChange={handleFilterChange} onUpdateProject={updateProject} onDelete={deleteProject} loading={loading} />
+              <ProjectTab
+                data={filteredAndSearchedResults}
+                allData={projects}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onUpdateProject={updateProject}
+                onDelete={deleteProject}
+                loading={loading}
+              />
             </div>
           </div>
         </div>

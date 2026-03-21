@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react"
-import { clearAuthTokens, get, post } from "@/Api"
+import { get, post } from "@/Api"
 import toast from "react-hot-toast"
 
 type User = {
@@ -8,6 +8,9 @@ type User = {
   username: string
   email: string
   profile_img: string
+  selected_character_id: number
+  bg_color_id: number
+  is_first_time: boolean
 }
 
 type AuthContextType = {
@@ -28,7 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  
+
   const checkAuth = async () => {
     setLoading(true)
     try {
@@ -45,19 +48,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(null)
       }
 
-      console.log("Auth status checked:", res.isAuthenticated)
+      console.log('Auth status checked:', res.isAuthenticated)
     } catch {
       setIsAuthenticated(false)
       setUser(null)
     } finally {
       setLoading(false)
     }
-  } 
+  }
 
   const logout = async () => {
-    await post<{}, unknown>("/api/auth/logout/", {})
-    clearAuthTokens()
-    toast.success("Logged out successfully.")
+    await post<Record<string, never>, { message?: string }>('/api/auth/logout/', {})
+    toast.success('Logged out successfully.\nSee you next quest!')
     setIsAuthenticated(false)
     setUser(null)
   }
@@ -65,7 +67,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     checkAuth()
   }, [])
-
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, loading, user, checkAuth, logout }}>
@@ -76,6 +77,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider")
+  if (!ctx) throw new Error('useAuth must be used inside AuthProvider')
   return ctx
 }

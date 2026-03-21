@@ -1,4 +1,4 @@
-export const TOTAL_AVATARS = 6;
+export const TOTAL_AVATARS = 9;
 
 export const AVATAR_OPTIONS = Array.from(
   { length: TOTAL_AVATARS },
@@ -22,4 +22,5 @@ export const AVATAR_COLORS: Record<number, string> = {
 export const getAvatarColor = (id: number) => AVATAR_COLORS[id] || "#cbd5e1";
 
 // Helper to get avatar image path
-export const getAvatarPath = (id: number) => `/avatars/${id}.png`;
+export const getAvatarPath = (id: number) =>
+  `/assets/sprites/characters/c${String(id).padStart(2, "0")}/profile.png`;

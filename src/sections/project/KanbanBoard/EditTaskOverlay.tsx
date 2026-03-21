@@ -25,7 +25,7 @@ import MultiCombobox, {
 } from "@/components/ui/multicombobox"
 
 const inputStyle =
-  "w-full rounded-xl !border-brown !border-2 px-4 py-3 font-['Baloo_2'] text-darkBrown placeholder:text-brown/50 focus:outline-none focus:ring-2 focus:ring-orange/50 focus:border-orange !bg-cream/30 transition-all"
+  "w-full rounded-xl !border-brown !border-2 px-4 py-3 font-baloo2 text-darkBrown placeholder:text-brown/50 focus:outline-none focus:ring-2 focus:ring-orange/50 focus:border-orange !bg-cream/30 transition-all"
 
 interface EditTaskOverlayProps {
   task: Task | null
@@ -92,14 +92,14 @@ export const EditTaskOverlay: React.FC<EditTaskOverlayProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-offWhite">
         <DialogHeader>
-          <DialogTitle className="font-['Baloo_2']">Edit Task</DialogTitle>
+          <DialogTitle className="font-baloo2">Edit Task</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label
               htmlFor="edit-title"
-              className="font-['Baloo_2'] font-bold text-darkBrown"
+              className="font-baloo2 font-bold text-darkBrown"
             >
               Title
             </Label>
@@ -116,7 +116,7 @@ export const EditTaskOverlay: React.FC<EditTaskOverlayProps> = ({
           <div className="space-y-2">
             <Label
               htmlFor="edit-priority"
-              className="font-['Baloo_2'] font-bold text-darkBrown"
+              className="font-baloo2 font-bold text-darkBrown"
             >
               Priority
             </Label>
@@ -132,28 +132,28 @@ export const EditTaskOverlay: React.FC<EditTaskOverlayProps> = ({
               >
                 <SelectValue placeholder="Select priority" />
               </SelectTrigger>
-              <SelectContent className="font-['Baloo_2'] !bg-cream/95 text-darkBrown !border-brown !border-2 rounded-xl">
+              <SelectContent className="font-baloo2 !bg-cream/95 text-darkBrown !border-brown !border-2 rounded-xl">
                 <SelectItem
                   value="Low"
-                  className="font-['Baloo_2'] hover:!bg-cream"
+                  className="font-baloo2 hover:!bg-cream"
                 >
                   Low
                 </SelectItem>
                 <SelectItem
                   value="Medium"
-                  className="font-['Baloo_2'] hover:!bg-cream"
+                  className="font-baloo2 hover:!bg-cream"
                 >
                   Medium
                 </SelectItem>
                 <SelectItem
                   value="High"
-                  className="font-['Baloo_2'] hover:!bg-cream"
+                  className="font-baloo2 hover:!bg-cream"
                 >
                   High
                 </SelectItem>
                 <SelectItem
                   value="Urgent"
-                  className="font-['Baloo_2'] hover:!bg-cream"
+                  className="font-baloo2 hover:!bg-cream"
                 >
                   Urgent
                 </SelectItem>
@@ -164,7 +164,7 @@ export const EditTaskOverlay: React.FC<EditTaskOverlayProps> = ({
           <div className="space-y-2">
             <Label
               htmlFor="edit-deadline"
-              className="font-['Baloo_2'] font-bold text-darkBrown"
+              className="font-baloo2 font-bold text-darkBrown"
             >
               Deadline
             </Label>
@@ -194,14 +194,14 @@ export const EditTaskOverlay: React.FC<EditTaskOverlayProps> = ({
             <Button
               type="button"
               variant="outline"
-              className="!bg-offWhite !border-darkBrown !text-darkBrown !font-['Baloo_2'] hover:!bg-cream normal-case"
+              className="!bg-offWhite !border-darkBrown !text-darkBrown !font-baloo2 hover:!bg-cream normal-case"
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="!bg-blue !text-white !font-['Baloo_2'] !border-blue hover:!bg-darkBlue normal-case"
+              className="!bg-blue !text-white !font-baloo2 !border-blue hover:!bg-darkBlue normal-case"
             >
               Save Changes
             </Button>

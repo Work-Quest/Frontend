@@ -1,18 +1,18 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import logo from "../assets/header-logo.svg"
-import { useLocation, useNavigate } from "react-router-dom"
-import { IoMenu } from "react-icons/io5"
+import { useState, useEffect } from 'react'
+import logo from '../assets/header-logo.svg'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { IoMenu } from 'react-icons/io5'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "./ui/button"
-import { useAuth } from "@/context/AuthContext"
+} from '@/components/ui/dropdown-menu'
+import { Button } from './ui/button'
+import { useAuth } from '@/context/AuthContext'
 
 export default function Header() {
   const location = useLocation()
@@ -24,10 +24,9 @@ export default function Header() {
     const handleResize = () => {
       setIsFullScreen(window.innerWidth >= 900)
     }
-    handleResize
-    window.addEventListener("resize", handleResize)
+    window.addEventListener('resize', handleResize)
     handleResize()
-    return () => window.removeEventListener("resize", handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   type MenuItem = {
@@ -35,29 +34,24 @@ export default function Header() {
     path: string
   }
 
-  let Items: MenuItem[];
+  let Items: MenuItem[]
 
   if (isAuthenticated) {
     Items = [
-      { name: "Home", path: "/home" },
-      { name: "Profile", path: `/profile/${user?.id || ''}` },
-      { name: "Friend", path: "/friend" },
-      { name: "Help", path: "/help" },
+      { name: 'Home', path: '/home' },
+      { name: 'Profile', path: `/profile/${user?.id || ''}` },
+      { name: 'Help', path: '/help' },
     ]
-    
   } else {
     Items = [
-      { name: "Home", path: "/" },
-      { name: "Help", path: "/help" }, 
+      { name: 'Home', path: '/' },
+      { name: 'Help', path: '/help' },
     ]
   }
   const authItems: MenuItem[] = [
-      { name: "Register", path: "/register" },
-      { name: "Login", path: "/login" },
-    ]
-    
-
- 
+    { name: 'Register', path: '/register' },
+    { name: 'Login', path: '/login' },
+  ]
 
   const handleClick = (path: string) => {
     console.log(`Navigating to: ${path}`)
@@ -66,8 +60,12 @@ export default function Header() {
 
   return (
     <div className="flex overflow-hidden bg-darkBrown w-screen h-[90px] items-center justify-between z-100">
-      <div onClick={() => handleClick("/")} className="cursor-pointer">
-        <img src={logo || "/placeholder.svg"} alt="Logo" className="h-[3.6875rem] w-auto ml-[2.5rem]" />
+      <div onClick={() => handleClick('/')} className="cursor-pointer">
+        <img
+          src={logo || '/placeholder.svg'}
+          alt="Logo"
+          className="h-[3.6875rem] w-auto ml-[2.5rem]"
+        />
       </div>
       {isFullScreen ? (
         <>
@@ -76,61 +74,73 @@ export default function Header() {
               <a
                 key={i.path}
                 href={i.path}
-                className={`text-offWhite px-[1.5rem] cursor-pointer font-['Baloo_2'] hover:text-gray-300 transition-colors ${location.pathname == i.path ? "border-b-2 border-offWhite" : ""}`}
+                className={`text-offWhite px-[1.5rem] cursor-pointer font-baloo2 hover:text-gray-300 transition-colors ${location.pathname == i.path ? 'border-b-2 border-offWhite' : ''}`}
               >
                 {i.name}
               </a>
             ))}
           </div>
-          { isAuthenticated ? (
+          {isAuthenticated ? (
             <div className="flex items-center mr-3">
-              <span 
-              className='text-offWhite px-[1.5rem]'>
-                {user?.name}
-                </span>
+              <span className="text-offWhite px-[1.5rem]">{user?.name}</span>
 
-                 <button
-              className="flex !bg-veryLightBrown text-darkBrown gap-1 items-center h-[2.1675rem] hover:text-brown !font-['Baloo_2'] transition-colors hover:!border-brown"
-              onClick={() => logout()}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
-                <path d="M13.5 1.125C13.7984 1.125 14.0845 1.24353 14.2955 1.4545C14.5065 1.66548 14.625 1.95163 14.625 2.25V16.875H16.3125C16.4617 16.875 16.6048 16.9343 16.7102 17.0398C16.8157 17.1452 16.875 17.2883 16.875 17.4375C16.875 17.5867 16.8157 17.7298 16.7102 17.8352C16.6048 17.9407 16.4617 18 16.3125 18H1.6875C1.53832 18 1.39524 17.9407 1.28975 17.8352C1.18426 17.7298 1.125 17.5867 1.125 17.4375C1.125 17.2883 1.18426 17.1452 1.28975 17.0398C1.39524 16.9343 1.53832 16.875 1.6875 16.875H3.375V2.25C3.375 1.95163 3.49353 1.66548 3.7045 1.4545C3.91548 1.24353 4.20163 1.125 4.5 1.125H13.5ZM11.25 11.25C11.5484 11.25 11.8345 11.1315 12.0455 10.9205C12.2565 10.7095 12.375 10.4234 12.375 10.125C12.375 9.82663 12.2565 9.54048 12.0455 9.3295C11.8345 9.11853 11.5484 9 11.25 9C10.9516 9 10.6655 9.11853 10.4545 9.3295C10.2435 9.54048 10.125 9.82663 10.125 10.125C10.125 10.4234 10.2435 10.7095 10.4545 10.9205C10.6655 11.1315 10.9516 11.25 11.25 11.25Z" />
-              </svg>
-              Logout
-            </button>
-          </div>
-          ): 
-          <div className="flex items-center mr-[2.5rem]">
-            <span
-              onClick={() => handleClick("/register")}
-              className='text-offWhite px-[1.5rem] cursor-pointer font-["Baloo_2"] hover:text-gray-300 transition-colors'
-            >
-              Register
-            </span>
-            <button
-              className="flex !bg-veryLightBrown text-darkBrown gap-1 items-center h-[2.1675rem] hover:text-brown !font-['Baloo_2'] transition-colors hover:!border-brown"
-              onClick={() => handleClick("/login")}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
-                <path d="M13.5 1.125C13.7984 1.125 14.0845 1.24353 14.2955 1.4545C14.5065 1.66548 14.625 1.95163 14.625 2.25V16.875H16.3125C16.4617 16.875 16.6048 16.9343 16.7102 17.0398C16.8157 17.1452 16.875 17.2883 16.875 17.4375C16.875 17.5867 16.8157 17.7298 16.7102 17.8352C16.6048 17.9407 16.4617 18 16.3125 18H1.6875C1.53832 18 1.39524 17.9407 1.28975 17.8352C1.18426 17.7298 1.125 17.5867 1.125 17.4375C1.125 17.2883 1.18426 17.1452 1.28975 17.0398C1.39524 16.9343 1.53832 16.875 1.6875 16.875H3.375V2.25C3.375 1.95163 3.49353 1.66548 3.7045 1.4545C3.91548 1.24353 4.20163 1.125 4.5 1.125H13.5ZM11.25 11.25C11.5484 11.25 11.8345 11.1315 12.0455 10.9205C12.2565 10.7095 12.375 10.4234 12.375 10.125C12.375 9.82663 12.2565 9.54048 12.0455 9.3295C11.8345 9.11853 11.5484 9 11.25 9C10.9516 9 10.6655 9.11853 10.4545 9.3295C10.2435 9.54048 10.125 9.82663 10.125 10.125C10.125 10.4234 10.2435 10.7095 10.4545 10.9205C10.6655 11.1315 10.9516 11.25 11.25 11.25Z" />
-              </svg>
-              Login
-            </button>
-          </div>
-          }
+              <button
+                className="flex !bg-veryLightBrown text-darkBrown gap-1 items-center h-[2.1675rem] hover:text-brown !font-baloo2 transition-colors hover:!border-brown"
+                onClick={() => logout()}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
+                  fill="currentColor"
+                >
+                  <path d="M13.5 1.125C13.7984 1.125 14.0845 1.24353 14.2955 1.4545C14.5065 1.66548 14.625 1.95163 14.625 2.25V16.875H16.3125C16.4617 16.875 16.6048 16.9343 16.7102 17.0398C16.8157 17.1452 16.875 17.2883 16.875 17.4375C16.875 17.5867 16.8157 17.7298 16.7102 17.8352C16.6048 17.9407 16.4617 18 16.3125 18H1.6875C1.53832 18 1.39524 17.9407 1.28975 17.8352C1.18426 17.7298 1.125 17.5867 1.125 17.4375C1.125 17.2883 1.18426 17.1452 1.28975 17.0398C1.39524 16.9343 1.53832 16.875 1.6875 16.875H3.375V2.25C3.375 1.95163 3.49353 1.66548 3.7045 1.4545C3.91548 1.24353 4.20163 1.125 4.5 1.125H13.5ZM11.25 11.25C11.5484 11.25 11.8345 11.1315 12.0455 10.9205C12.2565 10.7095 12.375 10.4234 12.375 10.125C12.375 9.82663 12.2565 9.54048 12.0455 9.3295C11.8345 9.11853 11.5484 9 11.25 9C10.9516 9 10.6655 9.11853 10.4545 9.3295C10.2435 9.54048 10.125 9.82663 10.125 10.125C10.125 10.4234 10.2435 10.7095 10.4545 10.9205C10.6655 11.1315 10.9516 11.25 11.25 11.25Z" />
+                </svg>
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center mr-[2.5rem]">
+              <span
+                onClick={() => handleClick('/register')}
+                className='text-offWhite px-[1.5rem] cursor-pointer font-baloo2 hover:text-gray-300 transition-colors'
+              >
+                Register
+              </span>
+              <button
+                className="flex !bg-veryLightBrown text-darkBrown gap-1 items-center h-[2.1675rem] hover:text-brown !font-baloo2 transition-colors hover:!border-brown"
+                onClick={() => handleClick('/login')}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
+                  fill="currentColor"
+                >
+                  <path d="M13.5 1.125C13.7984 1.125 14.0845 1.24353 14.2955 1.4545C14.5065 1.66548 14.625 1.95163 14.625 2.25V16.875H16.3125C16.4617 16.875 16.6048 16.9343 16.7102 17.0398C16.8157 17.1452 16.875 17.2883 16.875 17.4375C16.875 17.5867 16.8157 17.7298 16.7102 17.8352C16.6048 17.9407 16.4617 18 16.3125 18H1.6875C1.53832 18 1.39524 17.9407 1.28975 17.8352C1.18426 17.7298 1.125 17.5867 1.125 17.4375C1.125 17.2883 1.18426 17.1452 1.28975 17.0398C1.39524 16.9343 1.53832 16.875 1.6875 16.875H3.375V2.25C3.375 1.95163 3.49353 1.66548 3.7045 1.4545C3.91548 1.24353 4.20163 1.125 4.5 1.125H13.5ZM11.25 11.25C11.5484 11.25 11.8345 11.1315 12.0455 10.9205C12.2565 10.7095 12.375 10.4234 12.375 10.125C12.375 9.82663 12.2565 9.54048 12.0455 9.3295C11.8345 9.11853 11.5484 9 11.25 9C10.9516 9 10.6655 9.11853 10.4545 9.3295C10.2435 9.54048 10.125 9.82663 10.125 10.125C10.125 10.4234 10.2435 10.7095 10.4545 10.9205C10.6655 11.1315 10.9516 11.25 11.25 11.25Z" />
+                </svg>
+                Login
+              </button>
+            </div>
+          )}
         </>
       ) : (
         <div className="mr-[2.5rem]">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="pagination" className="!bg-transparent hover:!border-none focus:!border-none active:!border-none">
+              <Button
+                variant="pagination"
+                className="!bg-transparent hover:!border-none focus:!border-none active:!border-none"
+              >
                 <IoMenu className="w-6 h-6" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 bg-offWhite">
               {Items.map((i) => (
                 <DropdownMenuItem
-                  className='hover:bg-veryLightBrown font-["Baloo_2"]'
+                  className='hover:bg-veryLightBrown font-baloo2'
                   key={i.path}
                   onClick={() => handleClick(i.path)}
                 >
@@ -138,20 +148,19 @@ export default function Header() {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              {isAuthenticated ?( 
-                  <DropdownMenuItem 
-                    onClick={() => logout()}>
-                    Logout
+              {isAuthenticated ? (
+                <DropdownMenuItem onClick={() => logout()}>Logout</DropdownMenuItem>
+              ) : (
+                authItems.map((i) => (
+                  <DropdownMenuItem
+                    className='hover:bg-veryLightBrown font-baloo2'
+                    key={i.path}
+                    onClick={() => handleClick(i.path)}
+                  >
+                    {i.name}
                   </DropdownMenuItem>
-                ) : authItems.map((i) => (
-                <DropdownMenuItem
-                  className='hover:bg-veryLightBrown font-["Baloo_2"]'
-                  key={i.path}
-                  onClick={() => handleClick(i.path)}
-                >
-                  {i.name}
-                </DropdownMenuItem>)) 
-                }
+                ))
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

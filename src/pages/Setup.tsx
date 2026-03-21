@@ -1,17 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Check } from 'lucide-react'
-// import { post } from "@/Api"
+import { patch } from '@/Api'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/context/AuthContext'
-import { AVATAR_IDS, PRESET_COLORS } from '@/constants/avatar'
+import {
+  AVATAR_IDS,
+  PRESET_COLORS,
+  getAvatarProfilePath,
+  getColorIdByValue,
+} from '@/constants/avatar'
 
 function Setup() {
   const navigate = useNavigate()
-  const { checkAuth } = useAuth()
+  const { checkAuth, user } = useAuth()
 
   const [loading, setLoading] = useState(false)
 
@@ -24,6 +29,12 @@ function Setup() {
     username: '',
   })
 
+  useEffect(() => {
+    if (user && !user.is_first_time) {
+      navigate('/home', { replace: true })
+    }
+  }, [user, navigate])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
@@ -31,34 +42,60 @@ function Setup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    const cleanedDisplayName = formData.displayName.trim()
+    const cleanedUsername = formData.username.replace(/^@+/, '').trim().toLowerCase()
 
-    const payload = {
-      name: formData.displayName,
-      username: formData.username,
-      avatarId: selectedAvatar,
-      backgroundColor: selectedColor,
+    if (!cleanedDisplayName) {
+      toast.error('Display name required\nEnter how you want other adventurers to see you.')
+      return
     }
 
+    if (!cleanedUsername) {
+      toast.error(
+        'Adventure tag required\nChoose a unique @tag using lowercase letters and numbers.'
+      )
+      return
+    }
+
+    if (!/^[a-z0-9]+$/.test(cleanedUsername)) {
+      toast.error(
+        'Invalid adventure tag\nUse only lowercase letters and numbers (no spaces or symbols).'
+      )
+      return
+    }
+
+    setLoading(true)
+
     try {
-      /* * =================================================================
-       * TODO: REPLACE API HERE
-       * =================================================================
-       */
-
-      // const res = await post("/api/user/setup", payload)
-
-      // --- START MOCK DATA SIMULATION ---
-      console.log('Mock API Payload:', payload)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      // --- END MOCK DATA SIMULATION ---
+      await patch<
+        {
+          name: string
+          username: string
+          selected_character_id: number
+          bg_color_id: number
+          is_first_time: boolean
+        },
+        { message: string }
+      >('/api/me/', {
+        name: cleanedDisplayName,
+        username: cleanedUsername,
+        selected_character_id: selectedAvatar,
+        bg_color_id: getColorIdByValue(selectedColor),
+        is_first_time: false,
+      })
 
       await checkAuth()
-      toast.success('Profile setup complete!')
+      toast.success('Profile setup complete!\nYou’re ready to join quests.')
       navigate('/home')
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err)
-      toast.error('Failed to update profile.')
+      const backendError =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { data?: { error?: string } } }).response?.data?.error
+          : undefined
+      toast.error(
+        `Couldn't save profile\n${backendError || 'Check your connection and try again.'}`
+      )
     } finally {
       setLoading(false)
     }
@@ -78,9 +115,14 @@ function Setup() {
                 style={{ backgroundColor: selectedColor }}
               >
                 <img
-                  src={`/avatars/${selectedAvatar}.png`}
+                  src={getAvatarProfilePath(selectedAvatar)}
                   alt={`Avatar ${selectedAvatar}`}
                   className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    const target = e.currentTarget
+                    target.onerror = null
+                    target.src = '/mockImg/profile.svg'
+                  }}
                 />
               </div>
 
@@ -101,9 +143,14 @@ function Setup() {
                       }`}
                     >
                       <img
-                        src={`/avatars/${num}.png`}
+                        src={getAvatarProfilePath(num)}
                         alt={`Option ${num}`}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.currentTarget
+                          target.onerror = null
+                          target.src = '/mockImg/profile.svg'
+                        }}
                       />
                     </div>
                   ))}
@@ -144,7 +191,7 @@ function Setup() {
                     value={formData.displayName}
                     onChange={handleChange}
                     placeholder="Enter your display name"
-                    className="w-full p-3 border-brown font-['Baloo_2']"
+                    className="w-full p-3 border-brown font-baloo2"
                     required
                   />
                 </div>
@@ -153,15 +200,28 @@ function Setup() {
               {/* Adventurer Tag */}
               <div className="flex flex-col gap-1.5">
                 <Label className="text-sm font-bold text-darkBrown">Adventurer Tag</Label>
-                <div className="relative">
-                  <Input
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    placeholder="Enter your unique username"
-                    className="w-full p-3 border-brown font-['Baloo_2']"
-                    required
-                  />
+                <div className="flex w-full">
+                  <span className="flex items-center rounded-l-lg border-2 border-y border-l border-brown bg-lightBrown/30 px-4 font-baloo2 text-darkBrown">
+                    @
+                  </span>
+                  <div className="flex-1">
+                    <Input
+                      name="username"
+                      value={formData.username}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          username: e.target.value
+                            .replace(/^@+/, '')
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]/g, ''),
+                        })
+                      }
+                      placeholder="Enter your unique username"
+                      className="w-full p-3 border-brown border-l-0 rounded-l-none font-baloo2"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -176,15 +236,6 @@ function Setup() {
               >
                 {loading ? 'Saving...' : 'Next: Choose Class'}
               </Button>
-
-              <div className="text-center">
-                <span
-                  onClick={() => navigate('/home')}
-                  className="text-sm text-lightBrown cursor-pointer hover:text-orange hover:underline"
-                >
-                  Fill this later
-                </span>
-              </div>
             </div>
           </div>
         </div>

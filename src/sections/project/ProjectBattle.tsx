@@ -1,16 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { BattleScene } from '@/components/battle/BattleScene';
-import { useBattleLogic } from '@/hook/useBattleLogic';
-import type { UserStatus } from "@/types/User"
-import { useParams } from "react-router-dom"
-import { useGame } from "@/hook/useGame"
-import { useProjects } from "@/hook/useProjects"
-import { ENTITY_CONFIG } from "@/config/battleConfig"
-import type { GameActionPayload } from "@/types/battleTypes"
-import toast from "react-hot-toast"
-import { useNavigate } from "react-router-dom"
-import { useAuth } from "@/context/AuthContext"
-import NotificationDialog from "@/components/NotificationDialog"
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { BattleScene } from '@/components/battle/BattleScene'
+import { useBattleLogic } from '@/hook/useBattleLogic'
+import type { UserStatus } from '@/types/User'
+import { useParams } from 'react-router-dom'
+import { useGame } from '@/hook/useGame'
+import { useProjects } from '@/hook/useProjects'
+import { ENTITY_CONFIG } from '@/config/battleConfig'
+import type { GameActionPayload } from '@/types/battleTypes'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
+import NotificationDialog from '@/components/NotificationDialog'
+import BattleResponsiveHud from '@/sections/project/BattleResponsiveHud'
 
 type ProjectBattleProps = {
   projectMembers: UserStatus[]
@@ -19,6 +20,9 @@ type ProjectBattleProps = {
   bossRefreshNonce?: number
   bossUpdate?: { hp: number; maxHp: number } | null
   bossUpdateNonce?: number
+  battleHudProjectId?: string | null
+  battleHudPhase?: number
+  showBattleHudPhase?: boolean
 }
 
 const ProjectBattle = ({
@@ -28,36 +32,32 @@ const ProjectBattle = ({
   bossRefreshNonce,
   bossUpdate,
   bossUpdateNonce,
+  battleHudProjectId,
+  battleHudPhase,
+  showBattleHudPhase = true,
 }: ProjectBattleProps) => {
-  const {
-    users,
-    boss,
-    setBoss,
-    handleGameAction
-  } = useBattleLogic(projectMembers);
+  const { users, boss, setBoss, handleGameAction } = useBattleLogic(projectMembers)
 
+  const applyBossPatch = useCallback(
+    (patch: {
+      id: string
+      status: 'idle' | 'dead' | 'hidden'
+      hp: number
+      maxHp: number
+    }) => {
+      setBoss((prev) => {
+        const nextStatus = patch.status === 'dead' ? 'hidden' : patch.status
 
-  const applyBossPatch = (patch: {
-    id: string
-    status: "idle" | "dead" | "hidden"
-    hp: number
-    maxHp: number
-  }) => {
-    setBoss((prev) => {
-      // Backend can stay in a "dead" status after defeat, but in the UI we want the
-      // boss to disappear (hidden) after the death animation, and also not show at all
-      // if we load the page while the boss is already dead.
-      const nextStatus =
-        patch.status === "dead" ? "hidden" : patch.status
-
-      return {
-        ...prev,
-        ...patch,
-        status: nextStatus,
-        hp: nextStatus === "hidden" ? 0 : patch.hp,
-      }
-    })
-  }
+        return {
+          ...prev,
+          ...patch,
+          status: nextStatus,
+          hp: nextStatus === 'hidden' ? 0 : patch.hp,
+        }
+      })
+    },
+    [setBoss],
+  )
 
   // Keep a stable reference to the latest handler so queue processing
   // doesn't restart/cancel on every re-render.
@@ -77,7 +77,7 @@ const ProjectBattle = ({
   // Hold boss updates (from backend refresh) while animations are running, so HP doesn't jump mid-animation.
   const pendingBossPatchRef = useRef<{
     id: string
-    status: "idle" | "dead" | "hidden"
+    status: 'idle' | 'dead' | 'hidden'
     hp: number
     maxHp: number
   } | null>(null)
@@ -87,7 +87,7 @@ const ProjectBattle = ({
   useEffect(() => {
     if (!bossUpdate) return
     bossUpdateRef.current = bossUpdate
-  }, [bossUpdateNonce]) // intentionally only keyed by nonce
+  }, [bossUpdateNonce, bossUpdate])
 
   const { projectId } = useParams<{ projectId: string }>()
   const { getProjectBoss, setupSpecialBoss, gameStatus, refreshGameStatus } = useGame()
@@ -95,10 +95,7 @@ const ProjectBattle = ({
   const navigate = useNavigate()
   const [isClosing, setIsClosing] = useState(false)
   const [isSettingUpSpecialBoss, setIsSettingUpSpecialBoss] = useState(false)
-  const deadUsers = useMemo(
-    () => (users ?? []).filter((u) => u.status === "dead"),
-    [users]
-  )
+  const deadUsers = useMemo(() => (users ?? []).filter((u) => u.status === 'dead'), [users])
   const { user } = useAuth()
   const myMemberId = useMemo(() => {
     const me = gameStatus?.user_statuses?.find((s) => s.user_id === user?.id)
@@ -113,12 +110,12 @@ const ProjectBattle = ({
     if (!projectId || !myMemberId) return
     try {
       await revivePlayer(projectId, { player_id: myMemberId })
-      toast.success("Revived!")
+      toast.success('You’re back in the fight!\nYour HP is restored—keep pushing the boss.')
       // Update battle UI immediately (so the overlay disappears) by queuing a local revive animation.
-      setActionQueue((prev) => [...prev, { act: "REVIVE", userId: myMemberId }])
+      setActionQueue((prev) => [...prev, { act: 'REVIVE', userId: myMemberId }])
       await refreshGameStatus()
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to revive")
+      toast.error(`Couldn’t revive\n${e instanceof Error ? e.message : 'Please try again.'}`)
     }
   }
 
@@ -127,11 +124,11 @@ const ProjectBattle = ({
     try {
       setIsClosing(true)
       await closeProject(projectId)
-      toast.success("Project closed")
+      toast.success('Project closed\nView your team’s results on the end screen.')
       // Best-effort: send user back to projects list (adjust if your route differs)
       navigate(`/project/${projectId}/project-end`)
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to close project")
+      toast.error(`Couldn’t close project\n${e instanceof Error ? e.message : 'Please try again.'}`)
     } finally {
       setIsClosing(false)
     }
@@ -142,28 +139,28 @@ const ProjectBattle = ({
     try {
       setIsSettingUpSpecialBoss(true)
       await setupSpecialBoss(projectId)
-      toast.success("Special boss summoned!")
+      toast.success('Special boss summoned!\nA tougher fight is ready when you are.')
 
       // Refresh boss state immediately so overlay disappears
       const projectBoss = await getProjectBoss(projectId)
       if (projectBoss?.boss_name) {
-        const configId =
-          bossNameToConfigId.get(projectBoss.boss_name.trim().toLowerCase()) ??
-          "b01"
-        const backendStatus = String(projectBoss.status || "")
-        const isDead = backendStatus.toLowerCase().includes("dead")
+        const configId = bossNameToConfigId.get(projectBoss.boss_name.trim().toLowerCase()) ?? 'b01'
+        const backendStatus = String(projectBoss.status || '')
+        const isDead = backendStatus.toLowerCase().includes('dead')
         applyBossPatch({
           id: configId,
-          status: isDead ? ("dead" as const) : ("idle" as const),
+          status: isDead ? ('dead' as const) : ('idle' as const),
           hp: projectBoss.hp,
           maxHp: projectBoss.max_hp,
         })
       } else {
         // If backend still doesn't return a boss, at least hide overlay by making boss visible idle
-        setBoss((prev) => ({ ...prev, status: "idle" }))
+        setBoss((prev) => ({ ...prev, status: 'idle' }))
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to setup special boss")
+      toast.error(
+        `Couldn’t summon special boss\n${e instanceof Error ? e.message : 'Please try again.'}`
+      )
     } finally {
       setIsSettingUpSpecialBoss(false)
     }
@@ -191,22 +188,19 @@ const ProjectBattle = ({
         // If boss is not yet setup, backend returns boss fields as null.
         if (!projectBoss?.boss_name) return
 
-        const configId =
-          bossNameToConfigId.get(projectBoss.boss_name.trim().toLowerCase()) ??
-          "b01"
+        const configId = bossNameToConfigId.get(projectBoss.boss_name.trim().toLowerCase()) ?? 'b01'
 
-        const backendStatus = String(projectBoss.status || "")
-        const isDead = backendStatus.toLowerCase().includes("dead")
+        const backendStatus = String(projectBoss.status || '')
+        const isDead = backendStatus.toLowerCase().includes('dead')
 
         const patch = {
           id: configId,
-          status: isDead ? ("dead" as const) : ("idle" as const),
+          status: isDead ? ('dead' as const) : ('idle' as const),
           hp: projectBoss.hp,
           maxHp: projectBoss.max_hp,
         }
 
-        const isBusy =
-          actionQueueLengthRef.current > 0 || isProcessingQueueRef.current
+        const isBusy = actionQueueLengthRef.current > 0 || isProcessingQueueRef.current
 
         if (isBusy) {
           pendingBossPatchRef.current = patch
@@ -214,14 +208,13 @@ const ProjectBattle = ({
         }
 
         applyBossPatch(patch)
-
       } catch {
         // ignore; keep default boss until backend is ready
       }
     }
 
     loadBoss()
-  }, [bossNameToConfigId, bossRefreshNonce, getProjectBoss, projectId, setBoss])
+  }, [applyBossPatch, bossNameToConfigId, bossRefreshNonce, getProjectBoss, projectId])
 
   // When queue finishes, apply any pending boss refresh patch.
   useEffect(() => {
@@ -231,7 +224,7 @@ const ProjectBattle = ({
     if (!patch) return
     pendingBossPatchRef.current = null
     applyBossPatch(patch)
-  }, [actionQueue.length, setBoss])
+  }, [actionQueue.length, applyBossPatch])
 
   useEffect(() => {
     if (!payloadBatch || payloadBatch.length === 0) return
@@ -253,7 +246,7 @@ const ProjectBattle = ({
 
         // If we're about to revive the boss for a next phase, apply the new max HP first
         // so the revive sets HP to the correct max.
-        if (action?.act === "BOSS_REVIVE") {
+        if (action?.act === 'BOSS_REVIVE') {
           const update = bossUpdateRef.current
           if (update?.maxHp && Number.isFinite(update.maxHp)) {
             setBoss((prev) => ({
@@ -267,10 +260,10 @@ const ProjectBattle = ({
         }
 
         await handleGameActionRef.current(action)
-        
+
         // Update boss HP after each animation completes (for ATTACK actions)
         // This ensures the HP bar in BattleScene reflects the latest HP immediately
-        if (action?.act === "ATTACK" || action?.act === "BOSS_ATTACK_USER") {
+        if (action?.act === 'ATTACK' || action?.act === 'BOSS_ATTACK_USER') {
           const update = bossUpdateRef.current
           if (update && Number.isFinite(update.hp) && Number.isFinite(update.maxHp)) {
             setBoss((prev) => ({
@@ -309,35 +302,55 @@ const ProjectBattle = ({
   }, [actionQueue])
 
   return (
-    <div className="relative bg-slate-950 text-white font-sans flex flex-col z-10 translate-y-[-12px]">
-      {(boss.status === "hidden" || boss.status === "dead") && (
-        <div className="absolute inset-0 z-[999] bg-black/50 flex items-center justify-center">
+    <div className="relative z-0 flex h-full min-h-0 min-w-0 flex-col bg-slate-950 font-sans text-white translate-y-[-12px]">
+      <div className="relative z-0 min-h-0 flex-1">
+        <BattleScene
+          users={users}
+          boss={boss}
+          projectId={projectId ?? null}
+          myProjectMemberId={myMemberId}
+        />
+      </div>
+      {battleHudProjectId ? (
+        <div className="pointer-events-none absolute left-0 right-0 top-0 z-[105]">
+          <div className="pointer-events-auto">
+            <BattleResponsiveHud
+              projectId={battleHudProjectId}
+              myProjectMemberId={myMemberId}
+              bossPhase={battleHudPhase}
+              showBossPhase={showBattleHudPhase}
+            />
+          </div>
+        </div>
+      ) : null}
+      {(boss.status === 'hidden' || boss.status === 'dead') && (
+        <div className="absolute inset-0 z-[999] flex items-center justify-center bg-black/50">
           <div className="text-center font-mono tracking-widest">
             <h1 className="text-yellow-300 text-2xl">BOSS DEFEATED</h1>
             <div className=" mt-2 tracking-normal flex flex-col">
-                <h3 className="!text-white"> Choose your next step: </h3>
-                <text>You may continue working without a boss, but no points will be awarded.</text>
-                <button
-                  onClick={handleChallengeSpecialBoss}
-                  disabled={isSettingUpSpecialBoss || isClosing}
-                  className="!bg-blue-500 hover:!bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded mt-2"
-                >
-                  Challenge Special Boss
-                </button>
-                <button
-                  onClick={handleEndJourney}
-                  disabled={isClosing}
-                  className="!bg-red-500 hover:!bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded mt-2"
-                >
-                  End your journey here
-                </button>
+              <h3 className="!text-white"> Choose your next step: </h3>
+              <text>You may continue working without a boss, but no points will be awarded.</text>
+              <button
+                onClick={handleChallengeSpecialBoss}
+                disabled={isSettingUpSpecialBoss || isClosing}
+                className="!bg-blue-500 hover:!bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded mt-2"
+              >
+                Challenge Special Boss
+              </button>
+              <button
+                onClick={handleEndJourney}
+                disabled={isClosing}
+                className="!bg-red-500 hover:!bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded mt-2"
+              >
+                End your journey here
+              </button>
             </div>
           </div>
         </div>
       )}
-      {isMeDead && boss.status !== "hidden" && boss.status !== "dead" && ( 
-        <div className="absolute bottom-0 left-0 right-0 flex z-[998] h-[22%] bg-black gap-4 items-center justify-center">
-          <div className="text-center items-end flex font-mono tracking-widest gap-4">
+      {isMeDead && boss.status !== 'hidden' && boss.status !== 'dead' && (
+        <div className="absolute bottom-0 left-0 right-0 z-[998] flex h-[22%] items-center justify-center gap-4 bg-black">
+          <div className="flex items-end justify-center gap-4 text-center font-mono tracking-widest">
             <h1 className="text-red-400 text-2xl">You Die</h1>
             <div className="mt-3 flex items-center justify-center pointer-events-auto">
               <NotificationDialog
@@ -355,15 +368,8 @@ const ProjectBattle = ({
           </div>
         </div>
       )}
-      <BattleScene 
-        users={users} 
-        boss={boss} 
-        projectId={projectId ?? null}
-        myProjectMemberId={myMemberId}
-        bossPhase={gameStatus?.boss_status?.phase}
-      />
     </div>
-  );
-};
+  )
+}
 
-export default ProjectBattle;
+export default ProjectBattle

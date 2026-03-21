@@ -86,7 +86,7 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
   }, []);
 
   return (
-    <div className="w-full pr-3 self-stretch bg-offWhite inline-flex flex-col justify-start items-start font-['Baloo_2']">
+    <div className="w-full pr-3 self-stretch bg-offWhite inline-flex flex-col justify-start items-start font-baloo2">
       <Header bgColor="bg-orange" textColor="text-offWhite" text="Damage Log" />
       {damageLogs.length > 0 ? (
         damageLogs.slice(0, showCount).map((log) => <DamageLogItem key={log.id} log={log} />)
@@ -97,7 +97,7 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
       )}
       <Button
         variant="shadow"
-        className="!bg-orange mr-4 w-full my-4 font-['Baloo_2']"
+        className="!bg-orange mr-4 w-full my-4 font-baloo2"
         onClick={() => setModalOpen(true)}
       >
         See More
@@ -107,12 +107,12 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
         <DialogContent
           variant="normal"
           showCloseButton={true}
-          className="!w-[66.666vw] !min-w-[320px] !max-w-[95vw] h-[80vh] min-h-[420px] max-h-[90vh] p-0 gap-0 bg-[#FDF8F0] border-darkBrown/10 font-['Baloo_2'] overflow-hidden flex flex-col"
+          className="!w-[66.666vw] !min-w-[320px] !max-w-[95vw] h-[80vh] min-h-[420px] max-h-[90vh] p-0 gap-0 bg-[#FDF8F0] border-darkBrown/10 font-baloo2 overflow-hidden flex flex-col"
         >
-          <div className="bg-[#FDF8F0] rounded-lg overflow-hidden font-['Baloo_2'] flex-1 min-h-0 flex flex-col">
+          <div className="bg-[#FDF8F0] rounded-lg overflow-hidden font-baloo2 flex-1 min-h-0 flex flex-col">
             <DialogTitle className="sr-only">Damage Log</DialogTitle>
             <div className="flex items-center justify-between px-6 py-4 border-b border-darkBrown/10 shrink-0">
-              <h2 className="text-2xl font-bold text-darkBrown font-['Baloo_2']">
+              <h2 className="text-2xl font-bold text-darkBrown font-baloo2">
                 Damage Log
               </h2>
             </div>
@@ -120,14 +120,14 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-0 flex-1 min-h-0">
               {/* All Damage Logs */}
               <div className="flex flex-col border-r border-darkBrown/10 min-h-0 overflow-hidden">
-                <p className="px-6 py-3 text-base !font-medium text-darkBrown shrink-0 font-['Baloo_2']">
+                <p className="px-6 py-3 text-base !font-medium text-darkBrown shrink-0 font-baloo2">
                   All Damage Logs
                 </p>
                 <div className="flex-1 min-h-0 overflow-hidden px-2">
                   <ScrollArea className="h-full">
                     <div className="px-4 pb-4 space-y-3">
                       {damageLogs.length === 0 ? (
-                        <p className="py-6 text-center text-darkBrown/70 font-['Baloo_2']">
+                        <p className="py-6 text-center text-darkBrown/70 font-baloo2">
                           No damage logs yet
                         </p>
                       ) : (
@@ -143,17 +143,17 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
               {/* Damage Logs by Person */}
               <div className="flex flex-col min-h-0 overflow-hidden">
                 <div className="flex items-center justify-between px-6 py-3 shrink-0 gap-2">
-                  <p className="text-base !font-medium text-darkBrown font-['Baloo_2']">
+                  <p className="text-base !font-medium text-darkBrown font-baloo2">
                     Damage Logs by Person
                   </p>
                   <Select
                     value={personFilter}
                     onValueChange={setPersonFilter}
                   >
-                    <SelectTrigger className="w-[150px] border-darkBrown/20 text-darkBrown bg-white/80 font-['Baloo_2']">
+                    <SelectTrigger className="w-[150px] border-darkBrown/20 text-darkBrown bg-white/80 font-baloo2">
                       <SelectValue placeholder="Filter" />
                     </SelectTrigger>
-                    <SelectContent className="font-['Baloo_2']">
+                    <SelectContent className="font-baloo2">
                       <SelectItem value="only-you">Only You</SelectItem>
                       <SelectItem value="all">All</SelectItem>
                       {uniqueParticipants.map((name) => (
@@ -168,7 +168,7 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
                   <ScrollArea className="h-full">
                     <div className="px-4 pb-4 space-y-3">
                       {filteredByPerson.length === 0 ? (
-                        <p className="py-6 text-center text-darkBrown/70 font-['Baloo_2']">
+                        <p className="py-6 text-center text-darkBrown/70 font-baloo2">
                           No logs for this filter
                         </p>
                       ) : (

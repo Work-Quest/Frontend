@@ -6,39 +6,40 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
-import { Calendar } from "lucide-react"
-import { useState, useEffect } from "react"
-import toast from "react-hot-toast"
-import type { Project } from "@/types/Project"
-import { isoToDateInput } from "@/util/Datetime"
-import { cn } from "@/lib/utils"
+} from '@/components/ui/select'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Calendar } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
+import type { Project } from '@/types/Project'
+import { isoToDateInput } from '@/util/Datetime'
+import { cn } from '@/lib/utils'
 
 type ProjectEditFormProps = {
   project: Project
-  onUpdateProject: (projectId: string, data: {
-    project_name: string
-    deadline: string
-    status: string
-  }) => Promise<Project>
+  onUpdateProject: (
+    projectId: string,
+    data: {
+      project_name: string
+      deadline: string
+      status: string
+    }
+  ) => Promise<Project>
 }
 
 export default function ProjectEditForm({ project, onUpdateProject }: ProjectEditFormProps) {
   const [open, setOpen] = useState(false)
   const [projectName, setProjectName] = useState(project.project_name)
-const [deadline, setDeadline] = useState(
-  isoToDateInput(project.deadline)
-)
+  const [deadline, setDeadline] = useState(isoToDateInput(project.deadline))
   const [status, setStatus] = useState(project.status)
 
   useEffect(() => {
@@ -54,12 +55,12 @@ const [deadline, setDeadline] = useState(
       await onUpdateProject(project.project_id, {
         project_name: projectName,
         deadline: deadline,
-        status: status
+        status: status,
       })
-      toast.success("Project updated successfully!")
+      toast.success('Project updated\nYour deadline and details are saved for the team.')
       setOpen(false)
     } catch (err) {
-      toast.error("Failed to update project.")
+      toast.error('Couldn’t update project\nCheck your connection and try again.')
       console.error(err)
     }
   }
@@ -67,17 +68,13 @@ const [deadline, setDeadline] = useState(
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="text-brown border-brown hover:bg-brown/10">
-          Edit Project
-        </Button>
+        <Button className="text-brown border-brown hover:bg-brown/10">Edit Project</Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Edit Project</DialogTitle>
-          <DialogDescription>
-            Make changes to your project here.
-          </DialogDescription>
+          <DialogDescription>Make changes to your project here.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
@@ -118,15 +115,15 @@ const [deadline, setDeadline] = useState(
 
             <Select
               value={status}
-              onValueChange={(value) =>
-                setStatus(value as "Working" | "Done")
-              }
+              onValueChange={(value) => setStatus(value as 'Working' | 'Done')}
             >
-              <SelectTrigger className={cn(
-                    "col-span-3 h-10 px-3 py-2 text-sm",
-                    status === "Done" && "bg-green-50 text-green-700",
-                    status === "Working" && "bg-orange/20 text-orange"
-                  )}>
+              <SelectTrigger
+                className={cn(
+                  'col-span-3 h-10 px-3 py-2 text-sm',
+                  status === 'Done' && 'bg-green-50 text-green-700',
+                  status === 'Working' && 'bg-orange/20 text-orange'
+                )}
+              >
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
 
@@ -144,16 +141,3 @@ const [deadline, setDeadline] = useState(
     </Dialog>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

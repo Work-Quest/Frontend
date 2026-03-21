@@ -69,7 +69,7 @@ export default function AchievementModal({
                     />
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="!font-['Baloo_2'] !bg-darkBrown !text-white !border-none !z-[100] !px-3 !py-1.5 !max-w-[200px] !text-center !rounded-md">
+                <TooltipContent className="!font-baloo2 !bg-darkBrown !text-white !border-none !z-[100] !px-3 !py-1.5 !max-w-[200px] !text-center !rounded-md">
                   <p className="!text-white !text-sm leading-tight">
                     {badge.description || badge.name}
                   </p>

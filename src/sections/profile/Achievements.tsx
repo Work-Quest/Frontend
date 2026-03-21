@@ -44,7 +44,7 @@ export default function Achievements() {
   if (error) {
     return (
       <div className="flex flex-col gap-4 p-4 border-2 rounded-lg border-veryLightBrown">
-        <p className="!text-2xl font-bold font-['Baloo_2'] text-darkBrown">Achievements</p>
+        <p className="!text-2xl font-bold font-baloo2 text-darkBrown">Achievements</p>
         <p className="!text-sm !text-red-600">{error}</p>
       </div>
     )

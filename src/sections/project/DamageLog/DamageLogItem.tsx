@@ -12,7 +12,7 @@ const DamageLogItem: React.FC<DamageLogItemProps> = ({ log }) => {
   };
 
   return (
-    <div className="self-stretch px-6 py-4 border-b-[3px] border-lightBrown border-dashed inline-flex flex-col justify-start items-start gap-2 font-['Baloo_2']">
+    <div className="self-stretch px-6 py-4 border-b-[3px] border-lightBrown border-dashed inline-flex flex-col justify-start items-start gap-2 font-baloo2">
       <div className="self-stretch inline-flex justify-start items-center gap-2">
         <div className="flex-1 flex justify-start items-center gap-4">
           <div className="justify-start text-darkBrown text-base font-bold">

@@ -1,13 +1,13 @@
-"use client"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import { DotLottieReact } from "@lottiefiles/dotlottie-react"
-import { FaCaretDown } from "react-icons/fa"
-import { useEffect, useState, useCallback, useRef } from "react"
-import { useNavigate } from "react-router-dom";
+import { Button } from '@/components/ui/button'
+import { DotLottieReact, type DotLottie } from '@lottiefiles/dotlottie-react'
+import { FaCaretDown } from 'react-icons/fa'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 function Landing() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const [animationStage, setAnimationStage] = useState(0)
   const [isScrollVisible, setIsScrollVisible] = useState(true)
   const [currentFlow, setCurrentFlow] = useState<string | null>(null)
@@ -36,42 +36,42 @@ function Landing() {
         if (isInView && !isFlowSectionInView && !currentFlow) {
           setIsFlowSectionInView(true)
           setIsTransitioning(true)
-          setCurrentFlow("flow1")
+          setCurrentFlow('flow1')
         }
       }
     }
 
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener('scroll', handleScroll)
 
     return () => {
       timeouts.forEach((timeout) => clearTimeout(timeout))
-      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener('scroll', handleScroll)
     }
   }, [isFlowSectionInView, currentFlow])
 
   const dotLottieRefCallback = useCallback(
-    (dotLottie: any) => {
-      if (dotLottie && currentFlow === "flow1") {
+    (dotLottie: DotLottie | null) => {
+      if (dotLottie && currentFlow === 'flow1') {
         const handleComplete = () => {
-          setCurrentFlow("flow2")
+          setCurrentFlow('flow2')
           setShowButton(true)
         }
-        dotLottie.addEventListener("complete", handleComplete)
+        dotLottie.addEventListener('complete', handleComplete)
         setTimeout(() => {
-          setCurrentFlow("flow2")
+          setCurrentFlow('flow2')
           setShowButton(true)
         }, 3000)
 
         return () => {
-          dotLottie.removeEventListener("complete", handleComplete)
+          dotLottie.removeEventListener('complete', handleComplete)
         }
       }
     },
-    [currentFlow],
+    [currentFlow]
   )
 
   useEffect(() => {
-    if (currentFlow === "flow1" && isTransitioning) {
+    if (currentFlow === 'flow1' && isTransitioning) {
       const timer = setTimeout(() => {
         setIsTransitioning(false)
       }, 800)
@@ -122,7 +122,9 @@ function Landing() {
           <div className="order-2 lg:order-1 flex justify-center">
             <div
               className={`transition-all duration-1000 ease-out ${
-                animationStage >= 1 ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-95"
+                animationStage >= 1
+                  ? 'opacity-100 translate-y-0 scale-100'
+                  : 'opacity-0 translate-y-8 scale-95'
               }`}
             >
               <DotLottieReact
@@ -138,7 +140,7 @@ function Landing() {
             <div>
               <div
                 className={`transition-all duration-800 ease-out delay-100 ${
-                  animationStage >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+                  animationStage >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 }`}
               >
                 <h2 className="!text-red text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold">
@@ -148,7 +150,7 @@ function Landing() {
 
               <div
                 className={`transition-all duration-800 ease-out delay-200 ${
-                  animationStage >= 3 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+                  animationStage >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 }`}
               >
                 <h3 className="!text-brown text-lg sm:text-xl lg:text-2xl mt-2">
@@ -159,11 +161,16 @@ function Landing() {
 
             <div
               className={`w-full max-w-sm transition-all duration-800 ease-out delay-300 ${
-                animationStage >= 4 ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-6 scale-95"
+                animationStage >= 4
+                  ? 'opacity-100 translate-y-0 scale-100'
+                  : 'opacity-0 translate-y-6 scale-95'
               }`}
             >
-              <Button className="w-full !font-bold text-sm sm:text-base
-              "onClick={() => navigate('/home')}>
+              <Button
+                className="w-full !font-bold text-sm sm:text-base
+              "
+                onClick={() => navigate('/home')}
+              >
                 Start Your Quest
               </Button>
             </div>
@@ -174,7 +181,7 @@ function Landing() {
       {/* Scroll Indicator */}
       <div
         className={`flex justify-center items-center animate-bounce transition-opacity duration-700 ease-out pb-4 ${
-          animationStage >= 5 && isScrollVisible ? "opacity-100" : "opacity-0"
+          animationStage >= 5 && isScrollVisible ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <FaCaretDown size={20} className="text-brown mr-2 sm:mr-4" />
@@ -186,13 +193,17 @@ function Landing() {
         {/* Crush Your Tasks Section */}
         <div className="flex flex-col lg:flex-row justify-center items-center gap-8 lg:gap-12 max-w-6xl mx-auto">
           <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left max-w-md lg:max-w-lg">
-            <h2 className="!text-red text-xl sm:text-2xl lg:text-3xl font-bold mb-4">Crush Your Tasks!</h2>
+            <h2 className="!text-red text-xl sm:text-2xl lg:text-3xl font-bold mb-4">
+              Crush Your Tasks!
+            </h2>
             <div className="text-sm sm:text-base">
-              <span className="text-brown font-medium font-['Baloo_2'] mr-2">
-                Take on powerful bosses by completing your tasks. Every task you finish brings you closer to victory and
-                unlocks new challenges.
+              <span className="text-brown font-medium font-baloo2 mr-2">
+                Take on powerful bosses by completing your tasks. Every task you finish brings you
+                closer to victory and unlocks new challenges.
               </span>
-              <span className="text-orange font-bold font-['Baloo_2']">Ready to be the ultimate champion?</span>
+              <span className="text-orange font-bold font-baloo2">
+                Ready to be the ultimate champion?
+              </span>
             </div>
           </div>
           <DotLottieReact
@@ -206,10 +217,12 @@ function Landing() {
         {/* Team Up Section */}
         <div className="flex flex-col lg:flex-row-reverse justify-center items-center gap-8 lg:gap-12 max-w-6xl mx-auto">
           <div className="flex flex-col justify-center items-center lg:items-end text-center lg:text-right max-w-md lg:max-w-lg">
-            <h2 className="!text-red text-xl sm:text-2xl lg:text-3xl font-bold mb-4">Team Up, Power Up!</h2>
+            <h2 className="!text-red text-xl sm:text-2xl lg:text-3xl font-bold mb-4">
+              Team Up, Power Up!
+            </h2>
             <p className="text-sm sm:text-base">
-              Make teamwork fun and productive by collaborating smoothly and reaching goals together. Boost motivation,
-              share ideas, and celebrate every win as a team!
+              Make teamwork fun and productive by collaborating smoothly and reaching goals
+              together. Boost motivation, share ideas, and celebrate every win as a team!
             </p>
           </div>
           <DotLottieReact
@@ -223,10 +236,12 @@ function Landing() {
         {/* Compete Section */}
         <div className="flex flex-col lg:flex-row justify-center items-center gap-8 lg:gap-12 max-w-6xl mx-auto">
           <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left max-w-md lg:max-w-lg">
-            <h2 className="!text-red text-xl sm:text-2xl lg:text-3xl font-bold mb-4">Compete, Conquer, Climb!</h2>
+            <h2 className="!text-red text-xl sm:text-2xl lg:text-3xl font-bold mb-4">
+              Compete, Conquer, Climb!
+            </h2>
             <p className="text-sm sm:text-base">
-              Challenge your friends to exciting battles and climb the leaderboards. Show off your skills, earn rewards,
-              and become the top player in your circle!
+              Challenge your friends to exciting battles and climb the leaderboards. Show off your
+              skills, earn rewards, and become the top player in your circle!
             </p>
           </div>
           <DotLottieReact
@@ -240,10 +255,12 @@ function Landing() {
         {/* AI Feedback Section */}
         <div className="flex flex-col lg:flex-row-reverse justify-center items-center gap-8 lg:gap-12 max-w-6xl mx-auto">
           <div className="flex flex-col justify-center items-center lg:items-end text-center lg:text-right max-w-md lg:max-w-lg">
-            <h2 className="!text-red text-xl sm:text-2xl lg:text-3xl font-bold mb-4">Smart Feedback, Powered by AI</h2>
+            <h2 className="!text-red text-xl sm:text-2xl lg:text-3xl font-bold mb-4">
+              Smart Feedback, Powered by AI
+            </h2>
             <p className="text-sm sm:text-base">
-              Get fast, helpful feedback on your work with the power of AI. Improve quicker, fix mistakes smarter, and
-              grow your skills with every task you complete!
+              Get fast, helpful feedback on your work with the power of AI. Improve quicker, fix
+              mistakes smarter, and grow your skills with every task you complete!
             </p>
           </div>
           <DotLottieReact
@@ -259,17 +276,17 @@ function Landing() {
       <div
         ref={flowSectionRef}
         className="flex justify-center items-center w-full relative mt-12 sm:mt-16 lg:mt-24"
-        style={{ height: "calc(100vh - 140px)" }}
+        style={{ height: 'calc(100vh - 140px)' }}
       >
         {currentFlow && (
           <div
-            className={`flow-container ${currentFlow === "flow1" && isTransitioning ? "jump-animation" : ""} absolute z-10 flex justify-center items-center`}
+            className={`flow-container ${currentFlow === 'flow1' && isTransitioning ? 'jump-animation' : ''} absolute z-10 flex justify-center items-center`}
           >
             <DotLottieReact
-              src={currentFlow === "flow1" ? "flow1.lottie" : "flow2.lottie"}
+              src={currentFlow === 'flow1' ? 'flow1.lottie' : 'flow2.lottie'}
               autoplay
-              loop={currentFlow === "flow2"}
-              dotLottieRefCallback={currentFlow === "flow1" ? dotLottieRefCallback : undefined}
+              loop={currentFlow === 'flow2'}
+              dotLottieRefCallback={currentFlow === 'flow1' ? dotLottieRefCallback : undefined}
               className="w-130 h-130 sm:w-135 sm:h-135 md:w-140 md:h-140 lg:w-145 lg:h-145 xl:w-150 xl:h-150"
             />
           </div>
@@ -278,8 +295,8 @@ function Landing() {
           className="absolute z-20 w-3/4 sm:w-2/3 md:w-1/2 lg:w-1/3 !font-bold bottom-16 sm:bottom-20 lg:bottom-32 !text-darkBrown text-sm sm:text-base"
           style={{
             opacity: showButton ? 1 : 0,
-            transition: "opacity 1s ease-out",
-            pointerEvents: showButton ? "auto" : "none",
+            transition: 'opacity 1s ease-out',
+            pointerEvents: showButton ? 'auto' : 'none',
           }}
           onClick={() => navigate('/home')}
         >

@@ -64,7 +64,7 @@ const MultiCombobox = ({
       {label && (
         <Label
           htmlFor={id}
-          className="font-['Baloo_2'] font-bold text-darkBrown"
+          className="font-baloo2 font-bold text-darkBrown"
         >
           {label}
         </Label>

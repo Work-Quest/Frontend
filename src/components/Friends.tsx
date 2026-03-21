@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import FriendBox from "./FriendBox";
 import { ScrollArea } from "../components/ui/scroll-area";
 import type { UserProfile } from "@/types/User";
+import { getAvatarProfilePath } from "@/constants/avatar";
 
 interface FriendsProps {
   friendsCount?: number;
@@ -30,7 +31,10 @@ export default function Friends(friendsProps: FriendsProps) {
             {friendsProps.friends?.map((friend, index) => (
               <FriendBox
                 key={index}
-                profilePicture={friend.profileImg}
+                profilePicture={
+                  friend.profileImg ??
+                  getAvatarProfilePath(friend.selectedCharacterId)
+                }
                 name={friend.name}
                 username={friend.username}
                 avatarFallback={friend.avatarFallback}

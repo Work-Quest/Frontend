@@ -16,7 +16,7 @@ export default function LoadingScreen({
       aria-live="polite"
     >
       <LoadingSpinner size="lg" />
-      <p className="font-['Baloo_2'] text-brown/80 text-sm font-medium animate-pulse">
+      <p className="font-baloo2 text-brown/80 text-sm font-medium animate-pulse">
         {message}
       </p>
     </div>
