@@ -61,11 +61,11 @@ export default function EditProfile() {
         bg_color_id: getColorIdByValue(backgroundColor),
       })
       await checkAuth()
-      toast.success('Profile updated!')
+      toast.success('Profile updated!\nYour new look is saved.')
       navigate(user?.id ? `/profile/${user.id}` : '/home')
     } catch (error) {
       console.error(error)
-      toast.error('Failed to update profile.')
+      toast.error('Couldn’t update profile\nCheck your connection and try again.')
     } finally {
       setSaving(false)
     }

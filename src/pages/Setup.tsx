@@ -46,17 +46,21 @@ function Setup() {
     const cleanedUsername = formData.username.replace(/^@+/, '').trim().toLowerCase()
 
     if (!cleanedDisplayName) {
-      toast.error('Display name is required.')
+      toast.error('Display name required\nEnter how you want other adventurers to see you.')
       return
     }
 
     if (!cleanedUsername) {
-      toast.error('Adventure tag is required.')
+      toast.error(
+        'Adventure tag required\nChoose a unique @tag using lowercase letters and numbers.'
+      )
       return
     }
 
     if (!/^[a-z0-9]+$/.test(cleanedUsername)) {
-      toast.error('Adventure tag must use lowercase letters and numbers only.')
+      toast.error(
+        'Invalid adventure tag\nUse only lowercase letters and numbers (no spaces or symbols).'
+      )
       return
     }
 
@@ -81,7 +85,7 @@ function Setup() {
       })
 
       await checkAuth()
-      toast.success('Profile setup complete!')
+      toast.success('Profile setup complete!\nYou’re ready to join quests.')
       navigate('/home')
     } catch (err: unknown) {
       console.error(err)
@@ -89,7 +93,9 @@ function Setup() {
         err && typeof err === 'object' && 'response' in err
           ? (err as { response?: { data?: { error?: string } } }).response?.data?.error
           : undefined
-      toast.error(backendError || 'Failed to update profile.')
+      toast.error(
+        `Couldn't save profile\n${backendError || 'Check your connection and try again.'}`
+      )
     } finally {
       setLoading(false)
     }

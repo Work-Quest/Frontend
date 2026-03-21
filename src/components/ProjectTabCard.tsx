@@ -1,24 +1,38 @@
-import type { Project } from "@/types/Project"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Button } from "./ui/button"
-import { Badge } from "./ui/badge"
-import { Calendar, User, Target, CheckCircle } from "lucide-react"
-import ProjectEditForm from "./ProjectEditForm"
-import { useNavigate } from "react-router-dom"
-import toast from "react-hot-toast"
-import NotificationDialog from "./NotificationDialog"
+import type { Project } from '@/types/Project'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Button } from './ui/button'
+import { Badge } from './ui/badge'
+import { Calendar, User, Target, CheckCircle } from 'lucide-react'
+import ProjectEditForm from './ProjectEditForm'
+import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import NotificationDialog from './NotificationDialog'
 
 type ProfileTabCardProps = {
   project: Project
-  onUpdateProject: (projectId: string, data: {
+  onUpdateProject: (
+    projectId: string,
+    data: {
       project_name: string
       deadline: string
       status: string
-    }) => Promise<Project>
+    }
+  ) => Promise<Project>
   onDelete: (projectId: string) => void
 }
 
-export default function ProjectTabCard({ project, onUpdateProject, onDelete }: ProfileTabCardProps) {
+export default function ProjectTabCard({
+  project,
+  onUpdateProject,
+  onDelete,
+}: ProfileTabCardProps) {
   const completionPercentage = Math.round((project.completed_tasks / project.total_tasks) * 100)
   const navigate = useNavigate()
   return (
@@ -36,17 +50,19 @@ export default function ProjectTabCard({ project, onUpdateProject, onDelete }: P
                   style={{ width: `${completionPercentage}%` }}
                 ></div>
               </div>
-              <span className="text-xs text-brown/70 font-['Baloo_2']">{completionPercentage}%</span>
+              <span className="text-xs text-brown/70 font-['Baloo_2']">
+                {completionPercentage}%
+              </span>
             </div>
           </div>
           <div className="flex justify-between w-[40%] items-center">
             <div className="flex flex-col items-center">
               <Badge
-                variant={project.status === "Done" ? "default" : "secondary"}
+                variant={project.status === 'Done' ? 'default' : 'secondary'}
                 className={`text-xs ${
-                  project.status === "Done"
-                    ? "bg-green-500 hover:bg-green-600 text-white"
-                    : "bg-orange/20 text-orange hover:bg-orange/30"
+                  project.status === 'Done'
+                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                    : 'bg-orange/20 text-orange hover:bg-orange/30'
                 }`}
               >
                 {project.status}
@@ -54,7 +70,9 @@ export default function ProjectTabCard({ project, onUpdateProject, onDelete }: P
             </div>
             <div className="flex items-center w-[60%] justify-end">
               <div className="w-6 h-6 bg-orange/20 rounded-full flex items-center justify-center mr-2">
-                <span className="text-xs font-bold text-orange">{project.owner_username.charAt(0).toUpperCase()}</span>
+                <span className="text-xs font-bold text-orange">
+                  {project.owner_username.charAt(0).toUpperCase()}
+                </span>
               </div>
               <p className="text-right overflow-hidden !font-medium !text-brown truncate text-sm">
                 {project.owner_username}
@@ -65,9 +83,7 @@ export default function ProjectTabCard({ project, onUpdateProject, onDelete }: P
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center">
-            {project.project_name}
-          </DialogTitle>
+          <DialogTitle className="flex items-center">{project.project_name}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-4">
@@ -82,14 +98,18 @@ export default function ProjectTabCard({ project, onUpdateProject, onDelete }: P
               <Calendar className="w-4 h-4 text-brown/60" />
               <div>
                 <p className="!font-semibold !text-brown -mb-1">Start Date</p>
-                <p className="text-sm text-brown/80">{new Date(project.created_at).toLocaleDateString()}</p>
+                <p className="text-sm text-brown/80">
+                  {new Date(project.created_at).toLocaleDateString()}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Calendar className="w-4 h-4 text-red" />
               <div>
                 <p className="!font-semibold !text-brown -mb-1">Deadline</p>
-                <p className="text-sm text-brown/80">{new Date(project.deadline).toLocaleDateString()}</p>
+                <p className="text-sm text-brown/80">
+                  {new Date(project.deadline).toLocaleDateString()}
+                </p>
               </div>
             </div>
           </div>
@@ -119,15 +139,17 @@ export default function ProjectTabCard({ project, onUpdateProject, onDelete }: P
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className={`w-4 h-4 rounded-full ${project.status === "Done" ? "bg-green-500" : "bg-orange"}`} />
+              <div
+                className={`w-4 h-4 rounded-full ${project.status === 'Done' ? 'bg-green-500' : 'bg-orange'}`}
+              />
               <div>
                 <p className="!font-semibold !text-brown -mb-1">Status</p>
                 <Badge
-                  variant={project.status === "Done" ? "default" : "secondary"}
+                  variant={project.status === 'Done' ? 'default' : 'secondary'}
                   className={
-                    project.status === "Done"
-                      ? "bg-green-500 hover:bg-green-600 text-white"
-                      : "bg-orange/20 text-orange"
+                    project.status === 'Done'
+                      ? 'bg-green-500 hover:bg-green-600 text-white'
+                      : 'bg-orange/20 text-orange'
                   }
                 >
                   {project.status}
@@ -139,43 +161,50 @@ export default function ProjectTabCard({ project, onUpdateProject, onDelete }: P
         <div className="mt-6 p-4 bg-orange/10 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/placeholder.svg?height=40&width=40" alt="boss" className="w-10 h-10 rounded-lg" />
+              <img
+                src="/placeholder.svg?height=40&width=40"
+                alt="boss"
+                className="w-10 h-10 rounded-lg"
+              />
               <div>
                 <p className="!font-semibold !text-brown">Boss Challenge</p>
                 <p className="!text-brown/70">Ready to face the challenge?</p>
               </div>
             </div>
-            <Button 
-              variant="warning" 
-              className="!bg-orange hover:!bg-orange/90 hover:!outline-none !font-['Baloo_2']" 
+            <Button
+              variant="warning"
+              className="!bg-orange hover:!bg-orange/90 hover:!outline-none !font-['Baloo_2']"
               onClick={() => {
-                if (project.status === "Done") {
-                  toast.error("This project is already completed")
+                if (project.status === 'Done') {
+                  toast.error(
+                    'This quest is finished\nView results from your completed projects list.'
+                  )
                   return
                 }
                 // Route is guarded: if boss isn't setup yet, user will be redirected to /setup
                 navigate(`/project/${project.project_id}`)
-                }}>
-                Let's Fight!
+              }}
+            >
+              Let's Fight!
             </Button>
           </div>
         </div>
         <DialogFooter>
           <ProjectEditForm project={project} onUpdateProject={onUpdateProject} />
           <NotificationDialog
-              title="Delete Project"
-              description="Are you sure you want to proceed with this action? All Project history will be lost forever."
-              trigger={<Button className="text-red">Delete Project</Button>}
-              onConfirm={async () => {
-                  try {
-                    await onDelete(project.project_id)
-                    toast.success("Project deleted successfully")
-                  } catch (err) {
-                    toast.error("Failed to delete project.")
-                    console.error(err)
-                  }
-                }}
-              />
+            title="Delete Project"
+            description="Are you sure you want to proceed with this action? All Project history will be lost forever."
+            trigger={<Button className="text-red">Delete Project</Button>}
+            onConfirm={async () => {
+              try {
+                await onDelete(project.project_id)
+                toast.success('Project deleted\nIt’s removed from your list permanently.')
+              } catch (err) {
+                toast.error('Couldn’t delete project\nTry again or refresh the page.')
+                console.error(err)
+              }
+            }}
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,52 +1,54 @@
-"use client";
+'use client'
 
-import React, { useState, useEffect, useMemo } from "react"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import ToggleButton from "@/components/ToggleButton"
-import ProjectDetailCard from "@/sections/project/ProjectDetailCard/ProjectDetailCard"
-import ReviewTask from "@/sections/project/ReviewTask/ReviewTask"
-import DamageLog from "@/sections/project/DamageLog/DamageLog";
-import { KanbanBoard } from "@/sections/project/KanbanBoard/KanbanBoard";
-import { useKanbanBoard } from "@/sections/project/KanbanBoard/useKanbanBoard";
-import { useTask } from "@/hook/useTask";
-import { useProjectMembers } from "@/hook/useProjectMembers";
-import BossPlaceholder from "@/sections/project/BossPlaceholder";
-import { useParams, useNavigate } from "react-router-dom";
-import { useGame } from "@/hook/useGame";
-import toast from "react-hot-toast";
-import type { GameActionPayload } from "@/types/battleTypes";
-import useLog from "@/hook/useLog";
-import { useAuth } from "@/context/AuthContext";
-import { useOverdueBossAttack } from "@/hook/useOverdueBossAttack";
-import { POLLING_CONFIG } from "@/config/pollingConfig";
-import { getActionKey } from "@/utils/actionDeduplication";
-import { useAnimationSync } from "@/hook/useAnimationSync";
-import { useProjects } from "@/hook/useProjects";
-import DeadlineWarningModal from "@/sections/project/DeadlineWarningModal";
-import { useEstimateFinishTime } from "@/hook/useEstimateFinishTime";
+import React, { useState, useEffect, useMemo } from 'react'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import ToggleButton from '@/components/ToggleButton'
+import ProjectDetailCard from '@/sections/project/ProjectDetailCard/ProjectDetailCard'
+import ReviewTask from '@/sections/project/ReviewTask/ReviewTask'
+import DamageLog from '@/sections/project/DamageLog/DamageLog'
+import { KanbanBoard } from '@/sections/project/KanbanBoard/KanbanBoard'
+import { useKanbanBoard } from '@/sections/project/KanbanBoard/useKanbanBoard'
+import { useTask } from '@/hook/useTask'
+import { useProjectMembers } from '@/hook/useProjectMembers'
+import BossPlaceholder from '@/sections/project/BossPlaceholder'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useGame } from '@/hook/useGame'
+import toast from 'react-hot-toast'
+import type { GameActionPayload } from '@/types/battleTypes'
+import useLog from '@/hook/useLog'
+import { useAuth } from '@/context/AuthContext'
+import { useOverdueBossAttack } from '@/hook/useOverdueBossAttack'
+import { POLLING_CONFIG } from '@/config/pollingConfig'
+import { getActionKey } from '@/utils/actionDeduplication'
+import { useAnimationSync } from '@/hook/useAnimationSync'
+import { useProjects } from '@/hook/useProjects'
+import DeadlineWarningModal from '@/sections/project/DeadlineWarningModal'
+import { useEstimateFinishTime } from '@/hook/useEstimateFinishTime'
 
 const ProjectPage: React.FC = () => {
-  const [showBossPlaceholder, setShowBossPlaceholder] = useState(true);
+  const [showBossPlaceholder, setShowBossPlaceholder] = useState(true)
   const { projectId } = useParams<{ projectId: string }>()
   const { projects, closeProject } = useProjects()
   const navigate = useNavigate()
   const { estimatedDays } = useEstimateFinishTime(projectId)
-  const { fetchedTask } = useTask({ pollIntervalMs: POLLING_CONFIG.tasks.interval });
+  const { fetchedTask } = useTask({ pollIntervalMs: POLLING_CONFIG.tasks.interval })
   const { projectMembers } = useProjectMembers(projectId)
-  const { logs, loading: logsLoading } = useLog(projectId, { pollIntervalMs: POLLING_CONFIG.logs.interval });
-  const { playerAttack, bossAttack, gameStatus } = useGame(projectId, { pollIntervalMs: POLLING_CONFIG.gameStatus.interval });
-  const [payloadBatch, setPayloadBatch] = useState<GameActionPayload[] | null>(
-    null,
-  );
-  const [payloadBatchNonce, setPayloadBatchNonce] = useState(0);
-  const [bossRefreshNonce, setBossRefreshNonce] = useState(0);
+  const { logs, loading: logsLoading } = useLog(projectId, {
+    pollIntervalMs: POLLING_CONFIG.logs.interval,
+  })
+  const { playerAttack, bossAttack, gameStatus } = useGame(projectId, {
+    pollIntervalMs: POLLING_CONFIG.gameStatus.interval,
+  })
+  const [payloadBatch, setPayloadBatch] = useState<GameActionPayload[] | null>(null)
+  const [payloadBatchNonce, setPayloadBatchNonce] = useState(0)
+  const [bossRefreshNonce, setBossRefreshNonce] = useState(0)
   const [bossUpdate, setBossUpdate] = useState<{
-    hp: number;
-    maxHp: number;
-  } | null>(null);
-  const [bossUpdateNonce, setBossUpdateNonce] = useState(0);
+    hp: number
+    maxHp: number
+  } | null>(null)
+  const [bossUpdateNonce, setBossUpdateNonce] = useState(0)
   // Track API actions to prevent duplicates from log polling
-  const apiActionsRef = React.useRef<Map<string, number>>(new Map());
+  const apiActionsRef = React.useRef<Map<string, number>>(new Map())
 
   // Clear API actions tracking when projectId changes
   useEffect(() => {
@@ -80,67 +82,71 @@ const ProjectPage: React.FC = () => {
   }, [])
 
   const bumpBossRefresh = React.useCallback(() => {
-    setBossRefreshNonce((n) => n + 1);
-  }, []);
+    setBossRefreshNonce((n) => n + 1)
+  }, [])
 
   const handleMovedToDone = React.useCallback(
     async (taskId: string) => {
-      if (!projectId) return;
-      console.log(`Task ${taskId} moved to Done, initiating attack...`);
+      if (!projectId) return
+      console.log(`Task ${taskId} moved to Done, initiating attack...`)
       try {
-        const res = await playerAttack(projectId, { task_id: taskId });
-        const attacked = res.result.attacks?.length ?? 0;
-        const skipped = res.result.skipped?.length ?? 0;
+        const res = await playerAttack(projectId, { task_id: taskId })
+        const attacked = res.result.attacks?.length ?? 0
+        const skipped = res.result.skipped?.length ?? 0
         if (attacked > 0)
-          toast.success(`Boss attacked by ${attacked} assignee(s)`);
-        if (skipped > 0) toast(`Skipped ${skipped} assignee(s)`);
-        const bossPhaseAdvanced = !!res.result.boss_phase_advanced;
-        const bossWasDefeated =
-          bossPhaseAdvanced || (res.result.boss_hp ?? 0) <= 0;
+          toast.success(
+            `Boss attacked by ${attacked} assignee(s)\nDamage was dealt based on completed tasks.`
+          )
+        if (skipped > 0)
+          toast(`Skipped ${skipped} assignee(s)\nThey weren’t eligible to attack this round.`)
+        const bossPhaseAdvanced = !!res.result.boss_phase_advanced
+        const bossWasDefeated = bossPhaseAdvanced || (res.result.boss_hp ?? 0) <= 0
 
         if (bossPhaseAdvanced) {
           const phaseLabel =
-            typeof res.result.boss_phase === "number"
+            typeof res.result.boss_phase === 'number'
               ? `Phase ${res.result.boss_phase}`
-              : "next phase";
-          toast.success(`Boss advanced to ${phaseLabel}!`);
+              : 'next phase'
+          toast.success(
+            `Boss advanced to ${phaseLabel}!\nGet ready—the fight gets tougher from here.`
+          )
         }
 
-        const actions: GameActionPayload[] = (res.result.attacks ?? []).map(
-          (a) => ({ act: "ATTACK", userId: String(a.player_id) }),
-        );
+        const actions: GameActionPayload[] = (res.result.attacks ?? []).map((a) => ({
+          act: 'ATTACK',
+          userId: String(a.player_id),
+        }))
 
         // Boss transition animations:
         // - If boss was defeated and advances phase: die animation first, then revive to new max HP.
         // - If boss was defeated and does NOT advance phase: die animation only.
         if (bossWasDefeated) {
-          actions.push({ act: "BOSS_DIE" });
+          actions.push({ act: 'BOSS_DIE' })
         }
 
-        if (bossPhaseAdvanced) actions.push({ act: "BOSS_REVIVE" });
+        if (bossPhaseAdvanced) actions.push({ act: 'BOSS_REVIVE' })
 
         // Pass boss HP/maxHp updates down, but ProjectBattle will apply them only
         // when it is safe (e.g., before BOSS_REVIVE or after queue finishes).
-        if (
-          typeof res.result.boss_hp === "number" &&
-          typeof res.result.boss_max_hp === "number"
-        ) {
+        if (typeof res.result.boss_hp === 'number' && typeof res.result.boss_max_hp === 'number') {
           setBossUpdate({
             hp: res.result.boss_hp,
             maxHp: res.result.boss_max_hp,
-          });
-          setBossUpdateNonce((n) => n + 1);
+          })
+          setBossUpdateNonce((n) => n + 1)
         }
 
         enqueueActions(actions, taskId)
         bumpBossRefresh()
       } catch (err) {
-        console.error(err);
-        toast.error("Attack failed");
+        console.error(err)
+        toast.error(
+          'Attack failed\nThe boss didn’t take damage—try moving another task or refresh.'
+        )
       }
     },
-    [playerAttack, projectId, enqueueActions, bumpBossRefresh],
-  );
+    [playerAttack, projectId, enqueueActions, bumpBossRefresh]
+  )
 
   const overdueAttack = useOverdueBossAttack({
     projectId,
@@ -151,17 +157,17 @@ const ProjectPage: React.FC = () => {
     enqueueActions,
     bumpBossRefresh,
     enabled: true,
-  });
+  })
 
   useEffect(() => {
     if (overdueAttack.attackedTaskId) {
-      toast.error("Overdue task! Boss attacked!");
+      toast.error('Overdue task—boss struck!\nComplete tasks on time to avoid extra boss attacks.')
     }
     if (overdueAttack.error) {
       // Silent-ish: show only in console; you can toast if you want
-      console.error(overdueAttack.error);
+      console.error(overdueAttack.error)
     }
-  }, [overdueAttack.attackedTaskId, overdueAttack.error]);
+  }, [overdueAttack.attackedTaskId, overdueAttack.error])
 
   // Animation synchronization: convert logs to actions for cross-window animation sync
   useAnimationSync(logs, {
@@ -180,7 +186,7 @@ const ProjectPage: React.FC = () => {
     handleAddTask,
     handleUpdateTask,
     handleDeleteTask,
-  } = useKanbanBoard(fetchedTask, { onMovedToDone: handleMovedToDone });
+  } = useKanbanBoard(fetchedTask, { onMovedToDone: handleMovedToDone })
 
   const toggleBossPlaceholder = () => {
     setShowBossPlaceholder((prev) => !prev)
@@ -252,11 +258,13 @@ const ProjectPage: React.FC = () => {
   const handleCloseProject = async (projectId: string) => {
     try {
       await closeProject(projectId)
-      toast.success("Project closed successfully")
+      toast.success('Project closed successfully\nOpening your team’s end-of-quest summary.')
       navigate(`/project/${projectId}/project-end`)
     } catch (err) {
       console.error(err)
-      toast.error(err instanceof Error ? err.message : "Failed to close project")
+      toast.error(
+        `Couldn’t close project\n${err instanceof Error ? err.message : 'Please try again.'}`
+      )
     }
   }
 
@@ -266,18 +274,21 @@ const ProjectPage: React.FC = () => {
     return new Date(project.deadline).toLocaleDateString('en-US', {
       month: '2-digit',
       day: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     })
   }, [project?.deadline])
 
   // Create PROJECT_DATA with real values
-  const PROJECT_DATA = useMemo(() => ({
-    deadline: formattedDeadline,
-    daysLeft: isDelayed ? undefined : daysLeft,
-    delayedDays: isDelayed ? delayedDays : undefined,
-    isDelayed: isDelayed,
-    estimatedTime: estimatedDays ?? undefined,
-  }), [formattedDeadline, daysLeft, isDelayed, delayedDays, estimatedDays])
+  const PROJECT_DATA = useMemo(
+    () => ({
+      deadline: formattedDeadline,
+      daysLeft: isDelayed ? undefined : daysLeft,
+      delayedDays: isDelayed ? delayedDays : undefined,
+      isDelayed: isDelayed,
+      estimatedTime: estimatedDays ?? undefined,
+    }),
+    [formattedDeadline, daysLeft, isDelayed, delayedDays, estimatedDays]
+  )
   const HP_DATA = {
     boss: {
       current: gameStatus?.boss_status?.hp ?? 50,
@@ -287,7 +298,7 @@ const ProjectPage: React.FC = () => {
       current: me?.hp ?? 100,
       max: me?.max_hp ?? 100,
     },
-  };
+  }
 
   return (
     <div className="flex h-[calc(100vh-148px)] w-full relative">
@@ -318,7 +329,7 @@ const ProjectPage: React.FC = () => {
             myProjectMemberId={myProjectMemberId}
             onSupportApplied={(receiverIds) => {
               const actions: GameActionPayload[] = (receiverIds ?? []).map((id) => ({
-                act: "SUPPORT",
+                act: 'SUPPORT',
                 userId: String(id),
               }))
               enqueueActions(actions)
@@ -338,10 +349,7 @@ const ProjectPage: React.FC = () => {
           bossUpdate={bossUpdate ?? { hp: 0, maxHp: 0 }}
           bossUpdateNonce={bossUpdateNonce}
         />
-        <ToggleButton
-          isVisible={showBossPlaceholder}
-          onClick={toggleBossPlaceholder}
-        />
+        <ToggleButton isVisible={showBossPlaceholder} onClick={toggleBossPlaceholder} />
 
         {/* Kanban board */}
         <section className="flex-1 overflow-y-auto pt-6 z-40">
@@ -362,7 +370,7 @@ const ProjectPage: React.FC = () => {
         </section>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default ProjectPage;
+export default ProjectPage

@@ -1,98 +1,103 @@
 // src/sections/start-project/PartyMembers.tsx
-import { X } from "lucide-react";
-import { getAvatarColor, getAvatarPath } from "@/lib/avatarConstants";
-import { PartyMember } from "@/types/User";
-import MultiCombobox from "@/components/ui/multicombobox";
-import useBussinessUser from "@/hook/useBussinessUser";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { post } from "@/Api";
-import { getAxiosStatus } from "@/lib/apiError";
-import toast, { Toaster } from "react-hot-toast";
-import { useParams } from "react-router-dom";
+import { X } from 'lucide-react'
+import { getAvatarColor, getAvatarPath } from '@/lib/avatarConstants'
+import { PartyMember } from '@/types/User'
+import MultiCombobox from '@/components/ui/multicombobox'
+import useBussinessUser from '@/hook/useBussinessUser'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { post } from '@/Api'
+import { getAxiosStatus } from '@/lib/apiError'
+import toast from 'react-hot-toast'
+import { useParams } from 'react-router-dom'
 
 interface PartyMembersProps {
-  members: PartyMember[];
+  members: PartyMember[]
   // maxSize: number;
-  removeMember: (id: string) => void;
-  canRemoveMember?: (member: PartyMember) => boolean;
-  isLoading: boolean;
+  removeMember: (id: string) => void
+  canRemoveMember?: (member: PartyMember) => boolean
+  isLoading: boolean
 }
 
-export function PartyMembers({ members, removeMember, canRemoveMember, isLoading }: PartyMembersProps) {
-  const { projectId } = useParams<{ projectId: string }>();
-  const {users} = useBussinessUser();
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+export function PartyMembers({
+  members,
+  removeMember,
+  canRemoveMember,
+  isLoading,
+}: PartyMembersProps) {
+  const { projectId } = useParams<{ projectId: string }>()
+  const { users } = useBussinessUser()
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([])
 
   const memberOptions = users.map((u) => ({
     value: u.id,
     label: `@${u.username} (${u.name})`,
-  }));
+  }))
 
   type InviteResponse = {
-    project_id: string;
-    invited: { email: string; token: string; expired_at: string }[];
-    failed: { email: string; error: string }[];
-    error?: string;
-  };
+    project_id: string
+    invited: { email: string; token: string; expired_at: string }[]
+    failed: { email: string; error: string }[]
+    error?: string
+  }
 
-  async function handleInvite(){
+  async function handleInvite() {
     if (!projectId) {
-      toast.error("Missing project id.");
-      return;
-    }
-   
-    if (selectedMembers.length === 0) {
-      toast.error("Please select at least 1 user to invite.");
-      return;
+      toast.error('Missing project id.\nOpen this page from a project link and try again.')
+      return
     }
 
-    const partyMemberIds = new Set(members.map((m) => m.id));
+    if (selectedMembers.length === 0) {
+      toast.error('No adventurers selected\nPick at least one user from the list to send invites.')
+      return
+    }
+
+    const partyMemberIds = new Set(members.map((m) => m.id))
     const uniqueUserIds = Array.from(new Set(selectedMembers)).filter(
       (id) => !partyMemberIds.has(id)
-    );
+    )
 
     console.log(uniqueUserIds)
 
     if (uniqueUserIds.length === 0) {
-      toast.error("All selected users are already in your party.");
-      return;
+      toast.error('Already in the party\nEveryone you picked is already on this quest.')
+      return
     }
 
     try {
       const res = await post<{ user_ids: string[] }, InviteResponse>(
         `/api/project/${projectId}/invite/`,
         { user_ids: uniqueUserIds }
-      );
+      )
 
       if (res.failed?.length) {
-        toast.error(`Failed to invite ${res.failed.length} user(s).`);
-        console.error("Invite failures:", res.failed);
+        toast.error(
+          `Some invites failed\n${res.failed.length} user(s) could not be invited. Check the console for details.`
+        )
+        console.error('Invite failures:', res.failed)
       }
       if (res.invited?.length) {
-        toast.success(`Invited ${res.invited.length} user(s)!`);
+        toast.success(
+          `Invited ${res.invited.length} user(s)!\nThey’ll get access to join this project.`
+        )
       }
 
-      setSelectedMembers([]);
+      setSelectedMembers([])
     } catch (err: unknown) {
-      const status = getAxiosStatus(err);
+      const status = getAxiosStatus(err)
       if (status === 403) {
-        toast.error("Only the project owner can invite members.");
+        toast.error('Only the owner can invite\nAsk the project owner to add new party members.')
       } else {
-        toast.error("Failed to send invites.");
+        toast.error('Invites not sent\nCheck your connection and try again in a moment.')
       }
-      console.error(err);
-    } 
-
+      console.error(err)
+    }
   }
   return (
     <div className="bg-white rounded-2xl border border-brown/10 shadow-sm p-5 md:p-6 flex flex-col gap-6 flex-1">
       <div className="flex items-center gap-3 border-b border-offWhite pb-4">
-        <h3 className="text-xl font-bold text-darkBrown">
-          Summon Party Members
-        </h3>
+        <h3 className="text-xl font-bold text-darkBrown">Summon Party Members</h3>
       </div>
-      <Toaster />
       {/* Search Bar */}
       <div className="flex items-baseline-last gap-2">
         <MultiCombobox
@@ -101,22 +106,16 @@ export function PartyMembers({ members, removeMember, canRemoveMember, isLoading
           searchPlaceholder="Search adventurers..."
           options={memberOptions}
           value={selectedMembers}
-          onChange={setSelectedMembers} 
-          />
-        <Button
-          type="button"
-          onClick={handleInvite}
-          disabled={
-            selectedMembers.length === 0
-          }
-        >
+          onChange={setSelectedMembers}
+        />
+        <Button type="button" onClick={handleInvite} disabled={selectedMembers.length === 0}>
           Invite
         </Button>
       </div>
       {/* Header Row with Dynamic Count */}
       <div className="flex items-center justify-between mt-1">
         <span className="font-bold text-darkBrown text-sm">
-          Your Party{" "}
+          Your Party{' '}
           <span
             // className={
             //   members.length === maxSize ? "text-red" : "text-lightBrown"
@@ -124,8 +123,7 @@ export function PartyMembers({ members, removeMember, canRemoveMember, isLoading
             className="text-lightBrown"
           >
             ({members.length}
-            {/* /{maxSize} */}
-            )
+            {/* /{maxSize} */})
           </span>
         </span>
       </div>
@@ -158,9 +156,7 @@ export function PartyMembers({ members, removeMember, canRemoveMember, isLoading
                   </span>
                 )}
               </span>
-              <span className="text-lightBrown text-xs font-medium">
-                {member.username}
-              </span>
+              <span className="text-lightBrown text-xs font-medium">{member.username}</span>
             </div>
 
             {/* Remove Button (Only for non-leaders) */}
@@ -188,5 +184,5 @@ export function PartyMembers({ members, removeMember, canRemoveMember, isLoading
 
       <div className="flex-1"></div>
     </div>
-  );
+  )
 }

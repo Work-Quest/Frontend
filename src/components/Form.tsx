@@ -79,17 +79,17 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
           | undefined
         const redirectTo = `${from?.pathname || '/home'}${from?.search || ''}${from?.hash || ''}`
         navigate(redirectTo, { replace: true })
-        toast.success('Login successful!')
+        toast.success('Login successful!\nWelcome back—loading your dashboard.')
       } else {
         navigate('/login')
-        toast.success('Registration successful! Please login.')
+        toast.success('Registration successful!\nSign in with your new account to continue.')
       }
       console.log(formData)
     } catch (err) {
       if (method === 'login') {
-        toast.error('Login failed. Please check your credentials.')
+        toast.error('Login failed\nCheck your email and password, then try again.')
       } else {
-        toast.error('Registration failed. Please try again.')
+        toast.error('Registration failed\nFix any highlighted fields or try a different email.')
       }
       console.error(err)
     } finally {
@@ -111,9 +111,11 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
         | undefined
       const redirectTo = `${from?.pathname || '/home'}${from?.search || ''}${from?.hash || ''}`
       navigate(redirectTo, { replace: true })
+      toast.success('Signed in with Google\nWelcome back—loading your dashboard.')
     },
     onError: () => {
       console.log('Google Login Failed')
+      toast.error('Google sign-in failed\nTry again or use email and password.')
     },
   })
 

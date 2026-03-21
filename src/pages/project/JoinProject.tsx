@@ -49,11 +49,11 @@ export default function JoinProject() {
         if (!projectId) {
           const msg = res?.error || 'Invite accepted, but missing project id.'
           setError(msg)
-          toast.error(msg)
+          toast.error(`Invite not accepted\n${msg}`)
           return
         }
 
-        toast.success(res?.message || 'Invite accepted!')
+        toast.success(`${res?.message || 'Invite accepted!'}\nRedirecting you to the project…`)
         navigate(`/project/${projectId}`, { replace: true })
       } catch (err: unknown) {
         if (cancelled) return

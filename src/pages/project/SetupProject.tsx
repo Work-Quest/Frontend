@@ -79,12 +79,12 @@ export default function SetupProject() {
   const handleLeaveProject = async () => {
     try {
       await leaveProject()
-      toast.success('Left project successfully.')
+      toast.success('Left project successfully.\nYou’ve been returned to your home dashboard.')
       // After leaving, user no longer has access to this project routes.
       navigate('/home', { replace: true })
     } catch (err: unknown) {
       const apiMsg = getAxiosApiMessage(err)
-      toast.error(apiMsg || 'Failed to leave project.')
+      toast.error(`Couldn't leave project\n${apiMsg || 'Please try again in a moment.'}`)
       console.error(err)
     } finally {
       // Best-effort refresh if we stay on page for any reason.
@@ -95,16 +95,16 @@ export default function SetupProject() {
   const handleSetupBoss = async () => {
     try {
       if (!projectId) {
-        toast.error('Missing project id.')
+        toast.error('Missing project id.\nGo back to your projects list and open setup from there.')
         return
       }
 
       await setupBoss(projectId)
-      toast.success('Boss setup completed successfully!')
+      toast.success('Boss setup complete!\nHead into the project to start the battle.')
       navigate(`/project/${projectId}`)
     } catch (error) {
       console.error('Error setting up boss:', error)
-      toast.error('Failed to setup boss.')
+      toast.error('Boss setup failed\nCheck tasks and connection, then try again.')
       navigate(`/home`)
     }
   }

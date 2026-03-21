@@ -312,6 +312,28 @@ a:hover {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Toast countdown (duration set inline via --wq-toast-duration) */
+@keyframes wq-toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.wq-toast-progress-bar {
+  transform-origin: left center;
+  animation: wq-toast-progress var(--wq-toast-duration, 5000ms) linear forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wq-toast-progress-bar {
+    animation: none;
+    transform: scaleX(0);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

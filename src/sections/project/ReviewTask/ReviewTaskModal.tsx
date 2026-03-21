@@ -124,10 +124,10 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
       setReviewText('')
       onOpenChange(false)
       onSupportApplied?.(receiverIds)
-      toast.success('Review submitted')
+      toast.success('Review submitted\nThanks—your teammates got a boost from your feedback.')
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to submit review'
-      toast.error(msg)
+      toast.error(`Couldn't submit review\n${msg}`)
       console.error(e)
     } finally {
       setSubmitting(false)

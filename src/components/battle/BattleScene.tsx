@@ -185,7 +185,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
       } catch (error) {
         console.error('Failed to fetch items:', error)
         if (!opts?.silent) {
-          toast.error('Failed to load items')
+          toast.error('Couldn’t load items\nRefresh the page or try again in a few seconds.')
         }
       } finally {
         if (!opts?.silent) {
@@ -309,7 +309,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     try {
       setUsingItemId(userItemId)
       await consumeMemberItem(projectId, { item_id: userItemId })
-      toast.success(`Used ${itemName}`)
+      toast.success(`Used ${itemName}\nIts effect is applied for this battle.`)
 
       // Refresh items after use
       await refreshItems()
@@ -333,7 +333,7 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         errorMessage = error.message
       }
 
-      toast.error(errorMessage)
+      toast.error(`Couldn’t use item\n${errorMessage}`)
 
       // Refresh items on failure to get latest item IDs (item might have been used/deleted)
       try {

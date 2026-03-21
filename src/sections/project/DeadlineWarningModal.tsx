@@ -31,11 +31,13 @@ const DeadlineWarningModal: React.FC<DeadlineWarningModalProps> = ({
       await post<{ project_id: string }, Project>('/api/project/close/', {
         project_id: projectId,
       })
-      toast.success('Project closed successfully')
+      toast.success(
+        'Project closed successfully\nYou can view the summary on the project end screen.'
+      )
       navigate(`/project/${projectId}/end`)
     } catch (err) {
       console.error(err)
-      toast.error('Failed to close project')
+      toast.error('Couldn’t close project\nCheck your connection and try again.')
     } finally {
       setIsProcessing(false)
     }
@@ -48,11 +50,15 @@ const DeadlineWarningModal: React.FC<DeadlineWarningModalProps> = ({
         `/api/project/${projectId}/deadline/continue/`,
         {}
       )
-      toast.success(`Score reduction applied: ${reductionPercent}%`)
+      toast.success(
+        `Score reduction applied: ${reductionPercent}%\nYou can keep working; final scores will reflect this penalty.`
+      )
       onContinue()
     } catch (err) {
       console.error(err)
-      toast.error('Failed to apply score reduction')
+      toast.error(
+        'Couldn’t apply score reduction\nPlease try again or contact support if it keeps happening.'
+      )
     } finally {
       setIsProcessing(false)
     }
