@@ -22,6 +22,8 @@ export type UserProfile = {
   selectedCharacterId?: number
   bgColorId?: number
   backgroundColor?: string
+  /** Custom photo URL if set; otherwise UI can fall back to `getAvatarProfilePath(selectedCharacterId)`. */
+  profileImg?: string | null
   avatarFallback?: string
   tag?: Tag[]
   bossCollection?: Boss[]
