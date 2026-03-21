@@ -12,6 +12,7 @@ import {
   Tasks,
   TaskStatus,
 } from './types'
+import axios from 'axios'
 import { post, del, patch, put } from '@/Api'
 import { useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -80,9 +81,22 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
   }
 
   const handleUpdateTask = async (updatedTask: Task) => {
+    let previousAssignees: string[] = []
+    for (const column of Object.keys(tasks) as (keyof Tasks)[]) {
+      const found = tasks[column].find((t) => t.id === updatedTask.id)
+      if (found) {
+        previousAssignees = found.assignees.map(String)
+        break
+      }
+    }
+    const nextAssignees = updatedTask.assignees.map(String)
+    const prevSet = new Set(previousAssignees)
+    const nextSet = new Set(nextAssignees)
+
+    let putResponse: TaskResponse
     try {
       const mappedTask = mapTaskToTaskResponse(updatedTask)
-      await put<Record<string, unknown>, TaskResponse>(
+      putResponse = await put<Record<string, unknown>, TaskResponse>(
         `/api/project/${projectId}/tasks/${updatedTask.id}/update/`,
         {
           task_name: mappedTask.task_name,
@@ -92,23 +106,69 @@ export const useKanbanBoard = (initialTasks: Tasks, options?: UseKanbanBoardOpti
           status: mappedTask.status,
         }
       )
+    } catch (err) {
+      console.error(err)
+      toast.error('Couldn’t update task\nRefresh and try again if the problem continues.')
+      return
+    }
+
+    try {
+      for (const id of previousAssignees) {
+        if (!nextSet.has(id)) {
+          try {
+            await del(`/api/project/${projectId}/tasks/${updatedTask.id}/unassign/`, {
+              project_member_id: id,
+            })
+          } catch (e) {
+            // Already removed on server (stale UI) — continue syncing the rest
+            if (!axios.isAxiosError(e) || e.response?.status !== 404) throw e
+          }
+        }
+      }
+      for (const id of nextAssignees) {
+        if (!prevSet.has(id)) {
+          await post(`/api/project/${projectId}/tasks/${updatedTask.id}/assign/`, {
+            project_member_id: id,
+          })
+        }
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error(
+        'Task details saved, but assignees could not be updated\nRefresh the board and try changing assignees again.'
+      )
+      const fallback = mapTaskResponseToTask(putResponse)
       setTasks((prev) => {
         const newTasks = { ...prev }
         for (const column in newTasks) {
           const idx = newTasks[column as keyof Tasks].findIndex((t) => t.id === updatedTask.id)
           if (idx !== -1) {
             newTasks[column as keyof Tasks] = [...newTasks[column as keyof Tasks]]
-            newTasks[column as keyof Tasks][idx] = updatedTask
+            newTasks[column as keyof Tasks][idx] = {
+              ...fallback,
+              status: newTasks[column as keyof Tasks][idx].status,
+            }
             break
           }
         }
         return newTasks
       })
-      toast.success('Task updated\nChanges are saved for everyone on the project.')
-    } catch (err) {
-      console.error(err)
-      toast.error('Couldn’t update task\nRefresh and try again if the problem continues.')
+      return
     }
+
+    setTasks((prev) => {
+      const newTasks = { ...prev }
+      for (const column in newTasks) {
+        const idx = newTasks[column as keyof Tasks].findIndex((t) => t.id === updatedTask.id)
+        if (idx !== -1) {
+          newTasks[column as keyof Tasks] = [...newTasks[column as keyof Tasks]]
+          newTasks[column as keyof Tasks][idx] = updatedTask
+          break
+        }
+      }
+      return newTasks
+    })
+    toast.success('Task updated\nChanges are saved for everyone on the project.')
   }
 
   const handleDeleteTask = async (taskId: string) => {

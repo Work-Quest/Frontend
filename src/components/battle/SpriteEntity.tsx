@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/8bit/badge'
 import { ENTITY_CONFIG } from '@/config/battleConfig'
 
@@ -32,6 +32,29 @@ export const SpriteEntity: React.FC<SpriteProps> = ({
   const imgSrc = `/assets/sprites/${type}/${id}/${action}.gif`
   const magicRingSrc = `/assets/magic_ring.gif`
 
+  /** Keep showing the previous frame until the next GIF has loaded (reduces empty flashes on slow networks/devices). */
+  const targetSrcRef = useRef(imgSrc)
+  targetSrcRef.current = imgSrc
+  const [visibleSpriteUrl, setVisibleSpriteUrl] = useState(imgSrc)
+
+  useEffect(() => {
+    const want = imgSrc
+    const img = new Image()
+    const applyIfCurrent = () => {
+      if (targetSrcRef.current === want) {
+        setVisibleSpriteUrl(want)
+      }
+    }
+    img.onload = () => {
+      img.decode?.().then(applyIfCurrent).catch(applyIfCurrent)
+    }
+    img.onerror = applyIfCurrent
+    img.src = want
+    if (img.complete) {
+      img.decode?.().then(applyIfCurrent).catch(applyIfCurrent)
+    }
+  }, [imgSrc])
+
   const entityConfig =
     ENTITY_CONFIG[type as keyof typeof ENTITY_CONFIG] &&
     (
@@ -44,7 +67,9 @@ export const SpriteEntity: React.FC<SpriteProps> = ({
   const width = entityConfig?.size?.width || 64
   const height = entityConfig?.size?.height || 57
 
-  const backgroundImage = showBuffRing ? `url(${imgSrc}), url(${magicRingSrc})` : `url(${imgSrc})`
+  const backgroundImage = showBuffRing
+    ? `url(${visibleSpriteUrl}), url(${magicRingSrc})`
+    : `url(${visibleSpriteUrl})`
 
   const backgroundPosition = showBuffRing ? 'center bottom, center 60%' : 'center bottom'
 

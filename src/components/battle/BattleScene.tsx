@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { SpriteEntity } from '@/components/battle/SpriteEntity'
+import { useBattleAssetPreload } from '@/hook/useBattleAssetPreload'
 import { POSITIONS, ENTITY_CONFIG } from '@/config/battleConfig'
 import { User, BossState } from '@/types/battleTypes'
 import EnemyHealthDisplay from '@/components/ui/8bit/enemy-health-display'
@@ -173,6 +174,8 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     [projectId, myProjectMemberId]
   )
 
+  useBattleAssetPreload(users, boss)
+
   // Group effects by effect_id and count stacks
   const groupedEffects = useMemo(() => {
     const grouped = new Map<
@@ -212,7 +215,13 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
           imageRendering: 'pixelated',
         }}
       >
-        <img src="/assets/bg.gif" className="absolute inset-0 w-full h-full object-cover z-0" />
+        <img
+          src="/assets/bg.gif"
+          alt=""
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 z-0 h-full w-full object-cover"
+        />
 
         {boss.status !== 'hidden' && (
           <div className="absolute left-1/2 -translate-x-1/2 w-full z-40 pointer-events-none scale-35 transition-opacity duration-500">

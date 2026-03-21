@@ -150,10 +150,13 @@ export async function patch<T, U>(url: string, data: T): Promise<U> {
   }
 }
 
-// DELETE DATA (GENERIC)
-export async function del(url: string): Promise<void> {
+// DELETE DATA (GENERIC). Optional JSON body (e.g. task unassign uses DELETE + body).
+export async function del(url: string, data?: Record<string, unknown>): Promise<void> {
   try {
-    await api.delete(`${url}`)
+    const res = await api.delete(`${url}`, data ? { data } : undefined)
+    if (!res.status.toString().startsWith('2')) {
+      throw new Error(`HTTP error! status: ${res.status}`)
+    }
   } catch (error) {
     console.error('Delete request failed:', error)
     throw error
