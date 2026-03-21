@@ -23,8 +23,10 @@ export const BattleStatusEffectIcon: React.FC<{
     } else if (effect.effect_value == 20) {
       bgColor = 'bg-cyan-500/80'
       borderColor = 'border-green-500'
-    } else bgColor = 'bg-purple-500/80'
-    borderColor = 'border-emerald-500'
+    } else {
+      bgColor = 'bg-purple-500/80'
+      borderColor = 'border-emerald-500'
+    }
   } else {
     if (effect.effect_value == 10.0) {
       bgColor = 'bg-pink-500/80'
@@ -32,8 +34,10 @@ export const BattleStatusEffectIcon: React.FC<{
     } else if (effect.effect_value == 20.0) {
       bgColor = 'bg-rose-500/80'
       borderColor = 'border-rose-400'
-    } else bgColor = 'bg-red-500/80'
-    borderColor = 'border-red-400'
+    } else {
+      bgColor = 'bg-red-500/80'
+      borderColor = 'border-red-400'
+    }
   }
 
   const getIcon = (effectType: string): string => {
