@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BattleScene } from '@/components/battle/BattleScene'
 import { useBattleLogic } from '@/hook/useBattleLogic'
 import type { UserStatus } from '@/types/User'
@@ -11,6 +11,7 @@ import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import NotificationDialog from '@/components/NotificationDialog'
+import BattleResponsiveHud from '@/sections/project/BattleResponsiveHud'
 
 type ProjectBattleProps = {
   projectMembers: UserStatus[]
@@ -19,6 +20,9 @@ type ProjectBattleProps = {
   bossRefreshNonce?: number
   bossUpdate?: { hp: number; maxHp: number } | null
   bossUpdateNonce?: number
+  battleHudProjectId?: string | null
+  battleHudPhase?: number
+  showBattleHudPhase?: boolean
 }
 
 const ProjectBattle = ({
@@ -28,29 +32,32 @@ const ProjectBattle = ({
   bossRefreshNonce,
   bossUpdate,
   bossUpdateNonce,
+  battleHudProjectId,
+  battleHudPhase,
+  showBattleHudPhase = true,
 }: ProjectBattleProps) => {
   const { users, boss, setBoss, handleGameAction } = useBattleLogic(projectMembers)
 
-  const applyBossPatch = (patch: {
-    id: string
-    status: 'idle' | 'dead' | 'hidden'
-    hp: number
-    maxHp: number
-  }) => {
-    setBoss((prev) => {
-      // Backend can stay in a "dead" status after defeat, but in the UI we want the
-      // boss to disappear (hidden) after the death animation, and also not show at all
-      // if we load the page while the boss is already dead.
-      const nextStatus = patch.status === 'dead' ? 'hidden' : patch.status
+  const applyBossPatch = useCallback(
+    (patch: {
+      id: string
+      status: 'idle' | 'dead' | 'hidden'
+      hp: number
+      maxHp: number
+    }) => {
+      setBoss((prev) => {
+        const nextStatus = patch.status === 'dead' ? 'hidden' : patch.status
 
-      return {
-        ...prev,
-        ...patch,
-        status: nextStatus,
-        hp: nextStatus === 'hidden' ? 0 : patch.hp,
-      }
-    })
-  }
+        return {
+          ...prev,
+          ...patch,
+          status: nextStatus,
+          hp: nextStatus === 'hidden' ? 0 : patch.hp,
+        }
+      })
+    },
+    [setBoss],
+  )
 
   // Keep a stable reference to the latest handler so queue processing
   // doesn't restart/cancel on every re-render.
@@ -80,7 +87,7 @@ const ProjectBattle = ({
   useEffect(() => {
     if (!bossUpdate) return
     bossUpdateRef.current = bossUpdate
-  }, [bossUpdateNonce]) // intentionally only keyed by nonce
+  }, [bossUpdateNonce, bossUpdate])
 
   const { projectId } = useParams<{ projectId: string }>()
   const { getProjectBoss, setupSpecialBoss, gameStatus, refreshGameStatus } = useGame()
@@ -207,7 +214,7 @@ const ProjectBattle = ({
     }
 
     loadBoss()
-  }, [bossNameToConfigId, bossRefreshNonce, getProjectBoss, projectId, setBoss])
+  }, [applyBossPatch, bossNameToConfigId, bossRefreshNonce, getProjectBoss, projectId])
 
   // When queue finishes, apply any pending boss refresh patch.
   useEffect(() => {
@@ -217,7 +224,7 @@ const ProjectBattle = ({
     if (!patch) return
     pendingBossPatchRef.current = null
     applyBossPatch(patch)
-  }, [actionQueue.length, setBoss])
+  }, [actionQueue.length, applyBossPatch])
 
   useEffect(() => {
     if (!payloadBatch || payloadBatch.length === 0) return
@@ -295,9 +302,28 @@ const ProjectBattle = ({
   }, [actionQueue])
 
   return (
-    <div className="relative bg-slate-950 text-white font-sans flex flex-col z-10 translate-y-[-12px]">
+    <div className="relative z-0 flex h-full min-h-0 min-w-0 flex-col bg-slate-950 font-sans text-white translate-y-[-12px]">
+      <div className="relative z-0 min-h-0 flex-1">
+        <BattleScene
+          users={users}
+          boss={boss}
+          projectId={projectId ?? null}
+          myProjectMemberId={myMemberId}
+        />
+      </div>
+      {battleHudProjectId ? (
+        <div className="pointer-events-none absolute left-0 right-0 top-0 z-[105]">
+          <div className="pointer-events-auto">
+            <BattleResponsiveHud
+              projectId={battleHudProjectId}
+              bossPhase={battleHudPhase}
+              showBossPhase={showBattleHudPhase}
+            />
+          </div>
+        </div>
+      ) : null}
       {(boss.status === 'hidden' || boss.status === 'dead') && (
-        <div className="absolute inset-0 z-[999] bg-black/50 flex items-center justify-center">
+        <div className="absolute inset-0 z-[999] flex items-center justify-center bg-black/50">
           <div className="text-center font-mono tracking-widest">
             <h1 className="text-yellow-300 text-2xl">BOSS DEFEATED</h1>
             <div className=" mt-2 tracking-normal flex flex-col">
@@ -322,8 +348,8 @@ const ProjectBattle = ({
         </div>
       )}
       {isMeDead && boss.status !== 'hidden' && boss.status !== 'dead' && (
-        <div className="absolute bottom-0 left-0 right-0 flex z-[998] h-[22%] bg-black gap-4 items-center justify-center">
-          <div className="text-center items-end flex font-mono tracking-widest gap-4">
+        <div className="absolute bottom-0 left-0 right-0 z-[998] flex h-[22%] items-center justify-center gap-4 bg-black">
+          <div className="flex items-end justify-center gap-4 text-center font-mono tracking-widest">
             <h1 className="text-red-400 text-2xl">You Die</h1>
             <div className="mt-3 flex items-center justify-center pointer-events-auto">
               <NotificationDialog
@@ -341,13 +367,6 @@ const ProjectBattle = ({
           </div>
         </div>
       )}
-      <BattleScene
-        users={users}
-        boss={boss}
-        projectId={projectId ?? null}
-        myProjectMemberId={myMemberId}
-        bossPhase={gameStatus?.boss_status?.phase}
-      />
     </div>
   )
 }

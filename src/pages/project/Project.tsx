@@ -25,6 +25,8 @@ import { useProjects } from '@/hook/useProjects'
 import DeadlineWarningModal from '@/sections/project/DeadlineWarningModal'
 import { useEstimateFinishTime } from '@/hook/useEstimateFinishTime'
 
+const DEFAULT_BOSS_HP_PROP = { hp: 0, maxHp: 0 }
+
 const ProjectPage: React.FC = () => {
   const [showBossPlaceholder, setShowBossPlaceholder] = useState(true)
   const { projectId } = useParams<{ projectId: string }>()
@@ -301,7 +303,7 @@ const ProjectPage: React.FC = () => {
   }
 
   return (
-    <div className="flex h-[calc(100vh-148px)] w-full relative">
+    <div className="relative grid h-[calc(100vh-148px)] min-h-0 w-full max-w-full grid-cols-[minmax(0,1fr)_minmax(0,2fr)] overflow-hidden">
       {showDeadlineWarning && projectId && (
         <DeadlineWarningModal
           open={showDeadlineWarning}
@@ -311,9 +313,9 @@ const ProjectPage: React.FC = () => {
           onContinue={handleDeadlineContinue}
         />
       )}
-      {/* Left sidebar */}
-      <aside className="w-125 flex-shrink-0 bg-offWhite border-r border-cream">
-        <ScrollArea className="h-full" type="always">
+      {/* Left sidebar — 1fr of grid (= ⅓); main column is 2fr (= ⅔) */}
+      <aside className="h-full min-h-0 min-w-0 overflow-hidden border-r border-cream bg-offWhite">
+        <ScrollArea className="h-full max-w-full" type="always">
           <ProjectDetailCard
             hpData={HP_DATA}
             projectData={PROJECT_DATA}
@@ -338,22 +340,28 @@ const ProjectPage: React.FC = () => {
         </ScrollArea>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 flex flex-col bg-offWhite overflow-hidden">
+      {/* Main content — 2fr of grid (= ⅔); minmax(0,…) keeps width from content overflow */}
+      <main className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-offWhite">
         <BossPlaceholder
           isVisible={showBossPlaceholder}
           projectMembers={projectMembers ?? []}
           payloadBatch={payloadBatch ?? []}
           payloadBatchNonce={payloadBatchNonce}
           bossRefreshNonce={bossRefreshNonce}
-          bossUpdate={bossUpdate ?? { hp: 0, maxHp: 0 }}
+          bossUpdate={bossUpdate ?? DEFAULT_BOSS_HP_PROP}
           bossUpdateNonce={bossUpdateNonce}
+          projectId={projectId}
+          bossPhase={gameStatus?.boss_status?.phase}
+          showBossPhase={
+            gameStatus?.boss_status != null &&
+            String(gameStatus.boss_status.status ?? '').toLowerCase() !== 'dead'
+          }
         />
         <ToggleButton isVisible={showBossPlaceholder} onClick={toggleBossPlaceholder} />
 
         {/* Kanban board */}
-        <section className="flex-1 overflow-y-auto pt-6 z-40">
-          <ScrollArea className="h-full" type="always">
+        <section className="z-40 flex h-full min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden pt-6">
+          <ScrollArea className="h-full min-h-0 min-w-0 w-full max-w-full" type="always">
             <KanbanBoard
               tasks={tasks}
               onAddTask={handleAddTask}

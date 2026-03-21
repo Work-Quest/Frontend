@@ -11,6 +11,9 @@ interface BossPlaceholderProps {
   bossRefreshNonce: number
   bossUpdate: { hp: number; maxHp: number }
   bossUpdateNonce: number
+  projectId?: string | null
+  bossPhase?: number
+  showBossPhase?: boolean
 }
 
 const BossPlaceholder: React.FC<BossPlaceholderProps> = ({
@@ -21,9 +24,12 @@ const BossPlaceholder: React.FC<BossPlaceholderProps> = ({
   bossRefreshNonce,
   bossUpdate,
   bossUpdateNonce,
+  projectId,
+  bossPhase,
+  showBossPhase = true,
 }) => (
   <div
-    className={`overflow-hidden transition-all duration-500 ease-in-out ${
+    className={`relative overflow-hidden transition-all duration-500 ease-in-out ${
       isVisible ? 'h-82' : 'h-10'
     }`}
   >
@@ -34,6 +40,9 @@ const BossPlaceholder: React.FC<BossPlaceholderProps> = ({
       bossRefreshNonce={bossRefreshNonce}
       bossUpdate={bossUpdate}
       bossUpdateNonce={bossUpdateNonce}
+      battleHudProjectId={isVisible ? projectId : undefined}
+      battleHudPhase={bossPhase}
+      showBattleHudPhase={showBossPhase}
     />
   </div>
 )

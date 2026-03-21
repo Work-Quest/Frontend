@@ -1,10 +1,10 @@
-import React from "react"
-import { useDroppable } from "@dnd-kit/core"
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { TaskItem } from "./TaskItem"
-import { Task, Tasks, TaskStatus } from "./types"
-import { AddTaskOverlay } from "./AddTaskOverlay"
-import { UserStatus } from "@/types/User"
+import React from 'react'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { TaskItem } from './TaskItem'
+import { Task, Tasks, TaskStatus } from './types'
+import { AddTaskOverlay } from './AddTaskOverlay'
+import { UserStatus } from '@/types/User'
 
 interface KanbanColumnProps {
   id: keyof Tasks
@@ -32,24 +32,25 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   }
 
   return (
-    <div ref={setNodeRef} className="w-full flex flex-col">
-      <div className="flex items-center mb-3">
-        <h3 className="text-darkBrown font-medium font-['Baloo_2']">{title}</h3>
+    <div
+      ref={setNodeRef}
+      className="flex w-64 min-w-[15rem] max-w-[min(100%,18rem)] shrink-0 flex-col"
+    >
+      <div className="flex items-center gap-2 mb-3 min-w-0">
+        <h3
+          className="min-w-0 flex-1 !text-sm !leading-tight !line-clamp-1 !overflow-hidden text-darkBrown !font-medium font-['Baloo_2']"
+          title={title}
+        >
+          {title}
+        </h3>
         <p className="ml-2 px-2 bg-lightBrown !text-offWhite text-sm !font-bold rounded-full">
           {tasks.length}
         </p>
       </div>
 
-      <AddTaskOverlay
-        columnId={id}
-        projectMember={projectMember}
-        onAddTask={handleAddTask}
-      />
+      <AddTaskOverlay columnId={id} projectMember={projectMember} onAddTask={handleAddTask} />
 
-      <SortableContext
-        items={tasks.map((task) => task.id)}
-        strategy={verticalListSortingStrategy}
-      >
+      <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-3">
           {tasks.map((task) => (
             <TaskItem

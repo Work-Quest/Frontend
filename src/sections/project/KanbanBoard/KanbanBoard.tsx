@@ -67,7 +67,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     : (activeTask?.assignees ?? [])
 
   return (
-    <div className="p-4">
+    <div className="box-border min-w-0 w-full max-w-full p-4">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -82,7 +82,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
           },
         }}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4 px-2">
+        <div className="flex min-w-0 w-full max-w-full gap-4 overflow-x-auto overflow-y-visible pb-4 px-2 [scrollbar-gutter:stable]">
           {Object.keys(tasks).map((columnId) => (
             <KanbanColumn
               key={columnId}

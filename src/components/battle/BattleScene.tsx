@@ -1,33 +1,11 @@
 import React, { useState, useMemo } from 'react'
-import axios from 'axios'
 import { SpriteEntity } from '@/components/battle/SpriteEntity'
 import { POSITIONS, ENTITY_CONFIG } from '@/config/battleConfig'
 import { User, BossState } from '@/types/battleTypes'
 import EnemyHealthDisplay from '@/components/ui/8bit/enemy-health-display'
-import { Backpack } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemSeparator,
-  ItemTitle,
-} from '@/components/ui/8bit/item'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
 import { useGame } from '@/hook/useGame'
-import { getItemColorCategory } from '@/lib/utils'
-import type { ProjectMemberItemsResponse, StatusEffectEntry } from '@/types/GameApi'
-import toast from 'react-hot-toast'
-import { usePolling, usePollingWhen } from '@/hook/usePolling'
+import type { StatusEffectEntry } from '@/types/GameApi'
+import { usePolling } from '@/hook/usePolling'
 import { POLLING_CONFIG } from '@/config/pollingConfig'
 
 interface BattleSceneProps {
@@ -35,15 +13,6 @@ interface BattleSceneProps {
   boss: BossState
   projectId: string | null
   myProjectMemberId: string | null
-  bossPhase?: number
-}
-
-type GroupedItem = {
-  name: string
-  description: string
-  count: number
-  colorCategory: 'blue' | 'green' | 'red' | 'gray'
-  userItemIds: string[]
 }
 
 const getUserPosition = (slot: number, status: string) => {
@@ -158,54 +127,10 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
   boss,
   projectId,
   myProjectMemberId,
-  bossPhase,
 }) => {
   const bossName = getBossEntity(boss.id)?.name || 'GREAT BOSS'
-  const { getMyItems, consumeMemberItem, getMyStatusEffects } = useGame(projectId ?? undefined)
-  const [items, setItems] = useState<ProjectMemberItemsResponse | null>(null)
-  const [loadingItems, setLoadingItems] = useState(false)
-  const [usingItemId, setUsingItemId] = useState<string | null>(null)
+  const { getMyStatusEffects } = useGame(projectId ?? undefined)
   const [statusEffects, setStatusEffects] = useState<StatusEffectEntry[]>([])
-
-  // Fetch items when projectId changes
-  // Note: API uses authenticated user automatically, so myProjectMemberId is optional
-  const refreshItems = React.useCallback(
-    async (opts?: { silent?: boolean }) => {
-      if (!projectId) {
-        setItems(null)
-        return
-      }
-
-      try {
-        if (!opts?.silent) {
-          setLoadingItems(true)
-        }
-        const data = await getMyItems(projectId, opts?.silent)
-        setItems(data)
-      } catch (error) {
-        console.error('Failed to fetch items:', error)
-        if (!opts?.silent) {
-          toast.error('Couldn’t load items\nRefresh the page or try again in a few seconds.')
-        }
-      } finally {
-        if (!opts?.silent) {
-          setLoadingItems(false)
-        }
-      }
-    },
-    [projectId, getMyItems]
-  )
-
-  // Use conditional polling: always fetch, but only poll when projectId is available
-  usePollingWhen(
-    refreshItems,
-    () => !!projectId, // Condition: only poll when projectId exists
-    {
-      pollIntervalMs: POLLING_CONFIG.items.interval,
-      enabled: true,
-    },
-    [projectId] // Dependencies for initial fetch
-  )
 
   // Fetch status effects when projectId changes
   // Note: API uses authenticated user automatically, but we filter by myProjectMemberId if available
@@ -276,89 +201,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
     return Array.from(grouped.values())
   }, [statusEffects])
 
-  // Group items by name and count them
-  const groupedItems = useMemo<GroupedItem[]>(() => {
-    if (!items?.items) return []
-
-    const grouped = new Map<string, GroupedItem>()
-
-    items.items.forEach((itemEntry) => {
-      const itemName = itemEntry.item.name
-      const existing = grouped.get(itemName)
-
-      if (existing) {
-        existing.count += 1
-        existing.userItemIds.push(itemEntry.user_item_id)
-      } else {
-        grouped.set(itemName, {
-          name: itemName,
-          description: itemEntry.item.description || '',
-          count: 1,
-          colorCategory: getItemColorCategory(itemName),
-          userItemIds: [itemEntry.user_item_id],
-        })
-      }
-    })
-
-    return Array.from(grouped.values())
-  }, [items])
-
-  const handleUseItem = async (userItemId: string, itemName: string) => {
-    if (!projectId || usingItemId) return
-
-    try {
-      setUsingItemId(userItemId)
-      await consumeMemberItem(projectId, { item_id: userItemId })
-      toast.success(`Used ${itemName}\nIts effect is applied for this battle.`)
-
-      // Refresh items after use
-      await refreshItems()
-    } catch (error: unknown) {
-      console.error('Failed to use item:', error)
-
-      let errorMessage = 'Failed to use item'
-      if (axios.isAxiosError(error)) {
-        const data = error.response?.data
-        if (
-          data &&
-          typeof data === 'object' &&
-          'error' in data &&
-          typeof (data as { error: unknown }).error === 'string'
-        ) {
-          errorMessage = (data as { error: string }).error
-        } else if (error.message) {
-          errorMessage = error.message
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message
-      }
-
-      toast.error(`Couldn’t use item\n${errorMessage}`)
-
-      // Refresh items on failure to get latest item IDs (item might have been used/deleted)
-      try {
-        await refreshItems()
-      } catch (refreshError) {
-        console.warn('Failed to refresh items after use error:', refreshError)
-      }
-    } finally {
-      setUsingItemId(null)
-    }
-  }
-
-  const getColorClasses = (category: 'blue' | 'green' | 'red' | 'gray') => {
-    switch (category) {
-      case 'blue':
-        return 'text-blue-300 border-blue-500/50 hover:bg-blue-900/50 hover:text-blue-200'
-      case 'green':
-        return 'text-green-400 border-green-500/50 hover:bg-green-900/50 hover:text-green-200'
-      case 'red':
-        return 'text-red-400 border-red-500/50 hover:bg-red-900/50 hover:text-red-200'
-      default:
-        return 'text-gray-400 border-gray-500/50 hover:bg-gray-900/50 hover:text-gray-200'
-    }
-  }
-
   return (
     <div className="flex-1 min-h-[400px] flex items-end justify-center pb-12 overflow-hidden relative z-0">
       <div
@@ -371,17 +213,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
         }}
       >
         <img src="/assets/bg.gif" className="absolute inset-0 w-full h-full object-cover z-0" />
-
-        {/* Boss Phase Indicator - Top Left */}
-        {boss.status !== 'hidden' && bossPhase !== undefined && (
-          <div className="absolute top-1 left-2 z-50 pointer-events-none">
-            {/* <div className=" border-2 border-yellow-500 rounded-md px-3 py-1 shadow-lg"> */}
-            <span className="text-yellow-300 font-bold text-xs font-mono tracking-wider">
-              Phase {bossPhase}
-            </span>
-            {/* </div> */}
-          </div>
-        )}
 
         {boss.status !== 'hidden' && (
           <div className="absolute left-1/2 -translate-x-1/2 w-full z-40 pointer-events-none scale-35 transition-opacity duration-500">
@@ -398,9 +229,9 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
           </div>
         )}
 
-        {/* Status Effects Icons - positioned next to backpack button */}
+        {/* Status effects (bag / phase moved to BattleResponsiveHud in BossPlaceholder) */}
         {groupedEffects.length > 0 && (
-          <div className="absolute top-2 right-12 z-50 flex flex-col gap-1">
+          <div className="absolute top-2 right-2 z-50 flex flex-col gap-1">
             {groupedEffects.map((grouped) => (
               <EffectIconPlaceholder
                 key={grouped.effect.effect_id}
@@ -410,86 +241,6 @@ export const BattleScene: React.FC<BattleSceneProps> = ({
             ))}
           </div>
         )}
-
-        <div className="absolute top-2 right-2 z-50">
-          <Sheet>
-            <SheetTrigger asChild>
-              <div className="cursor-pointer hover:brightness-110 active:scale-95 transition-all">
-                <div className="bg-slate-800/90 border-2 border-slate-600 px-2 py-1 rounded-sm shadow-md">
-                  <Backpack className="w-4 h-4 text-yellow-400" />
-                </div>
-              </div>
-            </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="bg-slate-900 border-l-4 border-gray-600 w-[300px] text-white"
-            >
-              <SheetHeader>
-                <SheetTitle className="text-orange-400 font-bold font-mono text-xl tracking-widest border-b-2 border-gray-700 pb-2">
-                  INVENTORY
-                </SheetTitle>
-                <SheetDescription className="text-gray-400 text-[10px] uppercase">
-                  Select an item to use in battle
-                </SheetDescription>
-              </SheetHeader>
-              <div className="mt-6">
-                {loadingItems ? (
-                  <div className="text-gray-400 text-sm text-center py-4">Loading items...</div>
-                ) : groupedItems.length === 0 ? (
-                  <div className="text-gray-400 text-sm text-center py-4">
-                    No items in inventory
-                  </div>
-                ) : (
-                  <ItemGroup>
-                    {groupedItems.map((groupedItem, index) => {
-                      const colorClasses = getColorClasses(groupedItem.colorCategory)
-                      const displayName =
-                        groupedItem.count > 1
-                          ? `${groupedItem.name.toUpperCase()} • x${groupedItem.count}`
-                          : groupedItem.name.toUpperCase()
-                      const firstUserItemId = groupedItem.userItemIds[0]
-                      const isUsing = usingItemId === firstUserItemId
-
-                      return (
-                        <React.Fragment key={groupedItem.name}>
-                          {index > 0 && <ItemSeparator className="bg-gray-700 my-2" />}
-                          <Item
-                            variant="default"
-                            className={
-                              index < groupedItems.length - 1
-                                ? 'border-b border-gray-800 pb-2 mb-2'
-                                : 'pb-2 mb-2'
-                            }
-                          >
-                            <ItemContent>
-                              <ItemTitle className={`${colorClasses.split(' ')[0]} font-bold`}>
-                                {displayName}
-                              </ItemTitle>
-                              <ItemDescription className="text-gray-400 text-xs">
-                                {groupedItem.description || 'No description'}
-                              </ItemDescription>
-                            </ItemContent>
-                            <ItemActions>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className={`h-7 text-xs ${colorClasses}`}
-                                onClick={() => handleUseItem(firstUserItemId, groupedItem.name)}
-                                disabled={isUsing || !projectId}
-                              >
-                                {isUsing ? 'USING...' : 'USE'}
-                              </Button>
-                            </ItemActions>
-                          </Item>
-                        </React.Fragment>
-                      )
-                    })}
-                  </ItemGroup>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
 
         {(() => {
           let action = 'idle'
