@@ -1,14 +1,14 @@
-import { useState } from 'react'
-import { useLocation, useNavigate, type Location } from 'react-router-dom'
-import { Button } from './ui/button'
-import { FcGoogle } from 'react-icons/fc'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
-import { Eye, EyeOff } from 'lucide-react'
-import { useAuth } from '@/context/AuthContext'
-import { post } from '@/Api'
-import toast from 'react-hot-toast'
-import { useGoogleLogin } from '@react-oauth/google'
+import { useState } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
+import { Button } from "./ui/button"
+import { FcGoogle } from "react-icons/fc"
+import { Input } from "./ui/input"
+import { Label } from "./ui/label"
+import { Eye, EyeOff } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
+import { persistAuthTokens, post } from "@/Api"
+import toast from 'react-hot-toast';
+import { useGoogleLogin } from "@react-oauth/google"
 
 type AuthLocationState = {
   from?: { pathname?: string; search?: string; hash?: string }
@@ -68,11 +68,17 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
               email: formData.email,
             }
 
-      const res = await post(endpoint, request)
-      console.log('SUCCESS:', res)
+      const res = await post<
+        typeof request,
+        { username?: string; access?: string; refresh?: string }
+      >(endpoint, request)
+      console.log("SUCCESS:", res)
 
       // After success
-      if (method === 'login') {
+      if (method === "login") {
+        if (res.access && res.refresh) {
+          persistAuthTokens(res.access, res.refresh)
+        }
         await checkAuth()
         const from = location?.state?.from as
           | { pathname?: string; search?: string; hash?: string }
@@ -98,12 +104,18 @@ function Form({ method = 'register' }: { method?: 'login' | 'register' }) {
   }
 
   const loginWithGoogle = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      console.log('Google Login Success:', tokenResponse)
-      // Send Google access token to your backend
-      await post('/api/auth/google/', {
-        access_token: tokenResponse.access_token,
-      })
+  onSuccess: async (tokenResponse) => {
+    console.log("Google Login Success:", tokenResponse)
+    // Send Google access token to your backend
+    const googleRes = await post<
+      { access_token: string },
+      { username?: string; access?: string; refresh?: string }
+    >("/api/auth/google/", {
+      access_token: tokenResponse.access_token,
+    })
+    if (googleRes.access && googleRes.refresh) {
+      persistAuthTokens(googleRes.access, googleRes.refresh)
+    }
 
       await checkAuth()
       const from = location?.state?.from as

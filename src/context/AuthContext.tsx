@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { get, post } from '@/Api'
-import toast from 'react-hot-toast'
+import { createContext, useContext, useEffect, useState } from "react"
+import { clearAuthTokens, get, post } from "@/Api"
+import toast from "react-hot-toast"
 
 type User = {
   id: string

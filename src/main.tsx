@@ -22,6 +22,7 @@ import StartProject from './pages/StartProject.tsx';
 import JoinProject from "./pages/project/JoinProject.tsx"
 import BattlePlayground from './pages/BattlePlayground.tsx';
 import Setup from "@/pages/Setup.tsx";
+import Help from "@/pages/Help.tsx";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const router = createBrowserRouter([
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Landing /> },
       { path: 'setup', element: <Setup /> },
+      { path: 'help', element: <Help /> },
       { path: '*', element: <NotFound /> },
     ],
   },

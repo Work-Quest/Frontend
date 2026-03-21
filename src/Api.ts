@@ -11,6 +11,20 @@ const BASE_URL =
 
 const TIMEOUT_MS = 10000
 
+/** Stored JWTs when HTTP-only cookies are not sent (e.g. Safari cross-site). */
+export const AUTH_ACCESS_TOKEN_KEY = "access_token"
+export const AUTH_REFRESH_TOKEN_KEY = "refresh_token"
+
+export function persistAuthTokens(access: string, refresh: string): void {
+  localStorage.setItem(AUTH_ACCESS_TOKEN_KEY, access)
+  localStorage.setItem(AUTH_REFRESH_TOKEN_KEY, refresh)
+}
+
+export function clearAuthTokens(): void {
+  localStorage.removeItem(AUTH_ACCESS_TOKEN_KEY)
+  localStorage.removeItem(AUTH_REFRESH_TOKEN_KEY)
+}
+
 // Global Axios Instance
 const api = axios.create({
   baseURL: BASE_URL,
@@ -41,6 +55,13 @@ function stopLoading() {
 // AXIOS INTERCEPTORS (AUTO LOADING BAR)
 api.interceptors.request.use(
   (config) => {
+    const token = localStorage.getItem(AUTH_ACCESS_TOKEN_KEY)
+    if (token) {
+      config.headers = config.headers ?? {}
+      if (!config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    }
     // Only show loading bar if request is not marked as silent
     const isSilent = config.silent === true
     if (!isSilent) {
