@@ -3,6 +3,7 @@ import type { Project } from '@/types/Project'
 import { getBossProfileImageSrc } from '@/lib/bossProfileAsset'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
-import { Calendar, User, Target, CheckCircle } from 'lucide-react'
+import { Calendar, User, Target, CheckCircle, ScrollText } from 'lucide-react'
 import ProjectEditForm from './ProjectEditForm'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -73,7 +74,7 @@ export default function ProjectTabCard({
                 variant={project.status === 'Done' ? 'default' : 'secondary'}
                 className={`text-xs ${
                   project.status === 'Done'
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                    ? 'bg-orange text-offWhite hover:bg-orange/90'
                     : 'bg-orange/20 text-orange hover:bg-orange/30'
                 }`}
               >
@@ -152,7 +153,7 @@ export default function ProjectTabCard({
             </div>
             <div className="flex items-center gap-3">
               <div
-                className={`w-4 h-4 rounded-full ${project.status === 'Done' ? 'bg-green-500' : 'bg-orange'}`}
+                className={`w-4 h-4 rounded-full ${project.status === 'Done' ? 'bg-orange' : 'bg-orange/60'}`}
               />
               <div>
                 <p className="!font-semibold !text-brown -mb-1">Status</p>
@@ -160,7 +161,7 @@ export default function ProjectTabCard({
                   variant={project.status === 'Done' ? 'default' : 'secondary'}
                   className={
                     project.status === 'Done'
-                      ? 'bg-green-500 hover:bg-green-600 text-white'
+                      ? 'bg-orange text-offWhite hover:bg-orange/90'
                       : 'bg-orange/20 text-orange'
                   }
                 >
@@ -170,38 +171,61 @@ export default function ProjectTabCard({
             </div>
           </div>
         </div>
-        <div className="mt-6 p-4 bg-orange/10 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img
-                src={bossPortraitSrc}
-                alt={project.boss_name ? `${project.boss_name} boss` : 'Boss'}
-                className="h-10 w-10 rounded-lg border border-veryLightBrown/60 bg-offWhite object-cover [image-rendering:pixelated]"
-                onError={() => setBossPortraitFailed(true)}
-              />
-              <div>
-                <p className="!font-semibold !text-brown">Boss Challenge</p>
-                <p className="!text-brown/70">Ready to face the challenge?</p>
+        {project.status === 'Done' ? (
+          <div className="mt-6 rounded-xl border-2 border-orange/40 bg-orange/10 p-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-orange/50 bg-offWhite">
+                  <ScrollText className="h-5 w-5 text-orange" aria-hidden />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-baloo2 font-bold text-darkBrown">This quest is complete</p>
+                  <p className="font-baloo2 text-sm leading-snug text-brown/75">
+                    Open the project summary for scores, achievements, and feedback—not the battle
+                    screen.
+                  </p>
+                </div>
               </div>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="orange"
+                  className="w-full shrink-0 font-baloo2 sm:w-auto !bg-orange hover:!bg-orange/90 !text-offWhite"
+                  onClick={() => navigate(`/project/${project.project_id}/project-end`)}
+                >
+                  View project results
+                </Button>
+              </DialogClose>
             </div>
-            <Button
-              variant="warning"
-              className="!bg-orange hover:!bg-orange/90 hover:!outline-none !font-baloo2"
-              onClick={() => {
-                if (project.status === 'Done') {
-                  toast.error(
-                    'This quest is finished\nView results from your completed projects list.'
-                  )
-                  return
-                }
-                // Route is guarded: if boss isn't setup yet, user will be redirected to /setup
-                navigate(`/project/${project.project_id}`)
-              }}
-            >
-              Let's Fight!
-            </Button>
           </div>
-        </div>
+        ) : (
+          <div className="mt-6 rounded-lg bg-orange/10 p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <img
+                  src={bossPortraitSrc}
+                  alt={project.boss_name ? `${project.boss_name} boss` : 'Boss'}
+                  className="h-10 w-10 shrink-0 rounded-lg border border-veryLightBrown/60 bg-offWhite object-cover [image-rendering:pixelated]"
+                  onError={() => setBossPortraitFailed(true)}
+                />
+                <div className="min-w-0">
+                  <p className="!font-semibold !text-brown">Boss challenge</p>
+                  <p className="!text-brown/70">Ready to face the challenge?</p>
+                </div>
+              </div>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="warning"
+                  className="shrink-0 !bg-orange hover:!bg-orange/90 hover:!outline-none !font-baloo2"
+                  onClick={() => navigate(`/project/${project.project_id}`)}
+                >
+                  Let&apos;s fight!
+                </Button>
+              </DialogClose>
+            </div>
+          </div>
+        )}
         <DialogFooter>
           <ProjectEditForm project={project} onUpdateProject={onUpdateProject} />
           <NotificationDialog
