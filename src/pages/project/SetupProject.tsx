@@ -79,12 +79,12 @@ export default function SetupProject() {
   const handleLeaveProject = async () => {
     try {
       await leaveProject()
-      toast.success('Left project successfully.\nYou’ve been returned to your home dashboard.')
+      toast.success('You’ve left this project.\nBack on your home dashboard.')
       // After leaving, user no longer has access to this project routes.
       navigate('/home', { replace: true })
     } catch (err: unknown) {
       const apiMsg = getAxiosApiMessage(err)
-      toast.error(`Couldn't leave project\n${apiMsg || 'Please try again in a moment.'}`)
+      toast.error(`Couldn’t leave the project\n${apiMsg || 'Try again in a moment.'}`)
       console.error(err)
     } finally {
       // Best-effort refresh if we stay on page for any reason.
@@ -95,16 +95,16 @@ export default function SetupProject() {
   const handleSetupBoss = async () => {
     try {
       if (!projectId) {
-        toast.error('Missing project id.\nGo back to your projects list and open setup from there.')
+        toast.error('Missing project\nOpen setup from your project list and try again.')
         return
       }
 
       await setupBoss(projectId)
-      toast.success('Boss setup complete!\nHead into the project to start the battle.')
+      toast.success('Boss is ready!\nOpening your quest…')
       navigate(`/project/${projectId}`)
     } catch (error) {
       console.error('Error setting up boss:', error)
-      toast.error('Boss setup failed\nCheck tasks and connection, then try again.')
+      toast.error('Couldn’t start the fight\nCheck your connection and backlog, then try again.')
       navigate(`/home`)
     }
   }
@@ -116,61 +116,75 @@ export default function SetupProject() {
     }, 0)
 
   return (
-    <div className=" h-[100%] bg-[#f9f6f1] px-8 py-6">
-      {/* Header */}
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-orange-500">Prepare Your Quest...</h1>
-      </header>
+    <div className="!bg-[#f9f6f1] px-8 pt-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
+        <header className="space-y-2 lg:col-span-2 lg:row-start-1 lg:self-start">
+          <h1 className="!text-3xl sm:!text-4xl !font-bold !text-red !font-baloo2 !tracking-tight">
+            Prepare your quest
+          </h1>
+        </header>
 
-      {/* Main Layout */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        {/* LEFT — TASKS */}
-        <section className="lg:col-span-2 space-y-4 h-[75vh] overflow-y-auto">
-          <h2 className="text-lg font-semibold">Backlog</h2>
-
-          <AddTaskOverlay
-            columnId={'backlog'}
-            projectMember={projectMembers ?? []}
-            onAddTask={handleBacklogAddTask}
-          />
-
-          {tasks.backlog.length === 0 ? (
-            <div className="rounded-xl bg-white p-6 text-center text-sm text-neutral-500 shadow-sm">
-              No tasks yet! Add tasks to begin your journey ⚔️
+        <section className="lg:col-span-2 lg:row-start-2 flex flex-col h-[72vh] min-h-0 gap-0">
+          <div className="shrink-0 space-y-4 pb-4 !bg-[#f9f6f1]">
+            <div>
+              <h2 className="!text-lg !font-semibold !text-darkBrown !font-baloo2">Backlog</h2>
+              <p className="mt-1 !text-sm !text-lightBrown !font-baloo2 !leading-relaxed">
+                Tasks here use priority to shape boss HP. Assign teammates before you head into battle.
+              </p>
             </div>
-          ) : (
-            tasks.backlog.map((task) => (
-              <TaskItem
-                key={task.id}
-                id={task.id}
-                task={task}
-                projectMember={projectMembers ?? []}
-                onDelete={handleDeleteTask}
-                onUpdateTask={handleUpdateTask}
-              />
-            ))
-          )}
+
+            <AddTaskOverlay
+              columnId={'backlog'}
+              projectMember={projectMembers ?? []}
+              onAddTask={handleBacklogAddTask}
+            />
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-y-auto space-y-4 pr-1 pb-12 [scrollbar-gutter:stable]">
+            {tasks.backlog.length === 0 ? (
+              <div className="rounded-xl !bg-white p-6 text-center shadow-sm border border-brown/10">
+                <p className="!text-sm !text-lightBrown !font-baloo2 !leading-relaxed max-w-md mx-auto">
+                  No tasks yet. Use{' '}
+                  <span className="!font-semibold !text-darkBrown !font-baloo2">Add Task</span> to
+                  build your backlog—each task adds to the boss’s strength by priority.
+                </p>
+              </div>
+            ) : (
+              tasks.backlog.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  id={task.id}
+                  task={task}
+                  disableHover
+                  projectMember={projectMembers ?? []}
+                  onDelete={handleDeleteTask}
+                  onUpdateTask={handleUpdateTask}
+                />
+              ))
+            )}
+          </div>
         </section>
 
-        {/* RIGHT — ESTIMATED BOSS HP */}
-        <div className="flex flex-col gap-4 h-full">
-          <aside className="flex flex-col justify-center rounded-xl bg-white p-6 shadow-sm h-[15vh]">
-            <h3 className="mb-4 text-center  text-lg font-semibold">Estimated Boss HP</h3>
-
+        <div className="flex flex-col gap-4 min-h-0 lg:col-start-3 lg:row-start-1 lg:row-span-2 lg:self-start">
+          <aside className="flex flex-col rounded-xl !bg-white p-6 shadow-sm border border-brown/10">
+            <h3 className="text-center !text-lg !font-semibold !text-darkBrown !font-baloo2">
+              Estimated boss HP
+            </h3>
+            <p className="mt-1 mb-3 text-center !text-xs !text-lightBrown !font-baloo2 px-2 !leading-relaxed">
+              Total from backlog task priorities—your starting challenge level.
+            </p>
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-red-500">
+              <p className="!text-3xl !font-bold !text-red-500 !font-baloo2 tabular-nums">
                 {estimatedBossHP.toLocaleString()} HP
-              </h1>
+              </p>
             </div>
           </aside>
 
-          <div className="flex flex-col gap-5 ">
+          <div className="flex flex-col gap-5 min-w-0">
             <PartyMembers
               members={partyMembers}
-              // maxSize={MAX_PARTY_SIZE}
               removeMember={() => handleLeaveProject()}
               canRemoveMember={(m) => {
-                // Only allow "remove" (leave) for the current user.
                 const currentUsername = (user?.username || '').toString().trim().toLowerCase()
                 const memberUsername = (m.username || '')
                   .toString()
@@ -179,36 +193,37 @@ export default function SetupProject() {
                   .toLowerCase()
                 return Boolean(currentUsername) && currentUsername === memberUsername && !m.isLeader
               }}
-              // handleCopyLink={handleCopyLink}
               isLoading={isLoading}
             />
           </div>
         </div>
-        <div
-          className="
-            fixed bottom-0 left-0
-            w-screen h-[70px]
-            flex items-center 
-            bg-white
-            z-[9999]
-            shadow-md
-        "
-        >
-          <div className="flex w-screen mx-10 justify-between">
-            <button
-              className="!text-[rgba(148, 139, 129, 1)] px-6 py-2 rounded-md"
-              type="button"
-              onClick={() => navigate(`/home`)}
-            >
-              retreat
-            </button>
-            <button
-              className="!bg-[rgba(215,206,197,1)] !text-[rgba(148, 139, 129, 1)] px-6 py-2 rounded-md"
-              onClick={handleSetupBoss}
-            >
-              Begin Fight!
-            </button>
-          </div>
+      </div>
+
+      <div
+        className="
+          fixed bottom-0 left-0
+          w-screen h-[70px]
+          flex items-center
+          !bg-white
+          z-[9999]
+          shadow-md
+      "
+      >
+        <div className="flex w-screen mx-10 justify-between items-center">
+          <button
+            className="!bg-transparent !text-[rgba(148,139,129,1)] !font-baloo2 !font-semibold !text-sm px-6 py-2 rounded-md hover:!opacity-90 transition-opacity"
+            type="button"
+            onClick={() => navigate(`/home`)}
+          >
+            Back to home
+          </button>
+          <button
+            type="button"
+            className="!bg-[rgba(215,206,197,1)] !text-darkBrown !font-baloo2 !font-semibold !text-sm px-6 py-2 rounded-md hover:!opacity-95 transition-opacity"
+            onClick={handleSetupBoss}
+          >
+            Begin fight
+          </button>
         </div>
       </div>
     </div>

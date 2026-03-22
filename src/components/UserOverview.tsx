@@ -3,6 +3,7 @@ import { RiSwordFill } from "react-icons/ri";
 import { GiAchievement } from "react-icons/gi";
 import { MdOutlineSportsScore } from "react-icons/md";
 import { useUserProfileStats } from "@/hook/useUserProfileStats";
+import { ACHIEVEMENT_IDS } from "@/lib/achievementConstants";
 
 interface StatItem {
     icon: React.ElementType;
@@ -29,18 +30,31 @@ interface UserOverviewProps {
 export default function UserOverview({ userId }: UserOverviewProps) {
     const { stats, loading } = useUserProfileStats(userId);
 
+    const achievementTotal =
+        typeof stats?.achievements_total === "number"
+            ? stats.achievements_total
+            : ACHIEVEMENT_IDS.length;
+    const achievementUnlocked =
+        typeof stats?.achievements_unlocked === "number"
+            ? stats.achievements_unlocked
+            : 0;
+
     const userStats = {
         highestScore: stats?.highest_score || 0,
         projectCount: stats?.project_count || 0,
         bossDefeated: stats?.total_bosses_defeated || 0,
-        achievements: "0/0", // Keep as mock data
+        achievements: `${achievementUnlocked}/${achievementTotal}`,
     };
 
     const statsList: StatItem[] = [
         { icon: MdOutlineSportsScore, label: "Highest score", value: loading ? "..." : userStats.highestScore.toLocaleString() },
         { icon: PiNewspaperClippingFill, label: "Projects", value: loading ? "..." : userStats.projectCount },
         { icon: RiSwordFill, label: "Boss Defeated", value: loading ? "..." : userStats.bossDefeated },
-        { icon: GiAchievement, label: "Achievements", value: userStats.achievements },
+        {
+            icon: GiAchievement,
+            label: "Achievements",
+            value: loading ? "..." : userStats.achievements,
+        },
     ];
 
     return (

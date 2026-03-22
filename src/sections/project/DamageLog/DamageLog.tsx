@@ -20,7 +20,11 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DamageLogEntry, DamageLogPayload, DamageLogProps } from "./types";
 
-const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
+function usernameMatches(a: string, b: string): boolean {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+const DamageLog: React.FC<DamageLogProps> = ({ logs = [], currentUsername }) => {
   const [showCount, setShowCount] = useState(3);
   const [modalOpen, setModalOpen] = useState(false);
   const [personFilter, setPersonFilter] = useState<string>("only-you");
@@ -63,11 +67,18 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [] }) => {
 
   // 3) Filter FROM processed logs (since raw logs don't have participants)
   const filteredByPerson = useMemo(() => {
-    if (personFilter === "all" || personFilter === "only-you") return damageLogs;
+    if (personFilter === "all") return damageLogs;
+    if (personFilter === "only-you") {
+      const me = currentUsername?.trim();
+      if (!me) return [];
+      return damageLogs.filter((log) =>
+        log.participants.some((p) => usernameMatches(p, me))
+      );
+    }
     return damageLogs.filter((log) =>
-        log.participants.some((p) => p.toLowerCase() === personFilter.toLowerCase())
+      log.participants.some((p) => usernameMatches(p, personFilter))
     );
-  }, [damageLogs, personFilter]);
+  }, [damageLogs, personFilter, currentUsername]);
 
 
   useEffect(() => {

@@ -20,6 +20,7 @@ interface TaskItemProps {
   projectMember: UserStatus[]
   onDelete?: (taskId: string) => void
   onUpdateTask?: (task: Task) => void
+  disableHover?: boolean
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -29,6 +30,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   projectMember,
   onDelete,
   onUpdateTask,
+  disableHover = false,
 }) => {
 // export const TaskItem: React.FC<TaskItemProps> = ({ id, task, disabled = false, onDelete }) => {
   const isDone = disabled || task.status === "done";
@@ -64,6 +66,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         {...(disabled ? {} : attributes)}
         {...(disabled ? {} : listeners)}
         className={`p-3 rounded-lg border ${
+          disableHover ? "" : "hover:shadow-md hover:scale-[1.01]"
+        } ${
           isDone
             ? "border-gray-300 bg-gray-100"
             : "border-brown bg-offWhite"
@@ -72,7 +76,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             ? "border-dashed scale-105 bg-white/80 shadow-lg"
             : isDone
               ? "shadow-sm"
-              : "shadow-sm hover:shadow-md hover:scale-[1.01]"
+              : disableHover ? "" : "shadow-sm hover:shadow-md hover:scale-[1.01]"
         } flex flex-col gap-2 transition-all ${
           disabled ? "cursor-default" : "cursor-grab active:cursor-grabbing"
         }`}

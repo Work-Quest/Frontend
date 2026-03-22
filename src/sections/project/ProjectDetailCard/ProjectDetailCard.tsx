@@ -45,7 +45,12 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
   const [isScoresModalOpen, setIsScoresModalOpen] = useState(false)
   const [isDashboardModalOpen, setIsDashboardModalOpen] = useState(false)
   const closeProjectTriggerRef = useRef<HTMLButtonElement>(null)
-  const { dashboardData, loading: dashboardLoading } = useDashboard(projectId)
+  const {
+    dashboardData,
+    loading: dashboardLoading,
+    error: dashboardError,
+    refetch: refetchDashboard,
+  } = useDashboard(projectId, isDashboardModalOpen)
   const bossHp = hpData?.boss?.current || 0
   const maxBossHp = hpData?.boss?.max || 100
   const playerHp = hpData?.player?.current || 0
@@ -70,7 +75,7 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="p-1 rounded hover:bg-cream/50 text-darkBlue2 hover:text-darkBlue2/80 transition-colors"
+                className="p-1 rounded !bg-darkBlue text-offWhite hover:text-offWhite/80 transition-colors"
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
@@ -156,6 +161,8 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
           projectId={projectId}
           dashboardData={dashboardData}
           loading={dashboardLoading}
+          error={dashboardError}
+          onRetry={refetchDashboard}
         />
       )}
     </div>

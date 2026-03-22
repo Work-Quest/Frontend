@@ -48,6 +48,8 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
 }) => {
   const { latestLogs, otherLogsOptions, history } = data
 
+  const hasLogsToReview = latestLogs.length > 0 || otherLogsOptions.length > 0
+
   const defaultLatestSelectedId = latestLogs[1]?.id ?? latestLogs[0]?.id ?? ''
 
   // Extract unique usernames from otherLogsOptions participants
@@ -156,72 +158,81 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
                 </h3>
               </div>
               <div className="flex-1 min-h-0 overflow-hidden px-6 pb-6">
-                <ScrollArea className="h-full">
-                  <div className="flex flex-col gap-3 mb-4">
-                    {latestLogs.map((log) => {
-                      const isSelectedLatest =
-                        selectedSource === 'latest' && selectedLogId === log.id
-                      return (
-                        <LatestLogCard
-                          key={log.id}
-                          log={log}
-                          isHighlighted={isSelectedLatest}
-                          reviewValue={isSelectedLatest ? reviewText : undefined}
-                          onReviewChange={isSelectedLatest ? setReviewText : undefined}
-                          onSelect={() => handleSelectLatestLog(log.id)}
-                        />
-                      )
-                    })}
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0 my-2">
-                    <div className="flex-1 h-px bg-darkBrown/20" />
-                    <span className="text-darkBrown/70 text-sm font-baloo2">or</span>
-                    <div className="flex-1 h-px bg-darkBrown/20" />
-                  </div>
-
-                  <h3 className="!text-xl !font-medium text-darkBrown mt-4 mb-2 font-baloo2">
-                    Other Logs
-                  </h3>
-                  <Select value={selectedUsername} onValueChange={handleSelectUsername}>
-                    <SelectTrigger className="w-full border-darkBrown/20 text-darkBrown bg-white font-baloo2">
-                      <SelectValue placeholder="Select by username" />
-                    </SelectTrigger>
-                    <SelectContent className="font-baloo2">
-                      {uniqueUsernames.map((username) => (
-                        <SelectItem key={username} value={username}>
-                          {username}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {selectedSource === 'other' && selectedUsername && (
-                    <div className="mt-3 space-y-3">
-                      {filteredLogsByUsername.length === 0 ? (
-                        <p className="text-darkBrown/70 text-sm text-center py-4 font-baloo2">
-                          No logs found for {selectedUsername}
-                        </p>
-                      ) : (
-                        filteredLogsByUsername.map((log) => {
-                          const isSelected = selectedLogId === log.id
-                          return (
-                            <LatestLogCard
-                              key={log.id}
-                              log={log}
-                              isHighlighted={isSelected}
-                              reviewValue={isSelected ? reviewText : undefined}
-                              onReviewChange={isSelected ? setReviewText : undefined}
-                              onSelect={() => {
-                                setSelectedLogId(log.id)
-                              }}
-                            />
-                          )
-                        })
-                      )}
+                {hasLogsToReview ? (
+                  <ScrollArea className="h-full">
+                    <div className="flex flex-col gap-3 mb-4">
+                      {latestLogs.map((log) => {
+                        const isSelectedLatest =
+                          selectedSource === 'latest' && selectedLogId === log.id
+                        return (
+                          <LatestLogCard
+                            key={log.id}
+                            log={log}
+                            isHighlighted={isSelectedLatest}
+                            reviewValue={isSelectedLatest ? reviewText : undefined}
+                            onReviewChange={isSelectedLatest ? setReviewText : undefined}
+                            onSelect={() => handleSelectLatestLog(log.id)}
+                          />
+                        )
+                      })}
                     </div>
-                  )}
-                </ScrollArea>
+
+                    <div className="flex items-center gap-2 shrink-0 my-2">
+                      <div className="flex-1 h-px bg-darkBrown/20" />
+                      <span className="text-darkBrown/70 text-sm font-baloo2">or</span>
+                      <div className="flex-1 h-px bg-darkBrown/20" />
+                    </div>
+
+                    <h3 className="!text-xl !font-medium text-darkBrown mt-4 mb-2 font-baloo2">
+                      Other Logs
+                    </h3>
+                    <Select value={selectedUsername} onValueChange={handleSelectUsername}>
+                      <SelectTrigger className="w-full border-darkBrown/20 text-darkBrown bg-white font-baloo2">
+                        <SelectValue placeholder="Select by username" />
+                      </SelectTrigger>
+                      <SelectContent className="font-baloo2">
+                        {uniqueUsernames.map((username) => (
+                          <SelectItem key={username} value={username}>
+                            {username}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {selectedSource === 'other' && selectedUsername && (
+                      <div className="mt-3 space-y-3">
+                        {filteredLogsByUsername.length === 0 ? (
+                          <p className="text-darkBrown/70 text-sm text-center py-4 font-baloo2">
+                            No logs found for {selectedUsername}
+                          </p>
+                        ) : (
+                          filteredLogsByUsername.map((log) => {
+                            const isSelected = selectedLogId === log.id
+                            return (
+                              <LatestLogCard
+                                key={log.id}
+                                log={log}
+                                isHighlighted={isSelected}
+                                reviewValue={isSelected ? reviewText : undefined}
+                                onReviewChange={isSelected ? setReviewText : undefined}
+                                onSelect={() => {
+                                  setSelectedLogId(log.id)
+                                }}
+                              />
+                            )
+                          })
+                        )}
+                      </div>
+                    )}
+                  </ScrollArea>
+                ) : (
+                  <div className="h-full min-h-[12rem] flex flex-col items-center justify-center rounded-lg border border-dashed border-lightBrown/50 bg-cream/20 px-6 py-10">
+                    <p className="text-center text-sm text-darkBrown/55 font-baloo2 leading-relaxed max-w-[18rem]">
+                      No tasks are available to review right now. Completed work you can review will
+                      show up here.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -232,33 +243,43 @@ const ReviewTaskModal: React.FC<ReviewTaskModalProps> = ({
               </h3>
               <div className="flex-1 min-h-0 overflow-hidden px-4 pb-4">
                 <ScrollArea className="h-full">
-                  <div className="space-y-3 pr-2">
-                    {history.map((entry) => (
-                      <HistoryCard
-                        key={entry.id}
-                        entry={entry}
-                        isExpanded={expandedHistoryId === entry.id}
-                        onToggleExpand={() =>
-                          setExpandedHistoryId((id) => (id === entry.id ? null : entry.id))
-                        }
-                      />
-                    ))}
-                  </div>
+                  {history.length > 0 ? (
+                    <div className="space-y-3 pr-2">
+                      {history.map((entry) => (
+                        <HistoryCard
+                          key={entry.id}
+                          entry={entry}
+                          isExpanded={expandedHistoryId === entry.id}
+                          onToggleExpand={() =>
+                            setExpandedHistoryId((id) => (id === entry.id ? null : entry.id))
+                          }
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="min-h-[10rem] flex flex-col items-center justify-center rounded-lg border border-dashed border-lightBrown/40 bg-offWhite/80 px-4 py-8 mx-1">
+                      <p className="text-center text-sm text-darkBrown/50 font-baloo2 leading-relaxed max-w-[16rem]">
+                        No review history yet. Submitted reviews will appear here.
+                      </p>
+                    </div>
+                  )}
                 </ScrollArea>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-darkBrown/10 shrink-0">
-            <Button
-              variant="orange"
-              className="px-6 font-baloo2"
-              disabled={!projectId || submitting || !selectedLogId || !reviewText.trim()}
-              onClick={handleSubmitReview}
-            >
-              {submitting ? 'Submitting…' : 'Submit Review'}
-            </Button>
-          </div>
+          {hasLogsToReview ? (
+            <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-darkBrown/10 shrink-0">
+              <Button
+                variant="orange"
+                className="px-6 font-baloo2"
+                disabled={!projectId || submitting || !selectedLogId || !reviewText.trim()}
+                onClick={handleSubmitReview}
+              >
+                {submitting ? 'Submitting…' : 'Submit Review'}
+              </Button>
+            </div>
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>

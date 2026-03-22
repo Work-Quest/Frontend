@@ -18,6 +18,7 @@ export type DamageLogPayload = {
 
 export type DamageLogProps = {
   logs?: ProjectLogEntry[];
+  currentUsername?: string | null;
 };
 
 // export type ProjectLogEntry = {

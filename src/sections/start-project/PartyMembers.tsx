@@ -33,6 +33,7 @@ export function PartyMembers({
   const memberOptions = users.map((u) => ({
     value: u.id,
     label: `@${u.username} (${u.name})`,
+    keywords: [u.username, u.name, u.email, `@${u.username}`, `(${u.name})`].filter(Boolean),
   }))
 
   type InviteResponse = {
@@ -57,8 +58,6 @@ export function PartyMembers({
     const uniqueUserIds = Array.from(new Set(selectedMembers)).filter(
       (id) => !partyMemberIds.has(id)
     )
-
-    console.log(uniqueUserIds)
 
     if (uniqueUserIds.length === 0) {
       toast.error('Already in the party\nEveryone you picked is already on this quest.')
@@ -113,8 +112,7 @@ export function PartyMembers({
           Invite
         </Button>
       </div>
-      {/* Header Row with Dynamic Count */}
-      <div className="flex items-center justify-between mt-1">
+      <div className="shrink-0 flex items-center justify-between mt-1">
         <span className="font-bold text-darkBrown text-sm">
           Your Party{' '}
           <span
