@@ -33,7 +33,7 @@ function Leaderboard({ user }: LeaderboardProps) {
     if (!firstPlace) return null
 
     return (
-      <div className="self-stretch flex flex-col items-start gap-2">
+      <div className="self-stretch flex flex-col items-start gap-2 overflow-hidden">
         <div className="self-stretch p-5 bg-[#ff995a] rounded-[10px] flex justify-between items-center mb-4">
           <div className="flex items-center gap-4">
             <div

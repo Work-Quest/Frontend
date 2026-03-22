@@ -127,7 +127,7 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
       <div className="self-stretch inline-flex justify-start items-end flex-wrap content-end">
         <div className="flex-1 inline-flex flex-col justify-start items-start">
           <div className="flex w-full min-w-0 max-w-full flex-col items-start justify-center gap-3 self-stretch px-3 py-4 sm:px-6">
-            <HpBar label="Boss HP" current={bossHp} max={maxBossHp} color="orange" />
+            <HpBar label="Boss HP" current={bossHp} max={maxBossHp} color="orange" fractionDigits={2} />
             <HpBar label="Player HP" current={playerHp} max={maxPlayerHp} color="green" />
           </div>
         </div>

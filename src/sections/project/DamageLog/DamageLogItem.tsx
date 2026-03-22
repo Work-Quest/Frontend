@@ -12,18 +12,13 @@ const DamageLogItem: React.FC<DamageLogItemProps> = ({ log }) => {
   };
 
   return (
-    <div className="self-stretch px-6 py-4 border-b-[3px] border-lightBrown border-dashed inline-flex flex-col justify-start items-start gap-2 font-baloo2">
-      <div className="self-stretch inline-flex justify-start items-center gap-2">
-        <div className="flex-1 flex justify-start items-center gap-4">
-          <div className="justify-start text-darkBrown text-base font-bold">
-            {log.action}
-          </div>
-          <p className="justify-start text-darkBrown/80">
-            {formatTime(log.timestamp)}
-          </p>
+    <div className="inline-flex flex-col items-start gap-2 self-stretch border-b-[3px] border-dashed border-lightBrown px-6 py-4 font-baloo2">
+      <div className="flex w-full items-baseline justify-between gap-2">
+        <div className="min-w-0 flex-1 text-base font-bold text-darkBrown">
+          {log.action}
         </div>
         <div
-          className={`highlightText w-28 text-right justify-start ${
+          className={`highlightText shrink-0 text-right ${
             log.damageValue >= 0 ? "!text-green" : "text-red"
           }`}
         >
@@ -31,24 +26,25 @@ const DamageLogItem: React.FC<DamageLogItemProps> = ({ log }) => {
           {log.damageValue.toLocaleString()}
         </div>
       </div>
-      <div className="self-stretch inline-flex justify-between items-end">
-        <div className="flex-1 flex justify-start items-center gap-2 flex-wrap content-center">
+      <div className="flex w-full items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-1 flex-wrap content-center gap-2">
           {log.participants.map((participant, index) => (
             <div key={`${log.id}-${index}`} className="tag tag-name">
               {participant}
             </div>
           ))}
         </div>
-        {log.comment && (
-          <p
-            className={`justify-start !font-medium ${
-              log.damageValue >= 0 ? "!text-green" : "!text-red"
-            }`}
-          >
-            {log.comment}
-          </p>
-        )}
+        <p className="shrink-0 text-sm text-darkBrown/80">{formatTime(log.timestamp)}</p>
       </div>
+      {log.comment && (
+        <p
+          className={`!font-medium ${
+            log.damageValue >= 0 ? "!text-green" : "!text-red"
+          }`}
+        >
+          {log.comment}
+        </p>
+      )}
     </div>
   );
 };

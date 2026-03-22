@@ -18,10 +18,59 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { ProjectLogEntry } from "@/types/LogApi";
 import { DamageLogEntry, DamageLogPayload, DamageLogProps } from "./types";
 
 function usernameMatches(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+/** Group logs that share event + task + same clock second (e.g. multi-assignee attacks). */
+function mergeGroupKey(log: ProjectLogEntry): string {
+  const p = log.payload as DamageLogPayload;
+  const taskId =
+    p?.task_id != null && String(p.task_id).length > 0
+      ? String(p.task_id)
+      : p?.task && typeof (p.task as { task_id?: string }).task_id === "string"
+        ? String((p.task as { task_id: string }).task_id)
+        : "";
+  const sec = Math.floor(new Date(log.created_at).getTime() / 1000);
+  if (!taskId) {
+    return log.id;
+  }
+  return `${log.event_type}|${taskId}|${sec}`;
+}
+
+function mergeDamageLogEntries(entries: DamageLogEntry[]): DamageLogEntry {
+  if (entries.length === 1) return entries[0];
+  const byTimeDesc = [...entries].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+  const seen = new Set<string>();
+  const participants: string[] = [];
+  for (const e of byTimeDesc) {
+    for (const name of e.participants) {
+      const k = name.trim().toLowerCase();
+      if (!k || seen.has(k)) continue;
+      seen.add(k);
+      participants.push(name);
+    }
+  }
+  const damageValue = entries.reduce((sum, e) => sum + e.damageValue, 0);
+  const comments = entries.map((e) => e.comment).filter(Boolean) as string[];
+  const comment =
+    comments.length === 0
+      ? undefined
+      : [...new Set(comments)].join(" · ");
+
+  return {
+    id: byTimeDesc.map((e) => e.id).sort().join("+"),
+    action: byTimeDesc[0].action,
+    timestamp: byTimeDesc[0].timestamp,
+    damageValue,
+    participants,
+    comment,
+  };
 }
 
 const DamageLog: React.FC<DamageLogProps> = ({ logs = [], currentUsername }) => {
@@ -31,7 +80,7 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [], currentUsername }) => 
 
 
   const damageLogs = useMemo<DamageLogEntry[]>(() => {
-    return logs.map((log) => {
+    const rawEntries = logs.map((log) => {
       const p = log.payload as DamageLogPayload;
       const taskName = p?.task?.task_name;
       const actorName = p?.actor?.username;
@@ -57,6 +106,20 @@ const DamageLog: React.FC<DamageLogProps> = ({ logs = [], currentUsername }) => 
         participants: [actorName].filter(Boolean) as string[],
       };
     });
+
+    const groups = new Map<string, DamageLogEntry[]>();
+    for (let i = 0; i < logs.length; i++) {
+      const key = mergeGroupKey(logs[i]);
+      const list = groups.get(key);
+      if (list) list.push(rawEntries[i]);
+      else groups.set(key, [rawEntries[i]]);
+    }
+
+    const merged = Array.from(groups.values()).map((g) => mergeDamageLogEntries(g));
+    merged.sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    return merged;
   }, [logs]);
 
   const uniqueParticipants = useMemo(() => {

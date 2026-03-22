@@ -67,7 +67,9 @@ export default function EnemyHealthDisplay({
     0,
     Math.min(100, (currentHealth / maxHealth) * 100)
   );
-  const healthText = `${currentHealth}/${maxHealth}`;
+  const fmtHp = (n: number) =>
+    Number.isFinite(n) ? String(Number(n.toFixed(2))) : "0";
+  const healthText = `${fmtHp(currentHealth)}/${fmtHp(maxHealth)}`;
 
   return (
     <div

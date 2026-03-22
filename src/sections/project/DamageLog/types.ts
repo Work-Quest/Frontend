@@ -10,6 +10,7 @@ export type DamageLogEntry = {
 };
 
 export type DamageLogPayload = {
+  task_id?: string;
   task?: { task_name?: string };
   actor?: { username?: string };
   target?: { username?: string };
