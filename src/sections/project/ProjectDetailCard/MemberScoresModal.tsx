@@ -22,44 +22,57 @@ const MemberScoresModal: React.FC<MemberScoresModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogTitle className="text-2xl font-bold text-darkBrown mb-4">
-          Team Scores
-        </DialogTitle>
-        <ScrollArea className="max-h-[60vh]">
-          <div className="space-y-3 pr-4">
-            {sortedMembers.length === 0 ? (
-              <div className="text-center text-darkBrown/60 py-8">
-                No member scores available
-              </div>
-            ) : (
-              sortedMembers.map((member, index) => (
-                <div
-                  key={member.project_member_id}
-                  className="flex items-center justify-between p-4 bg-cream rounded-lg border-2 border-lightBrown"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-orange flex items-center justify-center text-white font-bold text-sm">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <div className="font-bold text-darkBrown">{member.username}</div>
-                      <div className="text-sm text-darkBrown/60">
-                        {member.status === "Alive" ? "Alive" : "Dead"}
+      <DialogContent
+        variant="normal"
+        showCloseButton
+        className="!w-[calc(100vw-2rem)] !max-w-[500px] max-h-[min(90dvh,720px)] p-0 gap-0 overflow-hidden flex flex-col font-baloo2"
+      >
+        <div className="flex min-h-0 max-h-[min(90dvh,720px)] flex-1 flex-col rounded-lg bg-offWhite/90">
+          <DialogTitle className="shrink-0 border-b border-darkBrown/10 px-6 py-4 pr-14 text-2xl font-bold text-darkBrown font-baloo2">
+            Team Scores
+          </DialogTitle>
+          <div className="min-h-0 flex-1 overflow-hidden px-2">
+            <ScrollArea
+              type="always"
+              className="h-[min(55dvh,420px)] w-full sm:h-[min(60dvh,480px)]"
+            >
+              <div className="space-y-3 px-4 py-4 pb-6">
+                {sortedMembers.length === 0 ? (
+                  <div className="py-8 text-center text-darkBrown/60 font-baloo2">
+                    No member scores available
+                  </div>
+                ) : (
+                  sortedMembers.map((member, index) => (
+                    <div
+                      key={member.project_member_id}
+                      className="flex items-center justify-between rounded-lg border-2 border-lightBrown bg-cream p-4"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange text-sm font-bold text-white">
+                          {index + 1}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="truncate font-bold text-darkBrown">
+                            {member.username}
+                          </div>
+                          <div className="text-sm text-darkBrown/60">
+                            {member.status === "Alive" ? "Alive" : "Dead"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right pl-2">
+                        <div className="text-xl font-bold text-orange">
+                          {member.score.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-darkBrown/60">points</div>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold text-orange">
-                      {member.score.toLocaleString()}
-                    </div>
-                    <div className="text-xs text-darkBrown/60">points</div>
-                  </div>
-                </div>
-              ))
-            )}
+                  ))
+                )}
+              </div>
+            </ScrollArea>
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

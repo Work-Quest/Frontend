@@ -324,7 +324,7 @@ const ProjectPage: React.FC = () => {
             projectId={projectId ?? undefined}
             onCloseProject={handleCloseProject}
           />
-          <DamageLog logs={logs} />
+          <DamageLog logs={logs} currentUsername={user?.username ?? null} />
           <ReviewTask
             projectId={projectId ?? null}
             doneTasks={tasks.done}

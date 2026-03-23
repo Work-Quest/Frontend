@@ -33,10 +33,13 @@ function Leaderboard({ user }: LeaderboardProps) {
     if (!firstPlace) return null
 
     return (
-      <div className="self-stretch flex flex-col items-start gap-2">
+      <div className="self-stretch flex flex-col items-start gap-2 overflow-hidden">
         <div className="self-stretch p-5 bg-[#ff995a] rounded-[10px] flex justify-between items-center mb-4">
           <div className="flex items-center gap-4">
-            <div className="w-[70px] h-[70px] bg-[#ffc3ab] rounded-full outline outline-[#faf9f6] flex items-center justify-center text-3xl font-bold text-orange-800">
+            <div
+              className="w-[70px] h-[70px] rounded-full outline outline-[#faf9f6] flex items-center justify-center text-3xl font-bold text-orange-800"
+              style={{ backgroundColor: getColorValueById(firstPlace.bg_color_id) }}
+            >
               <img
                 src={getAvatarProfilePath(firstPlace.selected_character_id)}
                 alt={firstPlace.username}

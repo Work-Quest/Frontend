@@ -6,6 +6,15 @@ import { Dialog as SheetPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
+const sheetCloseButtonClassName = cn(
+  "absolute top-4 right-4 z-30 inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-sm",
+  "!m-0 !appearance-none !border-0 !border-none !bg-transparent !p-0 !shadow-none !opacity-100",
+  "!outline-none focus:!outline-none focus-visible:!outline-none",
+  "!ring-0 !ring-offset-0 focus:!ring-0 focus-visible:!ring-0 focus:!ring-offset-0 focus-visible:!ring-offset-0",
+  "hover:!bg-transparent hover:!border-transparent hover:!shadow-none active:!bg-transparent",
+  "disabled:pointer-events-none data-[state=open]:!bg-transparent",
+)
+
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
@@ -75,8 +84,8 @@ function SheetContent({
       >
         {children}
         {showCloseButton && (
-          <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
-            <XIcon className="size-4" />
+          <SheetPrimitive.Close className={sheetCloseButtonClassName}>
+            <XIcon className="pointer-events-none size-4 !shadow-none" />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         )}

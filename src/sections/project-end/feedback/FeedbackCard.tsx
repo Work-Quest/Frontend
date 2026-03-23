@@ -2,7 +2,7 @@ import type { FeedbackResponse } from './types'
 import WorkloadChart from './WorkloadChart'
 import SkeletonLoading from './SkeletonLoading'
 import LoadingSpinner from '@/components/LoadingSpinner'
-import { Users, Gauge, Medal } from 'lucide-react'
+import { Users, Gauge, Medal, ListChecks } from 'lucide-react'
 import { WorkCategoryPanel } from '@/sections/project-end/feedback/WorkCategoryPanel'
 
 interface FeedbackCardProps {
@@ -34,8 +34,10 @@ const FeedbackCard = ({ feedbackData, loading, error, memberName }: FeedbackCard
   const speed = avgSpeedMinutes(feedbackData?.work_speed ?? null)
   const quality =
     feedbackData?.overall_quality_score != null
-      ? `${Number(feedbackData.overall_quality_score).toFixed(2)}/5`
+      ? `${Number(feedbackData.overall_quality_score).toFixed(2)}/100`
       : '—'
+  const diligence =
+    feedbackData?.diligence != null ? `${Number(feedbackData.diligence).toFixed(2)}%` : '—'
 
   return (
     <div className="rounded-2xl border border-brown/10 bg-white shadow-sm overflow-hidden w-full min-w-0 max-w-full">
@@ -66,7 +68,7 @@ const FeedbackCard = ({ feedbackData, loading, error, memberName }: FeedbackCard
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <div className="rounded-xl border border-brown/10 bg-offWhite p-4 flex flex-col gap-2">
                     <div className="flex items-center gap-2 text-lightBrown">
                       <Users className="w-5 h-5 text-orange shrink-0" />
@@ -103,6 +105,17 @@ const FeedbackCard = ({ feedbackData, loading, error, memberName }: FeedbackCard
                       {quality}
                     </p>
                   </div>
+                  <div className="rounded-xl border border-brown/10 bg-offWhite p-4 flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-lightBrown">
+                      <ListChecks className="w-5 h-5 text-orange shrink-0" />
+                      <span className="text-xs font-semibold font-baloo2 uppercase tracking-wide">
+                        Diligence
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-darkBrown font-baloo2 tabular-nums">
+                      {diligence}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="space-y-4 font-baloo2 text-darkBrown leading-relaxed">
@@ -120,13 +133,6 @@ const FeedbackCard = ({ feedbackData, loading, error, memberName }: FeedbackCard
             <div className="w-full min-w-0">
               <WorkloadChart work_load_per_day={feedbackData.work_load_per_day} />
             </div>
-
-            {feedbackData.diligence != null ? (
-              <p className="mt-4 text-sm text-lightBrown font-baloo2">
-                <span className="font-semibold text-darkBrown">Diligence: </span>
-                {feedbackData.diligence}%
-              </p>
-            ) : null}
           </>
         )}
 

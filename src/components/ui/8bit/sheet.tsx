@@ -15,6 +15,15 @@ import {
 
 import "@/components/ui/8bit/styles/retro.css";
 
+const retroSheetCloseClassName = cn(
+  "absolute right-4 top-4 z-30 inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-sm",
+  "!m-0 !appearance-none !border-0 !border-none !bg-transparent !p-0 !shadow-none !opacity-100",
+  "!outline-none focus:!outline-none focus-visible:!outline-none",
+  "!ring-0 !ring-offset-0 focus:!ring-0 focus-visible:!ring-0 focus:!ring-offset-0",
+  "hover:!bg-transparent hover:!border-transparent active:!bg-transparent",
+  "disabled:pointer-events-none data-[state=open]:!bg-transparent",
+)
+
 const Sheet = ShadcnSheet;
 
 const SheetTrigger = ShadcnSheetTrigger;
@@ -139,7 +148,7 @@ function SheetContent({
             </>
           )}
         </div>
-        <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <SheetPrimitive.Close className={retroSheetCloseClassName}>
           <svg
             width={50}
             height={50}

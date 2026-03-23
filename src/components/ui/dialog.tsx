@@ -4,6 +4,19 @@ import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/** Flat close control: no border, ring, shadow, or transition (overrides global `button` styles). */
+const dialogCloseButtonClassName = cn(
+  "absolute top-3 right-5 z-30 inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full",
+  "!m-0 !appearance-none !border-0 !border-none !bg-transparent !p-0 !shadow-none",
+  "!outline-none focus:!outline-none focus-visible:!outline-none",
+  "!ring-0 !ring-offset-0 focus:!ring-0 focus-visible:!ring-0 focus:!ring-offset-0 focus-visible:!ring-offset-0",
+  "hover:!bg-transparent hover:!border-transparent hover:!shadow-none active:!bg-transparent",
+  "disabled:pointer-events-none",
+)
+
+const dialogCloseIconClassName =
+  "pointer-events-none relative z-40 h-5 w-5 !p-0 text-darkBrown !shadow-none"
+
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
@@ -25,7 +38,7 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[50] bg-black/60 backdrop-blur-sm",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm",
         className,
       )}
       {...props}
@@ -53,7 +66,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-[50%] left-[50%] z-[51] translate-x-[-50%] translate-y-[-50%]",
+          "fixed top-[50%] left-[50%] z-[10001] translate-x-[-50%] translate-y-[-50%]",
           !isNormal && "w-full max-w-[calc(100%-2rem)] sm:max-w-lg",
           "data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -70,15 +83,8 @@ function DialogContent({
           <div className="relative bg-offWhite rounded-lg shadow-xl border border-white !p-0 h-full min-h-0 flex flex-col">
             {children}
             {showCloseButton && (
-              <DialogPrimitive.Close
-                className={cn(
-                  "absolute top-3 right-5 z-30",
-                  "w-10 h-10 rounded-full",
-                  "!bg-transparent hover:!border-transparent",
-                  "items-center justify-center",
-                )}
-              >
-                <XIcon className="w-5 h-5 text-darkBrown drop-shadow-sm relative z-40" />
+              <DialogPrimitive.Close className={dialogCloseButtonClassName}>
+                <XIcon className={dialogCloseIconClassName} />
                 <span className="sr-only">Close</span>
               </DialogPrimitive.Close>
             )}
@@ -95,16 +101,8 @@ function DialogContent({
             >
               <div className="relative z-20">{children}</div>
               {showCloseButton && (
-                <DialogPrimitive.Close
-                  className={cn(
-                    "absolute top-3 right-5 z-30",
-                    "w-10 h-10 rounded-full",
-                    "!bg-transparent hover:!border-transparent",
-                    "items-center justify-center",
-                    "transition-all duration-200 ease-in-out"
-                  )}
-                >
-                  <XIcon className="w-5 h-5 !p-0 text-darkBrown drop-shadow-sm transition-transform duration-200 ease-out relative z-40" />
+                <DialogPrimitive.Close className={dialogCloseButtonClassName}>
+                  <XIcon className={dialogCloseIconClassName} />
                   <span className="sr-only">Close</span>
                 </DialogPrimitive.Close>
               )}

@@ -45,7 +45,12 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
   const [isScoresModalOpen, setIsScoresModalOpen] = useState(false)
   const [isDashboardModalOpen, setIsDashboardModalOpen] = useState(false)
   const closeProjectTriggerRef = useRef<HTMLButtonElement>(null)
-  const { dashboardData, loading: dashboardLoading } = useDashboard(projectId)
+  const {
+    dashboardData,
+    loading: dashboardLoading,
+    error: dashboardError,
+    refetch: refetchDashboard,
+  } = useDashboard(projectId, isDashboardModalOpen)
   const bossHp = hpData?.boss?.current || 0
   const maxBossHp = hpData?.boss?.max || 100
   const playerHp = hpData?.player?.current || 0
@@ -70,7 +75,7 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="p-1 rounded hover:bg-cream/50 text-darkBlue2 hover:text-darkBlue2/80 transition-colors"
+                className="p-1 rounded !bg-darkBlue text-offWhite hover:text-offWhite/80 transition-colors"
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
@@ -122,7 +127,7 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
       <div className="self-stretch inline-flex justify-start items-end flex-wrap content-end">
         <div className="flex-1 inline-flex flex-col justify-start items-start">
           <div className="flex w-full min-w-0 max-w-full flex-col items-start justify-center gap-3 self-stretch px-3 py-4 sm:px-6">
-            <HpBar label="Boss HP" current={bossHp} max={maxBossHp} color="orange" />
+            <HpBar label="Boss HP" current={bossHp} max={maxBossHp} color="orange" fractionDigits={2} />
             <HpBar label="Player HP" current={playerHp} max={maxPlayerHp} color="green" />
           </div>
         </div>
@@ -156,6 +161,8 @@ const ProjectDetailCard: React.FC<ProjectDetailCardProps> = ({
           projectId={projectId}
           dashboardData={dashboardData}
           loading={dashboardLoading}
+          error={dashboardError}
+          onRetry={refetchDashboard}
         />
       )}
     </div>
