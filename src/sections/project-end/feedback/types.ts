@@ -9,6 +9,7 @@ export interface FeedbackResponse {
   work_load_per_day: string | number[] | null
   work_speed: string | null
   diligence: number | null
+  role_assigned: string | null
   created_at: string
   achievement_ids?: string[] | null
 }
