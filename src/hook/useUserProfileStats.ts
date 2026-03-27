@@ -5,6 +5,8 @@ export type UserProfileStats = {
   highest_score: number;
   project_count: number;
   total_bosses_defeated: number;
+  achievements_unlocked?: number;
+  achievements_total?: number;
 };
 
 type UseUserProfileStatsState = {

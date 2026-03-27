@@ -23,6 +23,7 @@ import {
 export type MultiComboboxOption = {
   value: string
   label: string
+  keywords?: string[]
 }
 
 type MultiComboboxProps = {
@@ -58,7 +59,6 @@ const MultiCombobox = ({
   const removeSelection = (val: string) => {
     onChange(value.filter((v) => v !== val))
   }
-  console.log("combobox", options)
   return (
     <div className="w-full space-y-2">
       {label && (
@@ -121,7 +121,7 @@ const MultiCombobox = ({
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="z-[60] w-(--radix-popper-anchor-width) p-0 pointer-events-auto">
+        <PopoverContent className="z-[10050] w-(--radix-popper-anchor-width) p-0 pointer-events-auto">
           <Command>
             <CommandInput placeholder={searchPlaceholder} />
             <CommandList>
@@ -132,26 +132,17 @@ const MultiCombobox = ({
                   <CommandItem
                     key={option.value}
                     value={option.value}
-                    asChild
-                    onSelect={(val) => {
-                      // keyboard support (Enter)
-                      toggleSelection(val)
+                    keywords={option.keywords ?? [option.label]}
+                    onSelect={() => {
+                      toggleSelection(option.value)
                       setOpen(true)
                     }}
+                    className="flex w-full cursor-pointer items-center gap-2"
                   >
-                    <div
-                      className="flex w-full cursor-pointer items-center"
-                      onClick={() => {
-                        // mouse click support
-                        toggleSelection(option.value)
-                        setOpen(true)
-                      }}
-                    >
-                      <span className="truncate">{option.label}</span>
-                      {value.includes(option.value) && (
-                        <CheckIcon size={16} className="ml-auto" />
-                      )}
-                    </div>
+                    <span className="truncate">{option.label}</span>
+                    {value.includes(option.value) ? (
+                      <CheckIcon size={16} className="ml-auto shrink-0" />
+                    ) : null}
                   </CommandItem>
                 ))}
               </CommandGroup>

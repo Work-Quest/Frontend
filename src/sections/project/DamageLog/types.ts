@@ -10,6 +10,7 @@ export type DamageLogEntry = {
 };
 
 export type DamageLogPayload = {
+  task_id?: string;
   task?: { task_name?: string };
   actor?: { username?: string };
   target?: { username?: string };
@@ -18,6 +19,7 @@ export type DamageLogPayload = {
 
 export type DamageLogProps = {
   logs?: ProjectLogEntry[];
+  currentUsername?: string | null;
 };
 
 // export type ProjectLogEntry = {

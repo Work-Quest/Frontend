@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/8bit/badge'
 import { ENTITY_CONFIG } from '@/config/battleConfig'
 
-const NAME_TAG_MAX_LEN = 5
+const NAME_TAG_MAX_LEN = 4
 
-function formatNameTag(name: string): string {
+function formatNameTag(name: string, type: SpriteProps['type']): string {
   const s = name.trim()
+  if (type === 'bosses') return s
   if (s.length <= NAME_TAG_MAX_LEN) return s
-  return `${s.slice(0, NAME_TAG_MAX_LEN)}...`
+  return `${s.slice(0, NAME_TAG_MAX_LEN)}..`
 }
 
 interface SpriteProps {
@@ -100,7 +101,7 @@ export const SpriteEntity: React.FC<SpriteProps> = ({
           title={name}
         >
           <Badge variant="default" className="scale-35">
-            {formatNameTag(name)}
+            {formatNameTag(name, type)}
           </Badge>
         </div>
       )}
